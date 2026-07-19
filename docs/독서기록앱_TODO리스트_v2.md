@@ -1,7 +1,16 @@
 # ✅ 독서 기록 공유 앱 — 배포까지 TODO 리스트
 
-> 작성일: 2026-07-02
+> 작성일: 2026-07-02 · 최종 업데이트: 2026-07-19
 > 참고 문서: 기획서, 테이블정의서, 화면설계서, 개발현황, 백엔드구축계획
+
+---
+
+## 0. 오늘 확인할 것 (로컬에서 직접 확인 필요)
+
+- [ ] `git pull` 로 Step 3 인증 커밋(`ec74095` 이후) 로컬에 받기
+- [ ] `gradle test` 실행 — 특히 신규 `AuthControllerTest`(회원가입/로그인/내정보조회/중복이메일/잘못된 비밀번호) 통과하는지 확인
+- [ ] 실제 MySQL(Docker Compose) 환경에서 `User` 테이블의 `(social_provider, social_id)` unique 제약이 잘 걸렸는지 확인 — `ddl-auto: update`는 이미 존재하는 테이블에 제약을 못 걸 수도 있어서, 안 걸려 있으면 테이블 재생성하거나 수동으로 `ALTER TABLE users ADD UNIQUE (social_provider, social_id);` 필요할 수 있음
+- [ ] (선택) `gradle bootRun --args="--spring.profiles.active=local"` 로 띄운 뒤 Swagger(`/swagger-ui.html`)에서 `POST /api/auth/signup` → `POST /api/auth/login` → `GET /api/auth/me` (Authorize에 토큰 입력) 순서로 직접 호출해보기
 
 ---
 
