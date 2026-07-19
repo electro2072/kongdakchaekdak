@@ -25,7 +25,8 @@ import java.util.List;
 
 /**
  * 책 기록(일정/서재) CRUD API (Step 2-b). User CRUD(Step 2-a)의 뒤를 이어
- * 등록/조회/수정/완독 처리를 제공한다.
+ * 등록/조회/수정/완독 처리를 제공한다. Step 3부터 인증(Authorization: Bearer {token})이
+ * 필요하다 (SecurityConfig 참고). 아직 "내 책만 수정 가능" 같은 소유자 검증은 없음 — 이후 단계에서 강화 예정.
  */
 @RestController
 @RequestMapping("/api/books")

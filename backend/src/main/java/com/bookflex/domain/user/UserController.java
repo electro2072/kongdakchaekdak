@@ -21,8 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 회원 CRUD API (Step 2). 소셜 로그인/인증은 Step 3에서 붙이며,
- * 그 전까지는 인증 없이 CRUD 동작만 검증하는 용도.
+ * 회원 CRUD API (Step 2). Step 3부터 인증(Authorization: Bearer {token})이 필요하다
+ * (SecurityConfig 참고). 아직 "본인 정보만 수정/삭제 가능" 같은 소유자 검증은 없고,
+ * 로그인만 되어 있으면 다른 회원의 정보도 조회/수정 가능한 상태 — 이후 단계에서 강화 예정.
  */
 @RestController
 @RequestMapping("/api/users")
@@ -33,7 +34,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    @Operation(summary = "회원 생성 (임시: 인증 없이 CRUD 검증용)")
+    @Operation(summary = "회원 생성 (관리자/테스트용 — 실제 가입은 POST /api/auth/signup 사용)")
     public ResponseEntity<UserResponse> create(@Valid @RequestBody UserCreateRequest request) {
         UserResponse response = userService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

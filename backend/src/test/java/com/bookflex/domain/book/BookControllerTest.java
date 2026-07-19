@@ -2,6 +2,7 @@ package com.bookflex.domain.book;
 
 import com.bookflex.domain.user.User;
 import com.bookflex.domain.user.UserRepository;
+import com.bookflex.security.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Step 3부터 /api/books/** 가 인증을 요구하므로, setUp에서 만든 테스트 사용자 id로 발급한
+ * 토큰을 모든 요청에 Authorization 헤더로 실어 보낸다. 지금 단계에는 소유자 검증이 없어
+ * (다른 사람 책도 수정 가능) 토큰의 주체가 book의 소유자와 같을 필요는 없지만, 테스트에서는
+ * 실제 흐름과 맞춰 setUp에서 만든 사용자 토큰을 사용한다.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -34,12 +41,17 @@ class BookControllerTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private JwtProvider jwtProvider;
+
     private Long userId;
+    private String bearerToken;
 
     @BeforeEach
     void setUp() {
         User user = new User("테스터", null, null, null, "kakao", "test-social-id");
         userId = userRepository.save(user).getId();
+        bearerToken = "Bearer " + jwtProvider.generateToken(userId);
     }
 
     @Test
@@ -51,7 +63,10 @@ class BookControllerTest {
                 "startDate", "2026-07-01"
         ));
 
-        mockMvc.perform(post("/api/books").contentType(MediaType.APPLICATION_JSON).content(body))
+        mockMvc.perform(post("/api/books")
+                        .header("Authorization", bearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("READING"))
                 .andExpect(jsonPath("$.title").value("클린 코드"));
@@ -67,6 +82,7 @@ class BookControllerTest {
         ));
 
         String response = mockMvc.perform(post("/api/books")
+                        .header("Authorization", bearerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createBody))
                 .andExpect(status().isCreated())
@@ -74,15 +90,19 @@ class BookControllerTest {
 
         Long bookId = objectMapper.readTree(response).get("id").asLong();
 
-        mockMvc.perform(get("/api/books/{id}", bookId))
+        mockMvc.perform(get("/api/books/{id}", bookId).header("Authorization", bearerToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.author").value("조슈아 블로크"));
 
-        mockMvc.perform(get("/api/books").param("userId", String.valueOf(userId)).param("status", "reading"))
+        mockMvc.perform(get("/api/books")
+                        .header("Authorization", bearerToken)
+                        .param("userId", String.valueOf(userId))
+                        .param("status", "reading"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(bookId));
 
         mockMvc.perform(patch("/api/books/{id}/complete", bookId)
+                        .header("Authorization", bearerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isOk())
@@ -99,7 +119,17 @@ class BookControllerTest {
                 "startDate", "2026-07-01"
         ));
 
-        mockMvc.perform(post("/api/books").contentType(MediaType.APPLICATION_JSON).content(body))
+        mockMvc.perform(post("/api/books")
+                        .header("Authorization", bearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 토큰_없이_요청하면_401() throws Exception {
+        mockMvc.perform(get("/api/books/{id}", 1L))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
     }
 }
