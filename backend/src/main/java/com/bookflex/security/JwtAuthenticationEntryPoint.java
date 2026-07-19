@@ -1,0 +1,40 @@
+package com.bookflex.security;
+
+import com.bookflex.common.exception.ErrorResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+
+/**
+ * 인증이 필요한 엔드포인트(/api/auth/me 등)에 토큰 없이/유효하지 않게 접근했을 때
+ * Spring Security 기본 403 응답 대신, 나머지 API와 동일한 {@link ErrorResponse} 포맷으로 401을 내려준다.
+ */
+@Component
+@RequiredArgsConstructor
+public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+    private final ObjectMapper objectMapper;
+
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response,
+                          AuthenticationException authException) throws IOException {
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+
+        ErrorResponse body = ErrorResponse.of(
+                HttpStatus.UNAUTHORIZED.value(),
+                "UNAUTHENTICATED",
+                "인증이 필요합니다. Authorization: Bearer {token} 헤더를 확인해주세요."
+        );
+        response.getWriter().write(objectMapper.writeValueAsString(body));
+    }
+}

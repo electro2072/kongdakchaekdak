@@ -20,3 +20,9 @@ spring:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+app:
+  jwt:
+    # 운영 배포 전 반드시 JWT_SECRET 환경변수로 교체할 것 (HS256 요구사항: UTF-8 기준 32바이트 이상).
+    secret: ${JWT_SECRET:please-change-this-dev-only-jwt-secret-before-deploying}
+    expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}

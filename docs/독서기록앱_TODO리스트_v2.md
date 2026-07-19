@@ -55,7 +55,7 @@
 - [x] Step 1. 프로젝트 뼈대 (Spring Boot + Gradle + MySQL Docker + Health check API)
 - [x] Step 2-a. User 기본 CRUD + Swagger 문서화 (2026-07-19 완료)
 - [x] Step 2-b. Book 기본 CRUD (등록/조회/수정/완독 처리) — 2026-07-19 완료, 사용자 로컬 환경(Java 17 + Gradle 8.14)에서 `gradle bootRun` 정상 실행 확인
-- [ ] Step 3. 인증 (이메일/PW → 카카오 → 구글 → 네이버 OAuth2)
+- [ ] Step 3. 인증 (이메일/PW 완료 2026-07-19 · 카카오 → 구글 → 네이버 OAuth2는 미착수)
 - [ ] Step 4. 이미지 업로드 (S3 presigned URL, BookPhoto API)
 - [ ] Step 5. 소감/공유 기능 (BookNote, Group, ShareRecord API)
 - [ ] Step 6. 배포 (AWS EC2 + RDS 또는 Railway)
