@@ -2,3 +2,7 @@ rootProject.name = 'ReadingRecordApp'
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')
+
+// react-native-config는 이 RN/CLI 버전 조합에서 autolinking이 감지를 못 해서 수동으로 추가한다.
+include ':react-native-config'
+project(':react-native-config').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-config/android')
