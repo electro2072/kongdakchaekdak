@@ -18,7 +18,21 @@ npm install
 cd ios && bundle install && bundle exec pod install && cd ..
 ```
 
-`.env.example`을 참고해서 `.env`를 만들고 알라딘/카카오 API 키를 채워주세요 (지금은 검색을 실제로 눌러야 호출되므로, 키가 없어도 화면 자체는 뜬다).
+## API 키 설정 (알라딘/카카오)
+
+`react-native-config`로 `.env`를 읽어온다. `frontend/.env.example`을 복사해서 `frontend/.env`를 만들고 발급받은 키를 채워넣으면 된다:
+
+```
+ALADIN_API_KEY=발급받은_알라딘_TTB키
+KAKAO_API_KEY=발급받은_카카오_REST_API키
+```
+
+- 알라딘 TTB 키: https://blog.aladin.co.kr/openapi/ (Open API 신청 → TTBKey 발급)
+- 카카오 REST API 키: https://developers.kakao.com → 애플리케이션 추가 → 앱 키의 "REST API 키" (도서 검색은 기본 제공되는 API라 별도 상품 활성화 없이 이 키만으로 바로 호출 가능)
+
+`.env`는 절대 git에 커밋하지 않는다 (`.gitignore`에 이미 포함됨). **`.env`를 새로 만들거나 값을 바꾸면 앱을 다시 빌드해야 반영된다** (Metro만 재시작해서는 안 됨 — `npm run android`로 다시 빌드).
+
+키가 없어도 화면 자체는 뜨지만, 검색 버튼을 누르면 "API 키가 설정되지 않았습니다" 에러가 난다.
 
 ## 실행
 Android Studio에서 에뮬레이터(AVD)를 하나 만들어 켜둔 다음, 터미널 두 개로:
