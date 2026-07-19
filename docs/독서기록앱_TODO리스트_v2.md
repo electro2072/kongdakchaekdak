@@ -53,8 +53,8 @@
 ## 5. 백엔드 개발 (백엔드구축계획 기준)
 
 - [x] Step 1. 프로젝트 뼈대 (Spring Boot + Gradle + MySQL Docker + Health check API)
-- [x] Step 2-a. User 기본 CRUD + Swagger 문서화 (2026-07-19 완료, Gradle 테스트는 샌드박스 네트워크 제약으로 미실행 — 개발현황 문서 참고)
-- [ ] Step 2-b. Book 기본 CRUD (등록/조회/수정/완독 처리)
+- [x] Step 2-a. User 기본 CRUD + Swagger 문서화 (2026-07-19 완료)
+- [x] Step 2-b. Book 기본 CRUD (등록/조회/수정/완독 처리) — 2026-07-19 완료, 사용자 로컬 환경(Java 17 + Gradle 8.14)에서 `gradle bootRun` 정상 실행 확인
 - [ ] Step 3. 인증 (이메일/PW → 카카오 → 구글 → 네이버 OAuth2)
 - [ ] Step 4. 이미지 업로드 (S3 presigned URL, BookPhoto API)
 - [ ] Step 5. 소감/공유 기능 (BookNote, Group, ShareRecord API)
