@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>독서 기록 공유 앱 - 화면설계서 v2 (Wireframe)</title>
+<style>
+  :root{
+    --canvas:#e9e9e9;
+    --frame-border:#c4c4c4;
+    --fig-blue:#0d99ff;
+    --line:#d4d4d8;
+    --line-dark:#a8a8ae;
+    --img-fill:#e2e2e6;
+    --text-muted:#6b6b73;
+    --warn:#ff6b3d;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--canvas);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+    color:#1a1a1e;
+  }
+  .doc-header{
+    padding:36px 48px 20px;
+    background:#ffffff;
+    border-bottom:1px solid #d6d6da;
+  }
+  .doc-header h1{margin:0 0 6px;font-size:22px;font-weight:700;}
+  .doc-header p{margin:0;font-size:13px;color:var(--text-muted);}
+  .doc-header .meta{margin-top:10px;display:flex;gap:16px;font-size:12px;color:var(--text-muted);flex-wrap:wrap;}
+  .doc-header .meta span{background:#f2f2f4;padding:3px 9px;border-radius:4px;}
+  .changelog{
+    margin-top:14px;background:#fff8f3;border:1px solid #ffe3d1;border-radius:8px;
+    padding:10px 14px;font-size:12px;line-height:1.7;color:#5c4033;
+  }
+  .changelog b{color:#c2410c;}
+  .board{padding:40px 48px 80px;}
+  .section-title{
+    font-size:16px;font-weight:700;margin:0 0 4px;color:#1a1a1e;
+    padding-top:8px;
+  }
+  .section-sub{font-size:12px;color:var(--text-muted);margin:0 0 20px;}
+  .tab-divider{
+    margin:56px 0 36px;padding-top:24px;border-top:2px dashed #c9c9cf;
+  }
+  .frame-block{margin-bottom:64px;}
+  .frame-label{
+    display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;
+    color:var(--fig-blue);margin-bottom:10px;
+  }
+  .frame-label::before{content:"◆";font-size:9px;}
+  .frame-label.new{color:var(--warn);}
+  .frame-label.new::before{content:"★";}
+  .frame-row{display:flex;gap:36px;align-items:flex-start;flex-wrap:wrap;}
+  .phone-frame{
+    width:300px;height:648px;background:#ffffff;border:1px solid var(--frame-border);
+    border-radius:2px;position:relative;flex-shrink:0;
+    outline:2px solid transparent;transition:outline .15s ease;
+  }
+  .phone-frame.hot{outline:2px solid var(--fig-blue);}
+  .statusbar{
+    height:22px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 14px;font-size:9px;color:#b5b5ba;
+  }
+  .statusbar .dot{width:30px;height:6px;background:#ececee;border-radius:2px;}
+  .wf-el{position:relative;}
+  .badge{
+    position:absolute;top:-8px;right:-8px;width:18px;height:18px;border-radius:50%;
+    background:var(--fig-blue);color:#fff;font-size:10px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;cursor:default;z-index:5;
+    box-shadow:0 0 0 2px #fff;
+  }
+  .badge.hot{background:#ff6b3d;}
+  .line{height:8px;background:var(--line);border-radius:3px;}
+  .line.sm{height:6px;width:40%;}
+  .line-dark{background:var(--line-dark);}
+  .img-box{
+    background:var(--img-fill);border-radius:4px;display:flex;align-items:center;justify-content:center;
+    color:#b3b3b9;font-size:9px;
+    background-image:repeating-linear-gradient(45deg,#eaeaee,#eaeaee 6px,#e2e2e6 6px,#e2e2e6 12px);
+  }
+  .btn{
+    height:32px;border:1px solid var(--line-dark);border-radius:6px;display:flex;align-items:center;
+    justify-content:center;font-size:10px;color:#55555c;background:#fff;
+  }
+  .btn.fill{background:#e9e9ec;}
+  .btn.accent{border-color:var(--fig-blue);color:var(--fig-blue);}
+  .tag{
+    height:20px;border:1px solid var(--line-dark);border-radius:20px;display:flex;align-items:center;
+    justify-content:center;font-size:9px;color:#6b6b73;padding:0 8px;
+  }
+  .icon-dot{width:16px;height:16px;border-radius:50%;background:var(--line-dark);}
+  .tabbar{
+    position:absolute;bottom:0;left:0;right:0;height:56px;border-top:1px solid #e4e4e8;
+    display:flex;align-items:center;justify-content:space-around;background:#fff;
+  }
+  .tabbar .tab-item{display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .tabbar .tab-item .icon-dot{width:18px;height:18px;}
+  .tabbar .tab-item span{font-size:8px;color:var(--text-muted);}
+  .tabbar .tab-item.active .icon-dot{background:var(--fig-blue);}
+  .tabbar .tab-item.active span{color:var(--fig-blue);font-weight:700;}
+  .annotation-panel{min-width:280px;flex:1;padding-top:4px;}
+  .annotation-panel ol{list-style:none;margin:0;padding:0;}
+  .annotation-panel li{
+    display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #dcdce0;font-size:12.5px;
+    line-height:1.5;transition:background .15s ease;border-radius:4px;
+  }
+  .annotation-panel li.hot{background:#eaf5ff;}
+  .annotation-panel li .num{
+    flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--fig-blue);color:#fff;
+    font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;
+  }
+  .annotation-panel li b{display:block;font-size:12.5px;color:#1a1a1e;}
+  .annotation-panel li span{color:var(--text-muted);font-size:11.5px;}
+  .annotation-panel li.open span{color:#c2410c;}
+  .footer-note{
+    padding:20px 48px 60px;font-size:11.5px;color:var(--text-muted);border-top:1px solid #d6d6da;background:#fff;
+  }
+  /* 브라우저 프레임 (공유 웹페이지용) */
+  .browser-frame{
+    width:340px;background:#fff;border:1px solid var(--frame-border);border-radius:6px;overflow:hidden;flex-shrink:0;
+  }
+  .browser-bar{
+    background:#eeeef1;padding:8px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #ddd;
+  }
+  .browser-bar .dots{display:flex;gap:4px;}
+  .browser-bar .dots span{width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;}
+  .browser-bar .url{
+    flex:1;background:#fff;border-radius:10px;padding:3px 10px;font-size:9.5px;color:#666;
+    border:1px solid #ddd;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .browser-body{padding:0;}
+</style>
+</head>
+<body>
+
+  <div class="doc-header">
+    <h1>📖 독서 기록 공유 앱 — 화면설계서 v2</h1>
+    <p>Wireframe Spec · Mobile App · 기획서 IA(일정/서재/공유/프로필) + 공유 웹페이지 반영</p>
+    <div class="meta">
+      <span>Ver 2.0</span>
+      <span>375 × 812 (iPhone 기준)</span>
+      <span>Low-fidelity Wireframe</span>
+      <span>작성일 2026-07-10</span>
+    </div>
+    <div class="changelog">
+      <b>v1 → v2 변경 사항</b><br>
+      · 하단 탭 구조를 <b>기획서 기준(일정 / 서재 / 공유 / 프로필)</b>으로 재정렬 — v1의 "홈/기록쓰기/서재/마이페이지" 구조 폐기<br>
+      · <b>공유 탭</b>을 신규로 그림 — 그룹 관리, 공유범위 선택(전체/그룹/인원지정), 공유 이력, 카드 미리보기<br>
+      · <b>서재 탭</b>을 목록+상세 2단 구성으로 재구성 (기획서 4-2 기준: 장소사진 / 소감 / 독서기간)<br>
+      · <b>공유 웹페이지</b>(비로그인, `/share/{public_token}`) 프레임 신규 추가 — 테이블정의서 `ShareRecord.share_type/card_image_url/public_token` 반영<br>
+      · 로그인 화면 소셜 버튼 순서를 기획서 기준(네이버/카카오/구글)으로 수정 — v1에서 네이버 누락 오류 수정<br>
+      · 마이페이지 대시보드(Recap)는 v1 내용 유지, "프로필" 탭 하위 화면으로 재배치
+    </div>
+  </div>
+
+  <div class="board">
+
+    <!-- ============ 로그인/온보딩 ============ -->
+    <div class="frame-block">
+      <div class="frame-label">Frame 01 · 로그인 / 온보딩</div>
+      <div class="frame-row">
+        <div class="phone-frame">
+          <div class="statusbar"><div class="dot"></div><div class="dot" style="width:16px"></div></div>
+          <div style="padding:22px 20px;display:flex;flex-direction:column;height:calc(100% - 22px);">
+            <div style="flex:0.8"></div>
+            <div class="wf-el" style="text-align:center;margin-bottom:8px;">
+              <div class="badge">1</div>
+              <div class="img-box" style="width:60px;height:60px;border-radius:16px;margin:0 auto 10px;">LOGO</div>
+              <div class="line sm" style="margin:0 auto;width:120px;height:10px;"></div>
+              <div class="line sm" style="margin:6px auto 0;width:90px;"></div>
+            </div>
+            <div style="flex:0.8"></div>
+            <div class="wf-el" style="margin-bottom:9px;">
+              <div class="badge">2</div>
+              <div class="btn fill">네이버로 시작하기</div>
+            </div>
+            <div class="btn fill" style="margin-bottom:9px;">카카오로 시작하기</div>
+            <div class="btn" style="margin-bottom:20px;">Google로 시작하기</div>
+            <div class="wf-el" style="text-align:center;">
+              <div class="badge">3</div>
+              <div class="line sm" style="margin:0 auto;width:140px;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="annotation-panel">
+          <ol>
+            <li data-n="1"><span class="num">1</span><div><b>로고 · 슬로건</b><span>서비스명(가칭 북플렉스)과 한 줄 슬로건</span></div></li>
+            <li data-n="2"><span class="num">2</span><div><b>소셜 로그인 버튼</b><span>기획서 3-5 순서 그대로 네이버 → 카카오 → 구글 노출 (v1에서 네이버 누락됐던 것 수정)</span></div></li>
+            <li data-n="3"><span class="num">3</span><div><b>비회원 둘러보기 링크</b><span>소셜 로그인만 지원 — 이메일 회원가입은 범위에서 제외</span></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 회원가입 ============ -->
+    <div class="frame-block">
+      <div class="frame-label">Frame 01.1 · 회원가입 (최소 정보 입력)</div>
+      <div class="frame-row">
+        <div class="phone-frame">
+          <div class="statusbar"><div class="dot"></div><div class="dot" style="width:16px"></div></div>
+          <div style="padding:18px 16px 0;height:calc(100% - 22px);">
+            <div class="wf-el" style="margin-bottom:16px;">
+              <div class="badge">1</div>
+              <div style="font-size:14px;font-weight:700;margin-bottom:4px;">몇 가지만 알려주세요</div>
+              <div style="font-size:10px;color:var(--text-muted);line-height:1.5;">닉네임 외 모든 정보는 선택이에요</div>
+            </div>
+            <div class="wf-el" style="margin-bottom:14px;">
+              <div class="badge">2</div>
+              <div style="font-size:10px;color:#55555c;margin-bottom:5px;">닉네임 (필수)</div>
+              <div class="line" style="height:32px;border-radius:8px;background:#f0f0f2;border:1px solid var(--line-dark);"></div>
+            </div>
+            <div class="wf-el" style="margin-bottom:14px;">
+              <div class="badge">3</div>
+              <div style="font-size:10px;color:#55555c;margin-bottom:5px;">성별 <span style="color:#b3b3b9;">· User.gender, 책 추천에 활용</span></div>
+              <div style="display:flex;gap:6px;">
+                <div class="tag" style="flex:1;height:28px;">여성</div>
+                <div class="tag" style="flex:1;height:28px;background:var(--fig-blue);color:#fff;border-color:var(--fig-blue);">남성</div>
+                <div class="tag" style="flex:1;height:28px;">선택 안 함</div>
+              </div>
+            </div>
+            <div class="wf-el" style="margin-bottom:14px;">
+              <div class="badge">4</div>
+              <div style="font-size:10px;color:#55555c;margin-bottom:5px;">관심 분야 <span style="color:#b3b3b9;">· Interest/UserInterest, 중복선택</span></div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <div class="tag" style="background:var(--fig-blue);color:#fff;border-color:var(--fig-blue);">소설</div>
+                <div class="tag">에세이</div>
+                <div class="tag" style="background:var(--fig-blue);color:#fff;border-color:var(--fig-blue);">자기계발</div>
+                <div class="tag">인문</div>
+                <div class="tag" style="background:var(--fig-blue);color:#fff;border-color:var(--fig-blue);">과학</div>
+                <div class="tag">경제·경영</div>
+              </div>
+            </div>
+            <div class="wf-el" style="margin-bottom:14px;">
+              <div class="badge">5</div>
+              <div style="font-size:10px;color:#55555c;margin-bottom:5px;">속한 독서모임이 있나요? <span style="color:#b3b3b9;">· GroupMember 재사용 · 선택</span></div>
+              <div style="display:flex;gap:6px;border:1px dashed var(--line-dark);border-radius:8px;padding:7px;align-items:center;">
+                <div style="flex:1;font-size:9.5px;color:#b3b3b9;">모임 이름으로 검색</div>
+                <div class="tag" style="flex-shrink:0;">＋ 추가</div>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:7px;">
+                <div class="tag" style="border-color:var(--fig-blue);color:var(--fig-blue);">책벙개 ✕</div>
+              </div>
+            </div>
+            <div class="wf-el">
+              <div class="badge">6</div>
+              <div class="btn fill">시작하기</div>
+            </div>
+          </div>
+        </div>
+        <div class="annotation-panel">
+          <ol>
+            <li data-n="1"><span class="num">1</span><div><b>안내 헤더</b><span>최소 정보만 수집한다는 점을 먼저 안내</span></div></li>
+            <li data-n="2"><span class="num">2</span><div><b>닉네임</b><span>가입 시 유일한 필수 항목 (User.nickname)</span></div></li>
+            <li data-n="3"><span class="num">3</span><div><b>성별</b><span>User.gender, 선택 안 함 기본값</span></div></li>
+            <li data-n="4"><span class="num">4</span><div><b>관심 분야</b><span>Interest 마스터 데이터 기준 다중 선택 → UserInterest 매핑</span></div></li>
+            <li data-n="5"><span class="num">5</span><div><b>독서모임 연결</b><span>기존 Group 검색 후 GroupMember로 매핑, 나중에 공유 탭에서도 추가 가능</span></div></li>
+            <li data-n="6"><span class="num">6</span><div><b>시작하기</b><span>완료 후 일정 탭으로 진입</span></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-divider">
+      <div class="section-title">📅 하단탭 ① 일정 (Schedule)</div>
+      <div class="section-sub">기획서 3-1 기준 · 읽고 있는 책 등록 및 진행 관리</div>
+    </div>
+
+    <!-- ============ 일정 탭 ============ -->
+    <div class="frame-block">
+      <div class="frame-label">Frame 02 · 일정 탭</div>
+      <div class="frame-row">
+        <div class="phone-frame">
+          <div class="statusbar"><div class="dot"></div><div class="dot" style="width:16px"></div></div>
+          <div style="padding:14px 16px 0;height:calc(100% - 78px);overflow:hidden;position:relative;">
+
+            <!-- 1. 헤더 -->
+            <div class="wf-el" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+              <div class="badge">1</div>
+              <div>
+                <div style="font-size:15px;font-weight:700;">이번달 독서 일정</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">2026년 7월 · 지금까지 3권 완독</div>
+              </div>
+              <div class="icon-dot"></div>
+            </div>
+
+            <!-- 2. 미니 캘린더 스트립 -->
+            <div class="wf-el" style="margin-bottom:16px;">
+              <div class="badge">2</div>
+              <div style="display:flex;justify-content:space-between;">
+                <div style="text-align:center;"><div style="font-size:9px;color:var(--text-muted);margin-bottom:6px;">월</div><div class="line sm" style="width:22px;height:22px;border-radius:50%;margin:0 auto;"></div></div>
+                <div style="text-align:center;"><div style="font-size:9px;color:var(--text-muted);margin-bottom:6px;">화</div><div class="line sm" style="width:22px;height:22px;border-radius:50%;margin:0 auto;"></div></div>
+                <div style="text-align:center;"><div style="font-size:9px;color:var(--text-muted);margin-bottom:6px;">수</div><div style="width:22px;height:22px;border-radius:50%;margin:0 auto;background:var(--fig-blue);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;">18</div></div>
+                <div style="text-align:center;"><div style="font-size:9px;color:var(--text-muted);margin-bottom:6px;">목</div><div class="line sm" style="width:22px;height:22px;border-radius:50%;margin:0 auto;"></div></div>
+                <div style="text-align:center;"><div style="font-size:9px;color:var(--text-muted);margin-bottom:6px;">금</div><div class="line sm" style="width:22px;height:22px;border-radius:50%;margin:0 auto;"></div></div>
+                <div style="text-align:center;"><div style="font-size:9px;color:var(--text-muted);margin-bottom:6px;">토</div><div style="width:22px;height:22px;border-radius:50%;margin:0 auto;background:#ffe9e0;"></div></div>
+                <div style="text-align:center;"><div style="font-size:9px;color:var(--text-muted);margin-bottom:6px;">일</div><div class="line sm" style="width:22px;height:22px;border-radius:50%;margin:0 auto;"></div></div>
+              </div>
+            </div>
+
+            <!-- 3. 오늘의 리딩 카드 -->
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">3</div>
+              <div style="border:1px solid #dceaff;background:#f5faff;border-radius:12px;padding:14px;">
+                <div style="display:flex;gap:10px;margin-bottom:10px;">
+                  <div class="img-box" style="width:40px;height:56px;flex-shrink:0;">표지</div>
+                  <div style="flex:1;">
+                    <div style="font-size:12.5px;font-weight:700;line-height:1.4;">오늘은 『아몬드』를<br>마저 읽을 차례예요!</div>
+                    <div style="font-size:10.5px;color:var(--text-muted);margin-top:5px;">어제 62p까지 읽었어요 · 진행률 62%</div>
+                  </div>
+                </div>
+                <div style="height:6px;border-radius:4px;background:#e2e2e6;overflow:hidden;margin-bottom:10px;">
+                  <div style="height:100%;width:62%;background:var(--fig-blue);"></div>
+                </div>
+                <div class="btn fill" style="border-color:var(--fig-blue);color:var(--fig-blue);">이어서 읽기</div>
+              </div>
+            </div>
+
+            <!-- 4. 이번주 일정 카드 -->
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">4</div>
+              <div style="border:1px solid #eaeaee;border-radius:12px;padding:12px 14px;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                  <div class="icon-dot" style="width:16px;height:16px;background:#ffb238;"></div>
+                  <div style="font-size:12px;font-weight:700;">이번주 독서모임 일정이 있어요!</div>
+                </div>
+                <div style="font-size:10.5px;color:var(--text-muted);">7월 20일(토) 14:00 · 독서모임 "책벙개"</div>
+              </div>
+            </div>
+
+            <!-- 5. 새 책 등록 -->
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">5</div>
+              <div class="btn accent">＋ 새 책 등록하기</div>
+            </div>
+
+            <!-- 6. 읽고 있는 책 -->
+            <div class="wf-el">
+              <div class="badge">6</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">읽고 있는 책 · 2</div>
+              <div style="display:flex;gap:10px;">
+                <div class="img-box" style="width:52px;height:72px;flex-shrink:0;"></div>
+                <div class="img-box" style="width:52px;height:72px;flex-shrink:0;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="tabbar">
+            <div class="tab-item active"><div class="icon-dot"></div><span>일정</span></div>
+            <div class="tab-item"><div class="icon-dot"></div><span>서재</span></div>
+            <div class="tab-item"><div class="icon-dot"></div><span>공유</span></div>
+            <div class="tab-item"><div class="icon-dot"></div><span>프로필</span></div>
+          </div>
+        </div>
+        <div class="annotation-panel">
+          <ol>
+            <li data-n="1"><span class="num">1</span><div><b>헤더 · 이번달 요약</b><span>"이번달 독서 일정" 타이틀과 이달 완독 권수 요약, 우측 알림 아이콘</span></div></li>
+            <li data-n="2"><span class="num">2</span><div><b>미니 캘린더 스트립</b><span>이번주 요일 노출, 오늘 강조 표시, 독서모임 등 일정 있는 날 별도 표시(예: 토요일)</span></div></li>
+            <li data-n="3"><span class="num">3</span><div><b>오늘의 리딩 카드</b><span>어제 읽던 책을 이어읽도록 유도하는 넛지 카드 — 진행률 + 이어읽기 버튼</span></div></li>
+            <li data-n="4"><span class="num">4</span><div><b>이번주 일정 카드</b><span>독서모임·약속 등 캘린더 연동 일정 알림, 탭 시 일정 상세로 이동</span></div></li>
+            <li data-n="5"><span class="num">5</span><div><b>새 책 등록</b><span>탭하면 책 검색/등록 모달로 진입 — <u>책 검색 컴포넌트는 이미 구현 완료</u> 상태라 바로 재사용 가능</span></div></li>
+            <li data-n="6"><span class="num">6</span><div><b>읽고 있는 책 리스트</b><span>현재 진행 중인 책 표지 가로 나열, 탭하면 서재 상세로 이동</span></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-divider">
+      <div class="section-title">📚 하단탭 ② 서재 (Library)</div>
+      <div class="section-sub">기획서 3-2 기준 · 목록 → 상세(장소사진/소감/독서기간)</div>
+    </div>
+
+    <!-- ============ 서재 탭 - 목록 ============ -->
+    <div class="frame-block">
+      <div class="frame-label">Frame 03 · 서재 탭 (목록)</div>
+      <div class="frame-row">
+        <div class="phone-frame">
+          <div class="statusbar"><div class="dot"></div><div class="dot" style="width:16px"></div></div>
+          <div style="padding:16px 16px 0;height:calc(100% - 78px);overflow:hidden;">
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;">서재</div>
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">1</div>
+              <div style="display:flex;gap:6px;">
+                <div class="tag" style="flex:1;background:var(--fig-blue);color:#fff;border-color:var(--fig-blue);">읽고 있는 책</div>
+                <div class="tag" style="flex:1;">읽은 책</div>
+              </div>
+            </div>
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">2</div>
+              <div style="display:flex;gap:6px;">
+                <div class="line" style="flex:1;height:28px;border-radius:8px;background:#f0f0f2;"></div>
+                <div class="tag" style="flex-shrink:0;height:28px;">최근순 ▾</div>
+              </div>
+            </div>
+            <div class="wf-el">
+              <div class="badge">3</div>
+              <div style="border:1px solid #eaeaee;border-radius:10px;padding:10px;display:flex;gap:10px;margin-bottom:8px;">
+                <div class="img-box" style="width:40px;height:56px;flex-shrink:0;"></div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:700;">아몬드 (손원평)</div>
+                  <div style="font-size:9.5px;color:var(--text-muted);margin:3px 0;">2026.06.20 ~ 2026.06.28 (9일)</div>
+                  <div style="display:flex;gap:8px;font-size:9px;color:var(--text-muted);">
+                    <span>📷 사진 3장</span><span>✏️ 소감 있음</span>
+                  </div>
+                </div>
+              </div>
+              <div style="border:1px solid #eaeaee;border-radius:10px;padding:10px;display:flex;gap:10px;">
+                <div class="img-box" style="width:40px;height:56px;flex-shrink:0;"></div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:700;">채식주의자 (한강)</div>
+                  <div style="font-size:9.5px;color:var(--text-muted);margin:3px 0;">2026.06.25 ~ 진행중</div>
+                  <div style="display:flex;gap:8px;font-size:9px;color:var(--text-muted);">
+                    <span>📷 사진 없음</span><span>✏️ 소감 없음</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tabbar">
+            <div class="tab-item"><div class="icon-dot"></div><span>일정</span></div>
+            <div class="tab-item active"><div class="icon-dot"></div><span>서재</span></div>
+            <div class="tab-item"><div class="icon-dot"></div><span>공유</span></div>
+            <div class="tab-item"><div class="icon-dot"></div><span>프로필</span></div>
+          </div>
+        </div>
+        <div class="annotation-panel">
+          <ol>
+            <li data-n="1"><span class="num">1</span><div><b>필터 탭</b><span>읽고있는책(reading) / 읽은책(done) — Book.status 기준 전환</span></div></li>
+            <li data-n="2"><span class="num">2</span><div><b>검색 · 정렬</b><span>제목 키워드 검색 + 최근순/제목순/완독일순</span></div></li>
+            <li data-n="3"><span class="num">3</span><div><b>책 카드</b><span>카드 탭 시 Frame 03.1 상세로 이동. 사진/소감 존재 여부를 아이콘으로 미리 표시</span></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 서재 탭 - 상세 ============ -->
+    <div class="frame-block">
+      <div class="frame-label">Frame 03.1 · 서재 탭 (책 상세)</div>
+      <div class="frame-row">
+        <div class="phone-frame">
+          <div class="statusbar"><div class="dot"></div><div class="dot" style="width:16px"></div></div>
+          <div style="padding:16px 16px 0;height:calc(100% - 22px);overflow:hidden;">
+            <div class="wf-el" style="display:flex;gap:12px;margin-bottom:14px;">
+              <div class="badge">1</div>
+              <div class="img-box" style="width:64px;height:88px;flex-shrink:0;">표지</div>
+              <div style="flex:1;padding-top:2px;">
+                <div style="font-size:13px;font-weight:700;">아몬드</div>
+                <div style="font-size:10px;color:var(--text-muted);margin:3px 0 8px;">손원평</div>
+                <div style="font-size:9.5px;color:var(--text-muted);">읽은 기간<br><b style="color:#1a1a1e;">2026.06.20 ~ 2026.06.28 (9일)</b></div>
+              </div>
+            </div>
+            <div class="wf-el" style="margin-bottom:14px;">
+              <div class="badge">2</div>
+              <div style="font-size:10.5px;color:var(--text-muted);margin-bottom:6px;">📷 장소 사진</div>
+              <div style="display:flex;gap:6px;">
+                <div style="text-align:center;">
+                  <div class="img-box" style="width:64px;height:64px;"></div>
+                  <div style="font-size:8px;color:var(--text-muted);margin-top:3px;">홍대 카페</div>
+                </div>
+                <div style="text-align:center;">
+                  <div class="img-box" style="width:64px;height:64px;"></div>
+                  <div style="font-size:8px;color:var(--text-muted);margin-top:3px;">출근길</div>
+                </div>
+                <div style="text-align:center;">
+                  <div class="img-box" style="width:64px;height:64px;"></div>
+                  <div style="font-size:8px;color:var(--text-muted);margin-top:3px;">자기 전</div>
+                </div>
+              </div>
+            </div>
+            <div class="wf-el" style="margin-bottom:16px;">
+              <div class="badge">3</div>
+              <div style="font-size:10.5px;color:var(--text-muted);margin-bottom:6px;">✏️ 소감</div>
+              <div class="img-box" style="height:70px;align-items:flex-start;justify-content:flex-start;padding:8px;font-size:9.5px;color:#6b6b73;">"인상 깊었던 부분은..."</div>
+            </div>
+            <div class="wf-el" style="margin-bottom:10px;">
+              <div class="badge">4</div>
+              <div class="btn fill" style="border-color:var(--fig-blue);color:var(--fig-blue);">다 읽었어요 (완독 처리)</div>
+            </div>
+            <div class="wf-el">
+              <div class="badge">5</div>
+              <div class="btn fill accent">이 책 공유하기 →</div>
+            </div>
+          </div>
+        </div>
+        <div class="annotation-panel">
+          <ol>
+            <li data-n="1"><span class="num">1</span><div><b>책 정보 헤더</b><span>표지·제목·저자, 독서기간(start_date~end_date 자동계산)</span></div></li>
+            <li data-n="2"><span class="num">2</span><div><b>장소 사진 갤러리</b><span>BookPhoto 여러 장, location_text 또는 위도/경도 태그 표시, 가로 스크롤</span></div></li>
+            <li data-n="3"><span class="num">3</span><div><b>소감</b><span>BookNote, 여러 번 작성 가능한 독서노트 형태 — 여기선 최신 1건 노출, 탭하면 전체 이력</span></div></li>
+            <li data-n="4"><span class="num">4</span><div><b>완독 처리 버튼</b><span>status=reading일 때만 노출. 탭하면 Book.status→done, end_date 기록 후 "읽은 책" 목록으로 이동 (일정 탭에 있던 버튼을 여기로 이전)</span></div></li>
+            <li data-n="5"><span class="num">5</span><div><b>공유하기 버튼</b><span>탭 시 이 책을 선택한 상태로 Frame 04 공유 탭으로 이동 (share_type=book)</span></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-divider">
+      <div class="section-title">🔗 하단탭 ③ 공유 (Share) <span style="color:var(--warn);font-size:12px;">· v2 신규</span></div>
+      <div class="section-sub">기획서 3-3 기준 · 그룹 관리 / 공유범위 / 이력 — v1 와이어프레임에는 없던 탭</div>
+    </div>
+
+    <!-- ============ 공유 탭 ============ -->
+    <div class="frame-block">
+      <div class="frame-label new">Frame 04 · 공유 탭</div>
+      <div class="frame-row">
+        <div class="phone-frame">
+          <div class="statusbar"><div class="dot"></div><div class="dot" style="width:16px"></div></div>
+          <div style="padding:16px 16px 0;height:calc(100% - 78px);overflow:hidden;">
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;">공유</div>
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">1</div>
+              <div style="display:flex;gap:8px;border:1px solid #eaeaee;border-radius:10px;padding:8px;align-items:center;">
+                <div class="img-box" style="width:32px;height:44px;flex-shrink:0;"></div>
+                <div style="font-size:11px;font-weight:700;">공유할 기록: 아몬드</div>
+              </div>
+            </div>
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">2</div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">공유 범위</div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div class="tag" style="justify-content:flex-start;padding:0 10px;height:26px;">◯ 전체 공개</div>
+                <div class="tag" style="justify-content:flex-start;padding:0 10px;height:26px;border-color:var(--fig-blue);color:var(--fig-blue);">● 그룹 선택 — 독서모임(8) · 가족(4)</div>
+                <div class="tag" style="justify-content:flex-start;padding:0 10px;height:26px;">◯ 인원 직접 선택</div>
+              </div>
+            </div>
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">3</div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">공유 카드 미리보기</div>
+              <div style="border:1px solid #dceaff;background:#f5faff;border-radius:10px;padding:10px;text-align:center;">
+                <div class="img-box" style="width:40px;height:56px;margin:0 auto 6px;"></div>
+                <div style="font-size:9.5px;">"인상 깊었던..." · 9일간 완독 📖</div>
+              </div>
+            </div>
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">4</div>
+              <div style="border:1px dashed #ffb238;background:#fff9ec;border-radius:8px;padding:8px 10px;font-size:9.5px;color:#8a5a00;">
+                ⚠️ 이 링크를 아는 사람은 누구나 볼 수 있어요
+              </div>
+            </div>
+            <div class="wf-el" style="display:flex;gap:6px;">
+              <div class="badge">5</div>
+              <div class="btn fill accent" style="flex:1;">앱 내 공유</div>
+              <div class="btn" style="flex:1;">SNS 공유</div>
+            </div>
+          </div>
+          <div class="tabbar">
+            <div class="tab-item"><div class="icon-dot"></div><span>일정</span></div>
+            <div class="tab-item"><div class="icon-dot"></div><span>서재</span></div>
+            <div class="tab-item active"><div class="icon-dot"></div><span>공유</span></div>
+            <div class="tab-item"><div class="icon-dot"></div><span>프로필</span></div>
+          </div>
+        </div>
+        <div class="annotation-panel">
+          <ol>
+            <li data-n="1"><span class="num">1</span><div><b>공유 대상 기록</b><span>서재 상세에서 넘어온 책 또는 대시보드(Recap)를 선택한 상태로 진입 — share_type 결정</span></div></li>
+            <li data-n="2"><span class="num">2</span><div><b>공유 범위 선택</b><span>ShareRecord.scope: all/group/custom. 그룹 선택 시 하단에 Group 목록·인원수 노출, 인원 직접 선택 시 연락처/팔로워 체크박스 화면으로 이동</span></div></li>
+            <li data-n="3"><span class="num">3</span><div><b>공유 카드 미리보기</b><span>실제 생성될 card_image_url 미리보기 (표지+소감 일부+기간)</span></div></li>
+            <li data-n="4"><span class="num">4</span><div><b>공유 전 안내 메시지</b><span>scope가 group/custom일 때만 노출. public_token은 scope와 무관하게 링크를 아는 누구나 접근 가능하므로, 공유 실행 전 이 사실을 확인받음 (all일 땐 이미 전체공개라 불필요)</span></div></li>
+            <li data-n="5"><span class="num">5</span><div><b>공유 실행</b><span>앱 내 공유(공유 이력에 기록) 또는 OS 공유시트로 외부 SNS 전달, 이때 Frame 06 공개 웹페이지 링크가 함께 생성됨</span></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 공유 탭 - 그룹관리/이력 ============ -->
+    <div class="frame-block">
+      <div class="frame-label new">Frame 04.1 · 공유 탭 (그룹 관리 · 공유 이력)</div>
+      <div class="frame-row">
+        <div class="phone-frame">
+          <div class="statusbar"><div class="dot"></div><div class="dot" style="width:16px"></div></div>
+          <div style="padding:16px 16px 0;height:calc(100% - 22px);overflow:hidden;">
+            <div class="wf-el" style="margin-bottom:16px;">
+              <div class="badge">1</div>
+              <div style="font-size:12px;font-weight:700;margin-bottom:8px;">내 그룹</div>
+              <div style="display:flex;gap:8px;margin-bottom:6px;border:1px solid #eaeaee;border-radius:8px;padding:8px;align-items:center;">
+                <div class="icon-dot" style="width:26px;height:26px;"></div>
+                <div style="flex:1;font-size:10.5px;">독서모임 <span style="color:var(--text-muted);">· 8명</span></div>
+                <div class="tag">관리</div>
+              </div>
+              <div style="display:flex;gap:8px;border:1px solid #eaeaee;border-radius:8px;padding:8px;align-items:center;">
+                <div class="icon-dot" style="width:26px;height:26px;"></div>
+                <div style="flex:1;font-size:10.5px;">가족 <span style="color:var(--text-muted);">· 4명</span></div>
+                <div class="tag">관리</div>
+              </div>
+              <div class="btn" style="margin-top:8px;">＋ 새 그룹 만들기</div>
+            </div>
+            <div class="wf-el">
+              <div class="badge">2</div>
+              <div style="font-size:12px;font-weight:700;margin-bottom:8px;">공유 이력</div>
+              <div style="font-size:9.5px;line-height:2.1;color:#3f3f46;">
+                <div>📖 아몬드 → 독서모임(8명) · 07/09</div>
+                <div>📊 3분기 리캡 → 전체공개 · 07/05</div>
+                <div>📖 채식주의자 → 인스타그램 · 07/01</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="annotation-panel">
+          <ol>
+            <li data-n="1"><span class="num">1</span><div><b>그룹 관리</b><span>Group/GroupMember CRUD, 회원가입 때 연결한 독서모임도 여기서 관리</span></div></li>
+            <li data-n="2"><span class="num">2</span><div><b>공유 이력</b><span>누구에게(target)/언제(shared_at)/무엇을(book 또는 dashboard) 공유했는지 ShareRecord 목록. 항목 탭 시 공개 웹페이지(Frame 06) 미리보기로 이동</span></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-divider">
+      <div class="section-title">👤 하단탭 ④ 프로필 (Profile)</div>
+      <div class="section-sub">기획서 3-6 기준 · 기본 프로필 + 독서 대시보드(Recap) 진입</div>
+    </div>
+
+    <!-- ============ 프로필 탭 ============ -->
+    <div class="frame-block">
+      <div class="frame-label">Frame 05 · 프로필 탭</div>
+      <div class="frame-row">
+        <div class="phone-frame">
+          <div class="statusbar"><div class="dot"></div><div class="dot" style="width:16px"></div></div>
+          <div style="padding:20px 16px 0;height:calc(100% - 78px);overflow:hidden;">
+            <div class="wf-el" style="text-align:center;margin-bottom:16px;">
+              <div class="badge">1</div>
+              <div class="img-box" style="width:56px;height:56px;border-radius:50%;margin:0 auto 8px;"></div>
+              <div style="font-size:13px;font-weight:700;">익명의 독서가</div>
+              <div style="font-size:9.5px;color:var(--text-muted);margin-top:3px;">한줄소개 (선택)</div>
+            </div>
+            <div class="wf-el" style="margin-bottom:16px;">
+              <div class="badge">2</div>
+              <div class="btn">프로필 편집</div>
+            </div>
+            <div class="wf-el" style="margin-bottom:16px;">
+              <div class="badge">3</div>
+              <div style="display:flex;gap:8px;">
+                <div style="flex:1;border:1px solid #eaeaee;border-radius:10px;padding:10px;text-align:center;">
+                  <div style="font-size:9px;color:var(--text-muted);">읽은 책</div>
+                  <div style="font-size:15px;font-weight:700;">12권</div>
+                </div>
+                <div style="flex:1;border:1px solid #eaeaee;border-radius:10px;padding:10px;text-align:center;">
+                  <div style="font-size:9px;color:var(--text-muted);">공유한 기록</div>
+                  <div style="font-size:15px;font-weight:700;">5건</div>
+                </div>
+              </div>
+            </div>
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">4</div>
+              <div style="border:1px solid #dceaff;background:#f5faff;border-radius:12px;padding:12px;display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-size:11px;font-weight:700;">📊 독서 대시보드<br><span style="font-size:9.5px;font-weight:400;color:var(--text-muted);">이번 분기 리캡 보기</span></div>
+                <div style="font-size:14px;color:var(--fig-blue);">→</div>
+              </div>
+            </div>
+            <div class="btn">로그아웃</div>
+          </div>
+          <div class="tabbar">
+            <div class="tab-item"><div class="icon-dot"></div><span>일정</span></div>
+            <div class="tab-item"><div class="icon-dot"></div><span>서재</span></div>
+            <div class="tab-item"><div class="icon-dot"></div><span>공유</span></div>
+            <div class="tab-item active"><div class="icon-dot"></div><span>프로필</span></div>
+          </div>
+        </div>
+        <div class="annotation-panel">
+          <ol>
+            <li data-n="1"><span class="num">1</span><div><b>프로필 정보</b><span>사진/닉네임/한줄소개 모두 선택 입력, 미설정 시 기본 아바타·"익명의 독서가"</span></div></li>
+            <li data-n="2"><span class="num">2</span><div><b>프로필 편집</b><span>비공개 모드 — 미설정이어도 핵심 기능 전부 이용 가능</span></div></li>
+            <li data-n="3"><span class="num">3</span><div><b>내 활동 요약</b><span>읽은 책 수, 공유한 기록 수 (선택적 노출)</span></div></li>
+            <li data-n="4"><span class="num">4</span><div><b>독서 대시보드 진입</b><span>탭하면 Frame 05.1 Recap 화면으로 이동</span></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 대시보드 Recap ============ -->
+    <div class="frame-block">
+      <div class="frame-label">Frame 05.1 · 독서 대시보드 (Recap)</div>
+      <div class="frame-row">
+        <div class="phone-frame">
+          <div class="statusbar"><div class="dot"></div><div class="dot" style="width:16px"></div></div>
+          <div style="padding:14px 16px 0;height:calc(100% - 22px);overflow:hidden;">
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">1</div>
+              <div style="display:flex;gap:6px;">
+                <div class="tag" style="flex:1;">월간</div>
+                <div class="tag" style="flex:1;background:var(--fig-blue);color:#fff;border-color:var(--fig-blue);">분기별</div>
+                <div class="tag" style="flex:1;">연간</div>
+              </div>
+            </div>
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">2</div>
+              <div style="display:flex;gap:8px;">
+                <div style="flex:1;border:1px solid #eaeaee;border-radius:10px;padding:9px;text-align:center;">
+                  <div style="font-size:9px;color:var(--text-muted);margin-bottom:4px;">완독 수</div>
+                  <div style="font-size:16px;font-weight:700;">5권</div>
+                </div>
+                <div style="flex:1;border:1px solid #eaeaee;border-radius:10px;padding:9px;text-align:center;">
+                  <div style="font-size:9px;color:var(--text-muted);margin-bottom:4px;">읽은 페이지</div>
+                  <div style="font-size:16px;font-weight:700;">1,480p</div>
+                </div>
+              </div>
+            </div>
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">3</div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">장르 비율</div>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:56px;height:56px;border-radius:50%;flex-shrink:0;background:conic-gradient(var(--fig-blue) 0% 40%, #93c5fd 40% 70%, #ffb238 70% 90%, #e2e2e6 90% 100%);"></div>
+                <div style="flex:1;font-size:9.5px;line-height:1.85;color:#3f3f46;">
+                  <div><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:var(--fig-blue);margin-right:5px;"></span>소설 40%</div>
+                  <div><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#93c5fd;margin-right:5px;"></span>에세이 30%</div>
+                  <div><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#ffb238;margin-right:5px;"></span>자기계발 20%</div>
+                </div>
+              </div>
+            </div>
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">4</div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">월별 완독 추이</div>
+              <div style="display:flex;align-items:flex-end;gap:8px;height:40px;">
+                <div style="flex:1;background:#dbeafe;border-radius:3px 3px 0 0;height:40%;"></div>
+                <div style="flex:1;background:#dbeafe;border-radius:3px 3px 0 0;height:70%;"></div>
+                <div style="flex:1;background:var(--fig-blue);border-radius:3px 3px 0 0;height:100%;"></div>
+                <div style="flex:1;background:#dbeafe;border-radius:3px 3px 0 0;height:55%;"></div>
+                <div style="flex:1;background:#dbeafe;border-radius:3px 3px 0 0;height:25%;"></div>
+              </div>
+            </div>
+            <div class="wf-el" style="margin-bottom:12px;">
+              <div class="badge">5</div>
+              <div style="border:1px solid #ffe3d1;background:#fff8f3;border-radius:10px;padding:9px 11px;">
+                <div style="font-size:9.5px;line-height:1.7;">✨ 이번 분기 가장 많이 읽은 장르는 <b>소설</b><br>📖 가장 오래 곱씹은 책은 <b>『아몬드』(9일)</b></div>
+              </div>
+            </div>
+            <div class="wf-el" style="display:flex;gap:8px;">
+              <div class="badge">6</div>
+              <div class="btn" style="flex:1;">🖼️ 이미지 저장</div>
+              <div class="btn fill accent" style="flex:1;">공유 탭으로</div>
+            </div>
+          </div>
+        </div>
+        <div class="annotation-panel">
+          <ol>
+            <li data-n="1"><span class="num">1</span><div><b>기간 토글</b><span>월간/분기별/연간, 아래 모든 지표 갱신</span></div></li>
+            <li data-n="2"><span class="num">2</span><div><b>핵심 지표</b><span>완독 수, 읽은 페이지 누적 집계</span></div></li>
+            <li data-n="3"><span class="num">3</span><div><b>장르 비율 도넛</b><span>Book.genre 기준 분포</span></div></li>
+            <li data-n="4"><span class="num">4</span><div><b>월별 완독 추이</b><span>월별 완독 권수 막대그래프</span></div></li>
+            <li data-n="5"><span class="num">5</span><div><b>하이라이트 카드</b><span>자동 생성 문구</span></div></li>
+            <li data-n="6"><span class="num">6</span><div><b>저장/공유</b><span>"공유 탭으로" 버튼 — v1에선 여기서 바로 SNS 공유했지만, v2는 공유범위 선택을 위해 공유 탭(Frame 04)으로 넘겨 share_type=dashboard로 처리</span></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-divider">
+      <div class="section-title">🌐 공유 웹페이지 (비로그인 공개) <span style="color:var(--warn);font-size:12px;">· v2 신규</span></div>
+      <div class="section-sub">기획서 7장 기준 · /share/{public_token} · 앱 없이도 SNS 링크로 열람 가능</div>
+    </div>
+
+    <!-- ============ 공유 웹페이지 ============ -->
+    <div class="frame-block">
+      <div class="frame-label new">Frame 06 · 공유 웹페이지 (독서기록 공유형)</div>
+      <div class="frame-row">
+        <div class="browser-frame">
+          <div class="browser-bar">
+            <div class="dots"><span></span><span></span><span></span></div>
+            <div class="url">bookflex.app/share/8f2a91c...</div>
+          </div>
+          <div class="browser-body">
+            <div class="wf-el" style="padding:20px;">
+              <div class="badge" style="top:10px;right:10px;">1</div>
+              <div class="img-box" style="width:100%;height:160px;margin-bottom:14px;">표지 + 카드 이미지 (OG 이미지)</div>
+              <div class="wf-el" style="margin-bottom:12px;">
+                <div class="badge">2</div>
+                <div style="font-size:14px;font-weight:700;margin-bottom:4px;">아몬드 · 손원평</div>
+                <div style="font-size:10.5px;color:var(--text-muted);">2026.06.20 ~ 2026.06.28 (9일)</div>
+              </div>
+              <div class="wf-el">
+                <div class="badge">3</div>
+                <div style="display:flex;gap:6px;margin-bottom:8px;">
+                  <div class="img-box" style="width:56px;height:56px;"></div>
+                  <div class="img-box" style="width:56px;height:56px;"></div>
+                  <div class="img-box" style="width:56px;height:56px;"></div>
+                </div>
+                <div style="font-size:10.5px;color:#3f3f46;">"인상 깊었던 부분은..."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="annotation-panel">
+          <ol>
+            <li data-n="1"><span class="num">1</span><div><b>OG 이미지 / 카드</b><span>ShareRecord.card_image_url을 og:image로 사용, 카카오톡 등 링크 미리보기에 그대로 노출</span></div></li>
+            <li data-n="2"><span class="num">2</span><div><b>책 정보</b><span>표지 고정 노출 + 제목/저자/독서기간</span></div></li>
+            <li data-n="3"><span class="num">3</span><div><b>선택 사진 + 소감</b><span>공유 시 사용자가 고른 사진(기본1장~최대N장) + 소감 텍스트. 앱 다운로드 CTA는 현재 범위 밖 — 필요해지면 추후 추가</span></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame-block">
+      <div class="frame-label new">Frame 06.1 · 공유 웹페이지 (대시보드 공유형)</div>
+      <div class="frame-row">
+        <div class="browser-frame">
+          <div class="browser-bar">
+            <div class="dots"><span></span><span></span><span></span></div>
+            <div class="url">bookflex.app/share/c91ff02...</div>
+          </div>
+          <div class="browser-body">
+            <div class="wf-el" style="padding:20px;">
+              <div class="badge" style="top:10px;right:10px;">1</div>
+              <div class="img-box" style="width:100%;height:220px;">Recap 카드 이미지 그대로 (완독수/장르비율/추이그래프 포함)</div>
+            </div>
+          </div>
+        </div>
+        <div class="annotation-panel">
+          <ol>
+            <li data-n="1"><span class="num">1</span><div><b>대시보드 렌더링 이미지</b><span>Frame 05.1에서 만들어진 card_image_url을 그대로 노출 — 별도 레이아웃 없이 이미지 자체가 콘텐츠 (기획서 7-2 ②)</span></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-note">
+    ※ 본 문서는 저해상도(Low-fidelity) 와이어프레임으로, 정보 구조와 화면 흐름 확인용입니다. 실제 비주얼 디자인(컬러·폰트·아이콘)은 별도 UI 디자인 단계에서 확정합니다.<br>
+    ※ <span style="color:var(--warn);">★ 표시</span>는 v1에 없던 v2 신규 프레임이며, <span style="color:#c2410c;">주황 글씨</span>는 기획서 상 아직 미결정(열린 질문)인 항목입니다.
+  </div>
+
+<script>
+  document.querySelectorAll('.badge').forEach(function(b){
+    var num = b.textContent.trim();
+    var frame = b.closest('.frame-block');
+    b.addEventListener('mouseenter', function(){
+      var li = frame.querySelector('li[data-n="'+num+'"]');
+      if(li) li.classList.add('hot');
+      b.classList.add('hot');
+    });
+    b.addEventListener('mouseleave', function(){
+      var li = frame.querySelector('li[data-n="'+num+'"]');
+      if(li) li.classList.remove('hot');
+      b.classList.remove('hot');
+    });
+  });
+  document.querySelectorAll('.annotation-panel li').forEach(function(li){
+    var num = li.getAttribute('data-n');
+    var frame = li.closest('.frame-block');
+    li.addEventListener('mouseenter', function(){
+      li.classList.add('hot');
+      frame.querySelectorAll('.badge').forEach(function(bd){
+        if(bd.textContent.trim()===num) bd.classList.add('hot');
+      });
+    });
+    li.addEventListener('mouseleave', function(){
+      li.classList.remove('hot');
+      frame.querySelectorAll('.badge').forEach(function(bd){
+        if(bd.textContent.trim()===num) bd.classList.remove('hot');
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

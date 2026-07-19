@@ -1,0 +1,17 @@
+{
+  "name": "reading-record-app-frontend",
+  "version": "0.0.1",
+  "private": true,
+  "description": "독서 기록 공유 앱 - React Native 프론트엔드",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-native": "0.74.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "typescript": "^5.4.0"
+  }
+}

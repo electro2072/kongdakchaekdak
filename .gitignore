@@ -1,0 +1,16 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Node / React Native
+node_modules/
+*.log
+.env
+
+# Java / Gradle (backend/.gitignore has details too)
+backend/.gradle/
+backend/build/
+
+# IDE
+.idea/
+.vscode/
