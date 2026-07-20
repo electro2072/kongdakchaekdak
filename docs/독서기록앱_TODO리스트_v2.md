@@ -1,6 +1,6 @@
 # ✅ 독서 기록 공유 앱 — 배포까지 TODO 리스트
 
-> 작성일: 2026-07-02 · 최종 업데이트: 2026-07-19
+> 작성일: 2026-07-02 · 최종 업데이트: 2026-07-20
 > 참고 문서: 기획서, 테이블정의서, 화면설계서, 개발현황, 백엔드구축계획
 
 ---
@@ -14,6 +14,7 @@
 - [ ] **(신규, `65d7480` 커밋)** `/api/users/**`, `/api/books/**` 를 이제 인증 없이 호출하면 401이 나는지 확인 (토큰 없이 `GET /api/users/1` 호출 → 401 예상), 그리고 Swagger Authorize에 토큰 넣은 뒤에는 정상 호출되는지 확인 — `gradle test`에서 `UserControllerTest`/`BookControllerTest`의 "토큰_없이_요청하면_401" 케이스로도 커버되지만, 실제 프론트/Postman에서 한 번 더 확인 권장
 - [ ] **(신규)** `backend/.env.example`을 복사해서 `backend/.env` 만들고, 카카오/구글/네이버 키를 발급받는 대로 채워넣기 — 파일이 없어도 `gradle bootRun`은 정상 동작하지만(경고 로그만 뜸) 소셜 로그인은 안 됨
 - [ ] **(신규)** 카카오/구글/네이버 소셜 로그인 코드(`gradle test`의 `SocialAuthControllerTest`, `GoogleOAuthClientTest`) 통과 확인 — 실제 앱 등록/`.env` 작성 전이라도 `@MockBean`으로 대체되어 있어서 지금 바로 `gradle test`만으로 검증 가능
+- [ ] **(신규, 2026-07-20)** 리소스 소유자 검증(`UserControllerTest`/`BookControllerTest`의 신규 403 테스트 4개) 통과 확인 — 다른 사용자 토큰으로 남의 프로필/책 수정·삭제·등록을 시도하면 403(`FORBIDDEN`)이 나는지, 실제 흐름(본인 것 수정/삭제)은 여전히 정상 동작하는지 Swagger/Postman으로도 한 번 확인 권장
 
 ---
 
@@ -67,7 +68,7 @@
 - [x] Step 1. 프로젝트 뼈대 (Spring Boot + Gradle + MySQL Docker + Health check API)
 - [x] Step 2-a. User 기본 CRUD + Swagger 문서화 (2026-07-19 완료)
 - [x] Step 2-b. Book 기본 CRUD (등록/조회/수정/완독 처리) — 2026-07-19 완료, 사용자 로컬 환경(Java 17 + Gradle 8.14)에서 `gradle bootRun` 정상 실행 확인
-- [ ] Step 3. 인증 (이메일/PW 완료 · User/Book API 인증 필수화 완료 · 카카오/구글/네이버 OAuth2 코드 구현 완료 — 모두 2026-07-19, 단 소셜 로그인은 실제 키/로컬 검증 전)
+- [x] Step 3. 인증 (이메일/PW · User/Book API 인증 필수화 · 카카오/구글/네이버 OAuth2 코드 구현 · 리소스 소유자 검증 강화 — 모두 완료, 마지막 항목은 2026-07-20. 단 소셜 로그인은 실제 키/로컬 검증 전)
 - [ ] Step 4. 이미지 업로드 (S3 presigned URL, BookPhoto API)
 - [ ] Step 5. 소감/공유 기능 (BookNote, Group, ShareRecord API)
 - [ ] Step 6. 배포 (AWS EC2 + RDS 또는 Railway)

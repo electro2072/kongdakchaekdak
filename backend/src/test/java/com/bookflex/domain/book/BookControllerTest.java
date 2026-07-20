@@ -15,17 +15,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Step 3부터 /api/books/** 가 인증을 요구하므로, setUp에서 만든 테스트 사용자 id로 발급한
- * 토큰을 모든 요청에 Authorization 헤더로 실어 보낸다. 지금 단계에는 소유자 검증이 없어
- * (다른 사람 책도 수정 가능) 토큰의 주체가 book의 소유자와 같을 필요는 없지만, 테스트에서는
- * 실제 흐름과 맞춰 setUp에서 만든 사용자 토큰을 사용한다.
+ * 토큰을 모든 요청에 Authorization 헤더로 실어 보낸다. 등록은 본인 명의로만, 수정/완독/삭제는
+ * 본인 소유 책에 대해서만 가능하도록 소유자 검증이 적용되어 있다 (BookService 참고).
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -131,5 +132,66 @@ class BookControllerTest {
         mockMvc.perform(get("/api/books/{id}", 1L))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
+    }
+
+    @Test
+    void 다른_사람_명의로_책을_등록하려하면_403() throws Exception {
+        User otherUser = new User("다른사람", null, null, null, "kakao", "other-social-id");
+        Long otherUserId = userRepository.save(otherUser).getId();
+
+        String body = objectMapper.writeValueAsString(Map.of(
+                "userId", otherUserId,
+                "title", "남의 이름으로 등록", "author", "익명",
+                "startDate", "2026-07-01"
+        ));
+
+        mockMvc.perform(post("/api/books")
+                        .header("Authorization", bearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+    }
+
+    @Test
+    void 다른_사람의_책을_수정_완독_삭제하려하면_403() throws Exception {
+        User otherUser = new User("다른사람2", null, null, null, "kakao", "other-social-id-2");
+        Long otherUserId = userRepository.save(otherUser).getId();
+        String otherToken = "Bearer " + jwtProvider.generateToken(otherUserId);
+
+        String createBody = objectMapper.writeValueAsString(Map.of(
+                "userId", otherUserId,
+                "title", "남의 책", "author", "익명",
+                "startDate", "2026-07-01"
+        ));
+        String response = mockMvc.perform(post("/api/books")
+                        .header("Authorization", otherToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createBody))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        Long otherBookId = objectMapper.readTree(response).get("id").asLong();
+
+        String updateBody = objectMapper.writeValueAsString(Map.of(
+                "title", "해킹된 제목", "author", "해커",
+                "coverImage", "", "isbn", "", "genre", "", "totalPages", 0
+        ));
+        mockMvc.perform(put("/api/books/{id}", otherBookId)
+                        .header("Authorization", bearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+
+        mockMvc.perform(patch("/api/books/{id}/complete", otherBookId)
+                        .header("Authorization", bearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+
+        mockMvc.perform(delete("/api/books/{id}", otherBookId).header("Authorization", bearerToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
     }
 }

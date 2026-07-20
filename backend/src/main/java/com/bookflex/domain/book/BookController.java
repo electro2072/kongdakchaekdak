@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,7 +27,9 @@ import java.util.List;
 /**
  * 책 기록(일정/서재) CRUD API (Step 2-b). User CRUD(Step 2-a)의 뒤를 이어
  * 등록/조회/수정/완독 처리를 제공한다. Step 3부터 인증(Authorization: Bearer {token})이
- * 필요하다 (SecurityConfig 참고). 아직 "내 책만 수정 가능" 같은 소유자 검증은 없음 — 이후 단계에서 강화 예정.
+ * 필요하다 (SecurityConfig 참고). 조회(단건/목록)는 다른 회원의 책도 볼 수 있게 열려 있지만
+ * (공유 앱 특성), 등록은 본인 명의로만 가능하고 수정/완독/삭제는 본인 소유 책에 대해서만
+ * 가능하도록 소유자 검증이 적용되어 있다 (BookService 참고).
  */
 @RestController
 @RequestMapping("/api/books")
@@ -37,9 +40,10 @@ public class BookController {
     private final BookService bookService;
 
     @PostMapping
-    @Operation(summary = "책 등록 (일정 탭)")
-    public ResponseEntity<BookResponse> create(@Valid @RequestBody BookCreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(bookService.create(request));
+    @Operation(summary = "책 등록 (일정 탭, 본인 명의로만 가능)")
+    public ResponseEntity<BookResponse> create(@Valid @RequestBody BookCreateRequest request,
+                                                @AuthenticationPrincipal Long currentUserId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookService.create(request, currentUserId));
     }
 
     @GetMapping("/{id}")
@@ -60,22 +64,24 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "책 기록 수정")
-    public BookResponse update(@PathVariable Long id, @Valid @RequestBody BookUpdateRequest request) {
-        return bookService.update(id, request);
+    @Operation(summary = "책 기록 수정 (본인 소유만 가능)")
+    public BookResponse update(@PathVariable Long id, @Valid @RequestBody BookUpdateRequest request,
+                                @AuthenticationPrincipal Long currentUserId) {
+        return bookService.update(id, request, currentUserId);
     }
 
     @PatchMapping("/{id}/complete")
-    @Operation(summary = "완독 처리 (endDate 생략 시 오늘 날짜)")
-    public BookResponse complete(@PathVariable Long id, @RequestBody(required = false) BookCompleteRequest request) {
+    @Operation(summary = "완독 처리 (endDate 생략 시 오늘 날짜, 본인 소유만 가능)")
+    public BookResponse complete(@PathVariable Long id, @RequestBody(required = false) BookCompleteRequest request,
+                                  @AuthenticationPrincipal Long currentUserId) {
         var endDate = request == null ? null : request.endDate();
-        return bookService.complete(id, endDate);
+        return bookService.complete(id, endDate, currentUserId);
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "책 기록 삭제")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        bookService.delete(id);
+    @Operation(summary = "책 기록 삭제 (본인 소유만 가능)")
+    public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal Long currentUserId) {
+        bookService.delete(id, currentUserId);
         return ResponseEntity.noContent().build();
     }
 }

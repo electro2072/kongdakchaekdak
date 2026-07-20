@@ -1,5 +1,6 @@
 package com.bookflex.domain.user;
 
+import com.bookflex.common.exception.ForbiddenException;
 import com.bookflex.common.exception.ResourceNotFoundException;
 import com.bookflex.domain.user.dto.UserCreateRequest;
 import com.bookflex.domain.user.dto.UserResponse;
@@ -47,16 +48,26 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse update(Long id, UserUpdateRequest request) {
+    public UserResponse update(Long id, UserUpdateRequest request, Long currentUserId) {
+        requireOwner(id, currentUserId);
         User user = findUserOrThrow(id);
         user.updateProfile(request.nickname(), request.profileImage(), request.bio(), request.gender());
         return UserResponse.from(user);
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void delete(Long id, Long currentUserId) {
+        requireOwner(id, currentUserId);
         User user = findUserOrThrow(id);
         userRepository.delete(user);
+    }
+
+    // 본인 계정만 수정/삭제할 수 있도록 강제한다. 다른 회원의 프로필 조회(getById/getAll)는
+    // 공유 앱 특성상 계속 열어둔다 — 여기서 막는 건 쓰기(수정/삭제) 작업뿐이다.
+    private void requireOwner(Long targetUserId, Long currentUserId) {
+        if (!targetUserId.equals(currentUserId)) {
+            throw new ForbiddenException("본인 계정만 수정/삭제할 수 있습니다.");
+        }
     }
 
     private User findUserOrThrow(Long id) {

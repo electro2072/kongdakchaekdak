@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,8 +23,8 @@ import java.util.List;
 
 /**
  * 회원 CRUD API (Step 2). Step 3부터 인증(Authorization: Bearer {token})이 필요하다
- * (SecurityConfig 참고). 아직 "본인 정보만 수정/삭제 가능" 같은 소유자 검증은 없고,
- * 로그인만 되어 있으면 다른 회원의 정보도 조회/수정 가능한 상태 — 이후 단계에서 강화 예정.
+ * (SecurityConfig 참고). 조회(단건/목록)는 다른 회원 정보도 볼 수 있게 열려 있지만(공유 앱 특성),
+ * 수정/삭제는 본인 계정에 대해서만 가능하도록 소유자 검증이 적용되어 있다 (UserService 참고).
  */
 @RestController
 @RequestMapping("/api/users")
@@ -53,15 +54,16 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    @Operation(summary = "회원 프로필 부분 수정")
-    public UserResponse update(@PathVariable Long id, @Valid @RequestBody UserUpdateRequest request) {
-        return userService.update(id, request);
+    @Operation(summary = "회원 프로필 부분 수정 (본인만 가능)")
+    public UserResponse update(@PathVariable Long id, @Valid @RequestBody UserUpdateRequest request,
+                                @AuthenticationPrincipal Long currentUserId) {
+        return userService.update(id, request, currentUserId);
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "회원 삭제")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        userService.delete(id);
+    @Operation(summary = "회원 삭제 (본인만 가능)")
+    public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal Long currentUserId) {
+        userService.delete(id, currentUserId);
         return ResponseEntity.noContent().build();
     }
 }
