@@ -77,7 +77,7 @@
 - [x] Step 4. 이미지 업로드 (S3 presigned URL, BookPhoto API — 2026-07-20 완료, 단 실제 AWS 키/로컬 검증 전)
 - [x] Step 5. 소감/공유 기능 (BookNote, Group, ShareRecord API — 2026-07-20 완료, "기록 전용" 범위. 실제 열람 권한 제어·카드 이미지·공개 웹뷰는 Step 5-2로 분리)
 - [x] Step 5-1. 독서 대시보드(Recap) 통계 (`GET /api/dashboard` — 2026-07-20 완료, 월간/분기별/연간 집계 + 장르 비율 + 6개월 추이 + 하이라이트 + 자동 캡션, 본인 통계만 조회)
-- [ ] Step 5-2. 공유 카드 이미지 + 공개 웹뷰 (의도적으로 분리, 나중에 진행)
+- [ ] Step 5-2. 공유 카드 이미지 + 공개 웹뷰 — **설계 완료(2026-07-20), 구현 전**: 카드 이미지 서버 생성은 보류(클라이언트 캡처 유지), 공개 웹뷰는 이 Spring Boot 앱에 Thymeleaf로, 소감은 BookNote 선택, 사진은 BookPhoto N장 선택 방식으로 확정. 상세 설계는 백엔드구축계획 문서 참고
 - [ ] Step 6. 배포 (AWS EC2 + RDS 또는 Railway)
 
 ---
