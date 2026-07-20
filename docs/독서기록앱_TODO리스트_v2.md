@@ -17,6 +17,8 @@
 - [ ] **(신규, 2026-07-20)** 리소스 소유자 검증(`UserControllerTest`/`BookControllerTest`의 신규 403 테스트 4개) 통과 확인 — 다른 사용자 토큰으로 남의 프로필/책 수정·삭제·등록을 시도하면 403(`FORBIDDEN`)이 나는지, 실제 흐름(본인 것 수정/삭제)은 여전히 정상 동작하는지 Swagger/Postman으로도 한 번 확인 권장
 - [ ] **(신규, 2026-07-20)** AWS 계정 생성 + S3 버킷 생성 + IAM 사용자(해당 버킷 `s3:PutObject` 권한만) 액세스 키 발급 → `backend/.env`에 `AWS_S3_BUCKET`/`AWS_S3_REGION`/`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` 채워넣기 (`.env.example` 참고)
 - [ ] **(신규, 2026-07-20)** `gradle test`의 `BookPhotoControllerTest` 통과 확인, 위 AWS 키 작성 후 `gradle bootRun` → Swagger에서 `POST /api/books/{bookId}/photos/presigned-url` 호출 → 받은 `uploadUrl`로 실제 이미지 파일 PUT 업로드 → `POST /api/books/{bookId}/photos`로 레코드 등록까지 엔드투엔드로 한 번 확인 (지금까지는 로컬 서명 로직만 검증됐고 실제 S3 왕복은 검증 전)
+- [ ] **(신규, 2026-07-20)** Step 5 `gradle test`의 `BookNoteControllerTest`/`GroupControllerTest`/`ShareRecordControllerTest` 통과 확인 — 그룹 소유자 탈퇴 불가, 멤버 중복 추가 409, ShareRecord 교차검증(shareType/scope별 400) 케이스 위주로 Swagger/Postman에서도 한 번씩 확인 권장
+- [ ] **(신규, 2026-07-20)** `독서기록앱_테이블정의서.xlsx`에 이번 Step 5에서 추가한 `ShareRecord.user_id`(공유한 사용자) 컬럼 반영 — 원본 스프레드시트에는 아직 없음
 
 ---
 
@@ -72,7 +74,7 @@
 - [x] Step 2-b. Book 기본 CRUD (등록/조회/수정/완독 처리) — 2026-07-19 완료, 사용자 로컬 환경(Java 17 + Gradle 8.14)에서 `gradle bootRun` 정상 실행 확인
 - [x] Step 3. 인증 (이메일/PW · User/Book API 인증 필수화 · 카카오/구글/네이버 OAuth2 코드 구현 · 리소스 소유자 검증 강화 — 모두 완료, 마지막 항목은 2026-07-20. 단 소셜 로그인은 실제 키/로컬 검증 전)
 - [x] Step 4. 이미지 업로드 (S3 presigned URL, BookPhoto API — 2026-07-20 완료, 단 실제 AWS 키/로컬 검증 전)
-- [ ] Step 5. 소감/공유 기능 (BookNote, Group, ShareRecord API)
+- [x] Step 5. 소감/공유 기능 (BookNote, Group, ShareRecord API — 2026-07-20 완료, "기록 전용" 범위. 실제 열람 권한 제어·카드 이미지·공개 웹뷰는 Step 5-2로 분리)
 - [ ] Step 6. 배포 (AWS EC2 + RDS 또는 Railway)
 
 ---
