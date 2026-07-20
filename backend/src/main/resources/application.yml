@@ -39,3 +39,12 @@ app:
     naver:
       client-id: ${NAVER_CLIENT_ID:}
       client-secret: ${NAVER_CLIENT_SECRET:}
+  # 책 사진(BookPhoto) 업로드용 S3 설정. 실제 값은 절대 여기에 직접 쓰지 말고 backend/.env에
+  # AWS_S3_BUCKET=... 형태로 넣을 것 (.env.example 참고). accessKey/secretKey가 비어 있어도
+  # 서버 기동 자체는 되지만, 실제 presigned URL 발급(사진 업로드) 시점에 실패한다.
+  s3:
+    bucket: ${AWS_S3_BUCKET:}
+    region: ${AWS_S3_REGION:ap-northeast-2}
+    access-key: ${AWS_ACCESS_KEY_ID:}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:}
+    presigned-url-expiration-seconds: ${AWS_S3_PRESIGNED_URL_EXPIRATION_SECONDS:600}

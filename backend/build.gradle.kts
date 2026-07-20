@@ -26,6 +26,10 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
     runtimeOnly("com.mysql:mysql-connector-j")
     runtimeOnly("com.h2database:h2")
+    // S3Presigner(software.amazon.awssdk:s3 모듈 안에 포함)만 사용 — presigned URL은 순수
+    // 로컬 서명 연산이라 실제로 AWS에 네트워크 요청을 보내지 않는다(S3Client는 별도로 안 만든다).
+    implementation(platform("software.amazon.awssdk:bom:2.47.4"))
+    implementation("software.amazon.awssdk:s3")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")

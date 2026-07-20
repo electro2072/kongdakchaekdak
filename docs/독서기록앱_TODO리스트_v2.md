@@ -15,6 +15,8 @@
 - [ ] **(신규)** `backend/.env.example`을 복사해서 `backend/.env` 만들고, 카카오/구글/네이버 키를 발급받는 대로 채워넣기 — 파일이 없어도 `gradle bootRun`은 정상 동작하지만(경고 로그만 뜸) 소셜 로그인은 안 됨
 - [ ] **(신규)** 카카오/구글/네이버 소셜 로그인 코드(`gradle test`의 `SocialAuthControllerTest`, `GoogleOAuthClientTest`) 통과 확인 — 실제 앱 등록/`.env` 작성 전이라도 `@MockBean`으로 대체되어 있어서 지금 바로 `gradle test`만으로 검증 가능
 - [ ] **(신규, 2026-07-20)** 리소스 소유자 검증(`UserControllerTest`/`BookControllerTest`의 신규 403 테스트 4개) 통과 확인 — 다른 사용자 토큰으로 남의 프로필/책 수정·삭제·등록을 시도하면 403(`FORBIDDEN`)이 나는지, 실제 흐름(본인 것 수정/삭제)은 여전히 정상 동작하는지 Swagger/Postman으로도 한 번 확인 권장
+- [ ] **(신규, 2026-07-20)** AWS 계정 생성 + S3 버킷 생성 + IAM 사용자(해당 버킷 `s3:PutObject` 권한만) 액세스 키 발급 → `backend/.env`에 `AWS_S3_BUCKET`/`AWS_S3_REGION`/`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` 채워넣기 (`.env.example` 참고)
+- [ ] **(신규, 2026-07-20)** `gradle test`의 `BookPhotoControllerTest` 통과 확인, 위 AWS 키 작성 후 `gradle bootRun` → Swagger에서 `POST /api/books/{bookId}/photos/presigned-url` 호출 → 받은 `uploadUrl`로 실제 이미지 파일 PUT 업로드 → `POST /api/books/{bookId}/photos`로 레코드 등록까지 엔드투엔드로 한 번 확인 (지금까지는 로컬 서명 로직만 검증됐고 실제 S3 왕복은 검증 전)
 
 ---
 
@@ -69,7 +71,7 @@
 - [x] Step 2-a. User 기본 CRUD + Swagger 문서화 (2026-07-19 완료)
 - [x] Step 2-b. Book 기본 CRUD (등록/조회/수정/완독 처리) — 2026-07-19 완료, 사용자 로컬 환경(Java 17 + Gradle 8.14)에서 `gradle bootRun` 정상 실행 확인
 - [x] Step 3. 인증 (이메일/PW · User/Book API 인증 필수화 · 카카오/구글/네이버 OAuth2 코드 구현 · 리소스 소유자 검증 강화 — 모두 완료, 마지막 항목은 2026-07-20. 단 소셜 로그인은 실제 키/로컬 검증 전)
-- [ ] Step 4. 이미지 업로드 (S3 presigned URL, BookPhoto API)
+- [x] Step 4. 이미지 업로드 (S3 presigned URL, BookPhoto API — 2026-07-20 완료, 단 실제 AWS 키/로컬 검증 전)
 - [ ] Step 5. 소감/공유 기능 (BookNote, Group, ShareRecord API)
 - [ ] Step 6. 배포 (AWS EC2 + RDS 또는 Railway)
 
