@@ -6,6 +6,7 @@ import com.bookflex.common.exception.ResourceNotFoundException;
 import com.bookflex.domain.auth.dto.LoginRequest;
 import com.bookflex.domain.auth.dto.SignupRequest;
 import com.bookflex.domain.auth.dto.TokenResponse;
+import com.bookflex.domain.user.RandomNicknameGenerator;
 import com.bookflex.domain.user.User;
 import com.bookflex.domain.user.UserRepository;
 import com.bookflex.domain.user.dto.UserResponse;
@@ -17,12 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
-
 /**
  * 이메일/PW 인증 (Step 3 첫 단계). socialProvider="local", socialId=이메일 로 저장해
  * 기존 User 테이블 구조를 그대로 재사용한다 (User.java 상단 Javadoc 참고).
- * 카카오→구글→네이버 순의 실제 소셜 로그인은 이후 단계에서 별도 서비스로 추가한다.
+ * 카카오/구글/네이버 소셜 로그인은 {@link SocialAuthService}에서 별도로 처리한다.
  */
 @Service
 @RequiredArgsConstructor
@@ -30,8 +29,6 @@ import java.security.SecureRandom;
 public class AuthService {
 
     private static final String LOCAL_PROVIDER = "local";
-    private static final String[] RANDOM_NICKNAME_PREFIXES = {"책벌레", "독서가", "이야기꾼", "페이지터너"};
-    private static final SecureRandom RANDOM = new SecureRandom();
 
     // 가입되지 않은 이메일로 로그인 시도할 때도 bcrypt 연산 시간을 동일하게 맞춰
     // 응답 시간 차이로 "가입된 이메일인지"를 추측(enumeration)하지 못하게 하기 위한 더미 해시.
@@ -43,6 +40,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
+    private final RandomNicknameGenerator randomNicknameGenerator;
 
     @Transactional
     public TokenResponse signup(SignupRequest request) {
@@ -52,7 +50,7 @@ public class AuthService {
                 });
 
         String nickname = (request.nickname() == null || request.nickname().isBlank())
-                ? generateRandomNickname()
+                ? randomNicknameGenerator.generate()
                 : request.nickname();
 
         User user = User.forLocalSignup(nickname, request.email(), passwordEncoder.encode(request.password()));
@@ -92,13 +90,7 @@ public class AuthService {
         return UserResponse.from(user);
     }
 
-    private TokenResponse issueToken(Long userId) {
+    TokenResponse issueToken(Long userId) {
         return TokenResponse.of(jwtProvider.generateToken(userId), jwtProperties.expirationSeconds());
-    }
-
-    private String generateRandomNickname() {
-        String prefix = RANDOM_NICKNAME_PREFIXES[RANDOM.nextInt(RANDOM_NICKNAME_PREFIXES.length)];
-        int suffix = 1000 + RANDOM.nextInt(9000);
-        return prefix + suffix;
     }
 }

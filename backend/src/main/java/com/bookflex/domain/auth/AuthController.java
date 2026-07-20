@@ -1,7 +1,9 @@
 package com.bookflex.domain.auth;
 
+import com.bookflex.domain.auth.dto.GoogleIdTokenRequest;
 import com.bookflex.domain.auth.dto.LoginRequest;
 import com.bookflex.domain.auth.dto.SignupRequest;
+import com.bookflex.domain.auth.dto.SocialAccessTokenRequest;
 import com.bookflex.domain.auth.dto.TokenResponse;
 import com.bookflex.domain.user.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,16 +20,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 이메일/PW 인증 API (Step 3-a). 카카오 등 실제 소셜 로그인은 이후 단계에서
- * 별도 엔드포인트(예: /api/auth/kakao)로 추가한다.
+ * 인증 API. 이메일/PW(Step 3-a)에 이어 카카오/구글/네이버 소셜 로그인(Step 3-b)을 제공한다.
+ * 소셜 로그인은 모바일 앱이 각 제공자 SDK로 이미 받아온 토큰을 그대로 넘겨받는 방식이라
+ * (SocialAuthService 참고), 프론트에서 카카오/구글/네이버 SDK 연동이 끝나야 실제로 끝까지 테스트할 수 있다.
  */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Tag(name = "Auth", description = "이메일/PW 인증 API")
+@Tag(name = "Auth", description = "인증 API (이메일/PW + 소셜 로그인)")
 public class AuthController {
 
     private final AuthService authService;
+    private final SocialAuthService socialAuthService;
 
     @PostMapping("/signup")
     @Operation(summary = "이메일/PW 회원가입 후 토큰 발급")
@@ -39,6 +43,24 @@ public class AuthController {
     @Operation(summary = "이메일/PW 로그인 후 토큰 발급")
     public TokenResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/kakao")
+    @Operation(summary = "카카오 로그인 (모바일 앱이 카카오 SDK로 받은 access token 전달) 후 토큰 발급")
+    public TokenResponse kakaoLogin(@Valid @RequestBody SocialAccessTokenRequest request) {
+        return socialAuthService.loginWithKakao(request.accessToken());
+    }
+
+    @PostMapping("/google")
+    @Operation(summary = "구글 로그인 (모바일 앱이 구글 SDK로 받은 ID token 전달) 후 토큰 발급")
+    public TokenResponse googleLogin(@Valid @RequestBody GoogleIdTokenRequest request) {
+        return socialAuthService.loginWithGoogle(request.idToken());
+    }
+
+    @PostMapping("/naver")
+    @Operation(summary = "네이버 로그인 (모바일 앱이 네이버 SDK로 받은 access token 전달) 후 토큰 발급")
+    public TokenResponse naverLogin(@Valid @RequestBody SocialAccessTokenRequest request) {
+        return socialAuthService.loginWithNaver(request.accessToken());
     }
 
     @GetMapping("/me")

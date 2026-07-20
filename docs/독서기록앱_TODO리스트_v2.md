@@ -12,6 +12,8 @@
 - [ ] 실제 MySQL(Docker Compose) 환경에서 `User` 테이블의 `(social_provider, social_id)` unique 제약이 잘 걸렸는지 확인 — `ddl-auto: update`는 이미 존재하는 테이블에 제약을 못 걸 수도 있어서, 안 걸려 있으면 테이블 재생성하거나 수동으로 `ALTER TABLE users ADD UNIQUE (social_provider, social_id);` 필요할 수 있음
 - [ ] (선택) `gradle bootRun --args="--spring.profiles.active=local"` 로 띄운 뒤 Swagger(`/swagger-ui.html`)에서 `POST /api/auth/signup` → `POST /api/auth/login` → `GET /api/auth/me` (Authorize에 토큰 입력) 순서로 직접 호출해보기
 - [ ] **(신규, `65d7480` 커밋)** `/api/users/**`, `/api/books/**` 를 이제 인증 없이 호출하면 401이 나는지 확인 (토큰 없이 `GET /api/users/1` 호출 → 401 예상), 그리고 Swagger Authorize에 토큰 넣은 뒤에는 정상 호출되는지 확인 — `gradle test`에서 `UserControllerTest`/`BookControllerTest`의 "토큰_없이_요청하면_401" 케이스로도 커버되지만, 실제 프론트/Postman에서 한 번 더 확인 권장
+- [ ] **(신규)** `backend/.env.example`을 복사해서 `backend/.env` 만들고, 카카오/구글/네이버 키를 발급받는 대로 채워넣기 — 파일이 없어도 `gradle bootRun`은 정상 동작하지만(경고 로그만 뜸) 소셜 로그인은 안 됨
+- [ ] **(신규)** 카카오/구글/네이버 소셜 로그인 코드(`gradle test`의 `SocialAuthControllerTest`, `GoogleOAuthClientTest`) 통과 확인 — 실제 앱 등록/`.env` 작성 전이라도 `@MockBean`으로 대체되어 있어서 지금 바로 `gradle test`만으로 검증 가능
 
 ---
 
@@ -65,7 +67,7 @@
 - [x] Step 1. 프로젝트 뼈대 (Spring Boot + Gradle + MySQL Docker + Health check API)
 - [x] Step 2-a. User 기본 CRUD + Swagger 문서화 (2026-07-19 완료)
 - [x] Step 2-b. Book 기본 CRUD (등록/조회/수정/완독 처리) — 2026-07-19 완료, 사용자 로컬 환경(Java 17 + Gradle 8.14)에서 `gradle bootRun` 정상 실행 확인
-- [ ] Step 3. 인증 (이메일/PW 완료 2026-07-19 · User/Book API 인증 필수화 완료 2026-07-19 · 카카오 → 구글 → 네이버 OAuth2는 미착수)
+- [ ] Step 3. 인증 (이메일/PW 완료 · User/Book API 인증 필수화 완료 · 카카오/구글/네이버 OAuth2 코드 구현 완료 — 모두 2026-07-19, 단 소셜 로그인은 실제 키/로컬 검증 전)
 - [ ] Step 4. 이미지 업로드 (S3 presigned URL, BookPhoto API)
 - [ ] Step 5. 소감/공유 기능 (BookNote, Group, ShareRecord API)
 - [ ] Step 6. 배포 (AWS EC2 + RDS 또는 Railway)

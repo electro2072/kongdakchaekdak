@@ -14,3 +14,15 @@ app:
   jwt:
     secret: test-only-jwt-secret-value-not-used-in-production-32bytes
     expiration-seconds: 3600
+  # 테스트에서는 KakaoOAuthClient/GoogleOAuthClient/NaverOAuthClient를 전부 @MockBean으로 대체하므로
+  # 실제 값이 필요 없다 — 프로퍼티 바인딩이 비어있어도 컨텍스트 로딩에는 문제없음을 명시적으로 남겨둔다.
+  oauth2:
+    kakao:
+      client-id: test-kakao-client-id
+      client-secret: test-kakao-client-secret
+    google:
+      client-id: test-google-client-id
+      client-secret: test-google-client-secret
+    naver:
+      client-id: test-naver-client-id
+      client-secret: test-naver-client-secret

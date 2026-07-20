@@ -35,3 +35,38 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+// backend/.env (git에 커밋되지 않음, 루트 .gitignore의 ".env" 패턴에 걸림)에 소셜 로그인
+// Client ID/Secret 같은 값을 KEY=VALUE 형태로 적어두면, gradle bootRun 실행 시 이 파일을 읽어
+// 프로세스 환경변수로 넘겨준다. application.yml의 ${KAKAO_CLIENT_ID:} 같은 플레이스홀더가
+// 이 환경변수를 그대로 읽는다. .env.example 파일에 필요한 키 목록이 있다.
+tasks.named<JavaExec>("bootRun") {
+    doFirst {
+        val envFile = file(".env")
+        if (envFile.exists()) {
+            envFile.readLines().forEach { rawLine ->
+                val line = rawLine.trim()
+                if (line.isNotEmpty() && !line.startsWith("#")) {
+                    val separatorIndex = line.indexOf('=')
+                    if (separatorIndex > 0) {
+                        val key = line.substring(0, separatorIndex).trim()
+                        var value = line.substring(separatorIndex + 1).trim()
+                        // 일부 에디터가 값을 따옴표로 감싸는 경우 벗겨낸다.
+                        if (value.length >= 2 &&
+                            ((value.startsWith("\"") && value.endsWith("\"")) ||
+                                    (value.startsWith("'") && value.endsWith("'")))
+                        ) {
+                            value = value.substring(1, value.length - 1)
+                        }
+                        environment(key, value)
+                    }
+                }
+            }
+        } else {
+            logger.lifecycle(
+                "[.env] backend/.env 파일이 없어 소셜 로그인 환경변수 없이 실행합니다 " +
+                        "(카카오/구글/네이버 로그인은 동작하지 않음 — .env.example 참고)."
+            )
+        }
+    }
+}

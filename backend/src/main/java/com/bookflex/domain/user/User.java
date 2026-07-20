@@ -101,6 +101,15 @@ public class User {
         return user;
     }
 
+    /**
+     * 소셜 로그인(카카오/구글/네이버) 최초 가입 전용 팩토리. {@code socialProvider}는
+     * "kakao"/"google"/"naver", {@code socialId}는 각 제공자가 내려주는 고유 사용자 식별자
+     * (카카오 id, 구글 sub, 네이버 id)를 문자열로 저장한다. passwordHash는 계속 null로 남는다.
+     */
+    public static User forSocialLogin(String nickname, String socialProvider, String socialId) {
+        return new User(nickname, null, null, null, socialProvider, socialId);
+    }
+
     public void updateProfile(String nickname, String profileImage, String bio, Gender gender) {
         if (nickname != null) {
             this.nickname = nickname;

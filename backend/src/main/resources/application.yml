@@ -26,3 +26,16 @@ app:
     # 운영 배포 전 반드시 JWT_SECRET 환경변수로 교체할 것 (HS256 요구사항: UTF-8 기준 32바이트 이상).
     secret: ${JWT_SECRET:please-change-this-dev-only-jwt-secret-before-deploying}
     expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
+  # 소셜 로그인(카카오/구글/네이버) Client ID/Secret. 실제 값은 절대 여기에 직접 쓰지 말고
+  # backend/.env 파일(git에 커밋되지 않음)에 KAKAO_CLIENT_ID=... 형태로 넣을 것 —
+  # build.gradle.kts의 bootRun 설정이 .env를 읽어 환경변수로 넘겨준다.
+  oauth2:
+    kakao:
+      client-id: ${KAKAO_CLIENT_ID:}
+      client-secret: ${KAKAO_CLIENT_SECRET:}
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
+      client-secret: ${GOOGLE_CLIENT_SECRET:}
+    naver:
+      client-id: ${NAVER_CLIENT_ID:}
+      client-secret: ${NAVER_CLIENT_SECRET:}
