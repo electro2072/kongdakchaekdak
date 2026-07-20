@@ -5,19 +5,34 @@ import com.bookflex.common.exception.InvalidRequestException;
 import com.bookflex.common.exception.ResourceNotFoundException;
 import com.bookflex.domain.book.Book;
 import com.bookflex.domain.book.BookRepository;
+import com.bookflex.domain.bookphoto.BookPhoto;
+import com.bookflex.domain.bookphoto.BookPhotoRepository;
+import com.bookflex.domain.booknote.BookNote;
+import com.bookflex.domain.booknote.BookNoteRepository;
+import com.bookflex.domain.dashboard.DashboardPeriod;
+import com.bookflex.domain.dashboard.DashboardService;
+import com.bookflex.domain.dashboard.dto.DashboardResponse;
 import com.bookflex.domain.group.Group;
 import com.bookflex.domain.group.GroupMemberRepository;
 import com.bookflex.domain.group.GroupRepository;
+import com.bookflex.domain.share.dto.DashboardSnapshotResponse;
 import com.bookflex.domain.share.dto.ShareRecordCreateRequest;
+import com.bookflex.domain.share.dto.ShareRecordNoteResponse;
+import com.bookflex.domain.share.dto.ShareRecordPhotoResponse;
 import com.bookflex.domain.share.dto.ShareRecordResponse;
 import com.bookflex.domain.share.dto.ShareTargetRequest;
 import com.bookflex.domain.share.dto.ShareTargetResponse;
 import com.bookflex.domain.user.User;
 import com.bookflex.domain.user.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,18 +41,29 @@ import java.util.UUID;
  * 제어는 다음 단계로 미룸). 그래서 Book/BookNote 조회 API는 이 기능과 무관하게 계속 전체
  * 공개 상태를 유지한다. 목록 조회(list)는 다른 도메인과 달리 "본인이 공유한 기록"만
  * 보여준다 — 마이페이지 개인 이력이지 공개 자원이 아니기 때문.
+ *
+ * <p>Step 5-2: 카드/공개 웹페이지에 노출할 소감(bookNoteId)·사진(photoIds) 선택, 그리고
+ * shareType=DASHBOARD일 때 공유 시점 대시보드 통계 스냅샷 생성이 추가됨.</p>
  */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ShareRecordService {
 
+    // 공유 시 한 번에 선택할 수 있는 사진 최대 장수 — 남용(무제한 첨부) 방지.
+    private static final int MAX_PHOTOS = 10;
+
     private final ShareRecordRepository shareRecordRepository;
     private final ShareRecordTargetRepository shareRecordTargetRepository;
+    private final ShareRecordPhotoRepository shareRecordPhotoRepository;
     private final BookRepository bookRepository;
+    private final BookNoteRepository bookNoteRepository;
+    private final BookPhotoRepository bookPhotoRepository;
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
+    private final DashboardService dashboardService;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     public ShareRecordResponse create(ShareRecordCreateRequest request, Long currentUserId) {
@@ -46,9 +72,13 @@ public class ShareRecordService {
 
         Book book = resolveBook(request, currentUserId);
         List<ShareTargetRequest> targetRequests = resolveTargets(request);
+        BookNote bookNote = resolveBookNote(request, book);
+        List<BookPhoto> photos = resolvePhotos(request, book);
+        String dashboardSnapshot = resolveDashboardSnapshot(request, currentUserId);
 
         ShareRecord record = new ShareRecord(sharer, book, request.shareType(), request.scope(),
-                request.platform(), request.cardImageUrl(), UUID.randomUUID().toString());
+                request.platform(), request.cardImageUrl(), UUID.randomUUID().toString(),
+                bookNote, dashboardSnapshot);
         record = shareRecordRepository.save(record);
 
         for (ShareTargetRequest targetRequest : targetRequests) {
@@ -57,19 +87,16 @@ public class ShareRecordService {
                     new ShareRecordTarget(record, targetRequest.targetType(), targetRequest.targetId()));
         }
 
-        List<ShareTargetResponse> targetResponses = targetRequests.stream()
-                .map(t -> new ShareTargetResponse(t.targetType(), t.targetId()))
-                .toList();
-        return ShareRecordResponse.from(record, targetResponses);
+        for (int i = 0; i < photos.size(); i++) {
+            shareRecordPhotoRepository.save(new ShareRecordPhoto(record, photos.get(i), i));
+        }
+
+        return toResponse(record);
     }
 
     public List<ShareRecordResponse> listMine(Long currentUserId) {
         return shareRecordRepository.findByUserIdOrderBySharedAtDesc(currentUserId).stream()
-                .map(record -> {
-                    List<ShareTargetResponse> targets = shareRecordTargetRepository.findByShareRecordId(record.getId())
-                            .stream().map(ShareTargetResponse::from).toList();
-                    return ShareRecordResponse.from(record, targets);
-                })
+                .map(this::toResponse)
                 .toList();
     }
 
@@ -83,7 +110,20 @@ public class ShareRecordService {
         }
 
         shareRecordTargetRepository.deleteByShareRecordId(id);
+        shareRecordPhotoRepository.deleteByShareRecordId(id);
         shareRecordRepository.delete(record);
+    }
+
+    private ShareRecordResponse toResponse(ShareRecord record) {
+        List<ShareTargetResponse> targets = shareRecordTargetRepository.findByShareRecordId(record.getId())
+                .stream().map(ShareTargetResponse::from).toList();
+        List<ShareRecordPhotoResponse> photoResponses = shareRecordPhotoRepository
+                .findByShareRecordIdOrderByDisplayOrderAsc(record.getId())
+                .stream().map(ShareRecordPhotoResponse::from).toList();
+        ShareRecordNoteResponse noteResponse = record.getBookNote() == null
+                ? null : ShareRecordNoteResponse.from(record.getBookNote());
+        DashboardSnapshotResponse snapshotResponse = parseSnapshot(record.getDashboardSnapshot());
+        return ShareRecordResponse.from(record, targets, noteResponse, photoResponses, snapshotResponse);
     }
 
     // shareType=BOOK이면 bookId 필수 + 본인 소유 책인지 확인. shareType=DASHBOARD면 bookId는 무시(null).
@@ -136,6 +176,95 @@ public class ShareRecordService {
         boolean isMember = groupMemberRepository.existsByGroupIdAndUserId(group.getId(), currentUserId);
         if (!isOwner && !isMember) {
             throw new ForbiddenException("본인이 속한 그룹에만 공유할 수 있습니다. groupId=" + group.getId());
+        }
+    }
+
+    // Step 5-2: bookNoteId는 shareType=BOOK일 때만 허용, 지정한 책(bookId) 소속 소감이어야 함.
+    private BookNote resolveBookNote(ShareRecordCreateRequest request, Book book) {
+        if (request.bookNoteId() == null) {
+            return null;
+        }
+        if (request.shareType() != ShareType.BOOK) {
+            throw new InvalidRequestException("bookNoteId는 shareType이 BOOK일 때만 지정할 수 있습니다.");
+        }
+        BookNote note = bookNoteRepository.findById(request.bookNoteId())
+                .orElseThrow(() -> new ResourceNotFoundException("소감을 찾을 수 없습니다. id=" + request.bookNoteId()));
+        if (!note.getBook().getId().equals(book.getId())) {
+            throw new InvalidRequestException("bookNoteId는 공유하는 책(bookId) 소속 소감이어야 합니다.");
+        }
+        return note;
+    }
+
+    // Step 5-2: photoIds는 shareType=BOOK일 때만 허용, 지정한 책(bookId) 소속 사진이어야 하며
+    // 최대 MAX_PHOTOS장. 요청 리스트의 순서를 그대로 display_order로 사용한다.
+    private List<BookPhoto> resolvePhotos(ShareRecordCreateRequest request, Book book) {
+        List<Long> photoIds = request.photoIds();
+        if (photoIds == null || photoIds.isEmpty()) {
+            return List.of();
+        }
+        if (request.shareType() != ShareType.BOOK) {
+            throw new InvalidRequestException("photoIds는 shareType이 BOOK일 때만 지정할 수 있습니다.");
+        }
+        if (photoIds.size() > MAX_PHOTOS) {
+            throw new InvalidRequestException("사진은 한 번에 최대 " + MAX_PHOTOS + "장까지 선택할 수 있습니다.");
+        }
+
+        List<BookPhoto> photos = new ArrayList<>();
+        for (Long photoId : photoIds) {
+            BookPhoto photo = bookPhotoRepository.findById(photoId)
+                    .orElseThrow(() -> new ResourceNotFoundException("사진을 찾을 수 없습니다. id=" + photoId));
+            if (!photo.getBook().getId().equals(book.getId())) {
+                throw new InvalidRequestException("photoIds는 공유하는 책(bookId) 소속 사진이어야 합니다. id=" + photoId);
+            }
+            photos.add(photo);
+        }
+        return photos;
+    }
+
+    // Step 5-2: shareType=DASHBOARD일 때만 스냅샷을 만든다. 다른 교차검증들과 일관되게, 반대로
+    // shareType=BOOK인데 dashboardPeriod/dashboardDate가 있으면 그냥 무시하지 않고 400으로 거부한다.
+    private String resolveDashboardSnapshot(ShareRecordCreateRequest request, Long currentUserId) {
+        if (request.shareType() != ShareType.DASHBOARD) {
+            if (request.dashboardPeriod() != null || request.dashboardDate() != null) {
+                throw new InvalidRequestException(
+                        "dashboardPeriod/dashboardDate는 shareType이 DASHBOARD일 때만 지정할 수 있습니다.");
+            }
+            return null;
+        }
+
+        DashboardPeriod period = request.dashboardPeriod() == null ? DashboardPeriod.MONTH : request.dashboardPeriod();
+        YearMonth referenceMonth;
+        try {
+            referenceMonth = request.dashboardDate() == null ? YearMonth.now() : YearMonth.parse(request.dashboardDate());
+        } catch (DateTimeParseException ex) {
+            throw new InvalidRequestException("dashboardDate는 yyyy-MM 형식이어야 합니다. 입력값=" + request.dashboardDate());
+        }
+
+        DashboardResponse dashboard = dashboardService.getDashboard(currentUserId, period, referenceMonth);
+        DashboardSnapshotResponse snapshot = new DashboardSnapshotResponse(
+                dashboard.periodLabel(),
+                dashboard.completedBookCount(),
+                dashboard.totalPagesRead(),
+                dashboard.highlights() == null ? null : dashboard.highlights().topGenre(),
+                dashboard.recommendedCaption()
+        );
+        try {
+            return objectMapper.writeValueAsString(snapshot);
+        } catch (JsonProcessingException e) {
+            // 고정된 필드만 가진 record 직렬화라 실무적으로 발생하지 않는다 — 방어적으로만 감싼다.
+            throw new IllegalStateException("대시보드 스냅샷 직렬화에 실패했습니다.", e);
+        }
+    }
+
+    private DashboardSnapshotResponse parseSnapshot(String json) {
+        if (json == null) {
+            return null;
+        }
+        try {
+            return objectMapper.readValue(json, DashboardSnapshotResponse.class);
+        } catch (JsonProcessingException e) {
+            // 저장 시점에 이 서비스가 직접 만든 JSON이라 정상적으로는 발생하지 않는다.
+            throw new IllegalStateException("대시보드 스냅샷 역직렬화에 실패했습니다.", e);
         }
     }
 }

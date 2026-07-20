@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${view.ogTitle()}">독서 기록 공유</title>
+
+    <!-- OG 메타태그 (기획서 7-3) — 카카오톡/인스타그램/스레드 등 SNS 링크 미리보기용 -->
+    <meta property="og:title" th:content="${view.ogTitle()}"/>
+    <meta property="og:description" th:content="${view.ogDescription()}"/>
+    <meta property="og:url" th:content="${view.pageUrl()}"/>
+    <meta th:if="${view.ogImageUrl() != null}" property="og:image" th:content="${view.ogImageUrl()}"/>
+
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; max-width: 480px; margin: 0 auto; padding: 24px 20px; color: #1a1a1e; }
+        .cover { width: 160px; border-radius: 8px; display: block; margin: 0 auto 16px; }
+        h1 { font-size: 20px; text-align: center; margin: 0 0 4px; }
+        .author { text-align: center; color: #6b6b70; font-size: 14px; margin-bottom: 16px; }
+        .period { text-align: center; font-size: 13px; color: #8a8a90; margin-bottom: 20px; }
+        .note { background: #f7f7f9; border-radius: 12px; padding: 16px; font-size: 14px; line-height: 1.6; margin-bottom: 20px; white-space: pre-wrap; }
+        .photos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px; }
+        .photos img { width: 100%; border-radius: 8px; object-fit: cover; aspect-ratio: 1; }
+        .sharer { text-align: center; font-size: 13px; color: #8a8a90; }
+    </style>
+</head>
+<body>
+    <img th:if="${view.bookCoverImage() != null}" class="cover" th:src="${view.bookCoverImage()}" alt="표지"/>
+    <h1 th:text="${view.bookTitle()}">책 제목</h1>
+    <div class="author" th:text="${view.bookAuthor()}">저자</div>
+    <div class="period">
+        <span th:text="${view.bookStartDate()}">시작일</span>
+        <span> ~ </span>
+        <span th:text="${view.bookEndDate() != null ? view.bookEndDate() : '읽는 중'}">종료일</span>
+        <span th:if="${view.readingDays() != null}" th:text="'(' + ${view.readingDays()} + '일)'"></span>
+    </div>
+    <div class="note" th:if="${view.noteContent() != null}" th:text="${view.noteContent()}">소감</div>
+    <div class="photos" th:if="${!view.photos().isEmpty()}">
+        <img th:each="photo : ${view.photos()}" th:src="${photo.imageUrl()}" alt="사진"/>
+    </div>
+    <div class="sharer" th:text="${view.sharerNickname()} + '님이 공유했어요'">공유자</div>
+</body>
+</html>

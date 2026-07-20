@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${view.ogTitle()}">독서 리캡 공유</title>
+
+    <!-- OG 메타태그 (기획서 7-3) -->
+    <meta property="og:title" th:content="${view.ogTitle()}"/>
+    <meta property="og:description" th:content="${view.ogDescription()}"/>
+    <meta property="og:url" th:content="${view.pageUrl()}"/>
+    <meta th:if="${view.ogImageUrl() != null}" property="og:image" th:content="${view.ogImageUrl()}"/>
+
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; max-width: 480px; margin: 0 auto; padding: 24px 20px; color: #1a1a1e; text-align: center; }
+        h1 { font-size: 20px; margin-bottom: 24px; }
+        .stats { display: flex; justify-content: center; gap: 32px; margin-bottom: 24px; }
+        .stat-value { font-size: 24px; font-weight: 700; }
+        .stat-label { font-size: 12px; color: #8a8a90; }
+        .genre { font-size: 14px; color: #6b6b70; margin-bottom: 16px; }
+        .caption { background: #f7f7f9; border-radius: 12px; padding: 16px; font-size: 15px; font-weight: 600; margin-bottom: 20px; }
+        .sharer { font-size: 13px; color: #8a8a90; }
+    </style>
+</head>
+<body>
+    <h1 th:text="${view.sharerNickname()} + '님의 ' + ${view.dashboardPeriodLabel()} + ' 독서 리캡'">독서 리캡</h1>
+    <div class="stats">
+        <div>
+            <div class="stat-value" th:text="${view.dashboardCompletedBookCount()} + '권'">0권</div>
+            <div class="stat-label">완독 수</div>
+        </div>
+        <div>
+            <div class="stat-value" th:text="${view.dashboardTotalPagesRead()} + 'p'">0p</div>
+            <div class="stat-label">읽은 페이지</div>
+        </div>
+    </div>
+    <div class="genre" th:if="${view.dashboardTopGenre() != null}" th:text="'가장 많이 읽은 장르: ' + ${view.dashboardTopGenre()}"></div>
+    <div class="caption" th:if="${view.dashboardRecommendedCaption() != null}" th:text="${view.dashboardRecommendedCaption()}"></div>
+    <div class="sharer" th:text="${view.sharerNickname()} + '님이 공유했어요'"></div>
+</body>
+</html>

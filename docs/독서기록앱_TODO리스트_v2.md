@@ -20,6 +20,8 @@
 - [ ] **(신규, 2026-07-20)** Step 5 `gradle test`의 `BookNoteControllerTest`/`GroupControllerTest`/`ShareRecordControllerTest` 통과 확인 — 그룹 소유자 탈퇴 불가, 멤버 중복 추가 409, ShareRecord 교차검증(shareType/scope별 400) 케이스 위주로 Swagger/Postman에서도 한 번씩 확인 권장
 - [ ] **(신규, 2026-07-20)** `독서기록앱_테이블정의서.xlsx`에 이번 Step 5에서 추가한 `ShareRecord.user_id`(공유한 사용자) 컬럼 반영 — 원본 스프레드시트에는 아직 없음
 - [ ] **(신규, 2026-07-20)** Step 5-1 `gradle test`의 `DashboardControllerTest` 통과 확인 — 월간/분기별/연간 집계, 완독 0권일 때 격려 문구, `date` 생략 시 이번 달 기본값, 토큰 없이 401 케이스 위주로 Swagger/Postman에서도 `GET /api/dashboard?period=month&date=2026-07` 등으로 한 번씩 확인 권장
+- [ ] **(신규, 2026-07-20)** Step 5-2 `gradle test`의 `PublicShareControllerTest`/`ShareRecordControllerTest` 신규 케이스 통과 확인, `gradle bootRun` 후 공유 하나 만들어서 `/public/share/{token}`을 브라우저(시크릿 모드 등 비로그인 상태)로 직접 열어보고, 카카오톡 링크 공유 디버거(https://developers.kakao.com/tool/debugger/sharing)로 OG 태그 미리보기가 정상 노출되는지 확인
+- [ ] **(신규, 2026-07-20)** `독서기록앱_테이블정의서.xlsx`에 Step 5-2에서 추가한 `ShareRecord.book_note_id`/`dashboard_snapshot` 컬럼, 신규 테이블 `ShareRecordPhoto` 반영 — 원본 스프레드시트에는 아직 없음
 
 ---
 
@@ -77,7 +79,7 @@
 - [x] Step 4. 이미지 업로드 (S3 presigned URL, BookPhoto API — 2026-07-20 완료, 단 실제 AWS 키/로컬 검증 전)
 - [x] Step 5. 소감/공유 기능 (BookNote, Group, ShareRecord API — 2026-07-20 완료, "기록 전용" 범위. 실제 열람 권한 제어·카드 이미지·공개 웹뷰는 Step 5-2로 분리)
 - [x] Step 5-1. 독서 대시보드(Recap) 통계 (`GET /api/dashboard` — 2026-07-20 완료, 월간/분기별/연간 집계 + 장르 비율 + 6개월 추이 + 하이라이트 + 자동 캡션, 본인 통계만 조회)
-- [ ] Step 5-2. 공유 카드 이미지 + 공개 웹뷰 — **설계 완료(2026-07-20), 구현 전**: 카드 이미지 서버 생성은 보류(클라이언트 캡처 유지), 공개 웹뷰는 이 Spring Boot 앱에 Thymeleaf로, 소감은 BookNote 선택, 사진은 BookPhoto N장 선택 방식으로 확정. 상세 설계는 백엔드구축계획 문서 참고
+- [x] Step 5-2. 공유 카드 이미지 + 공개 웹뷰 (2026-07-20 완료 — 카드 이미지 서버 생성은 보류(클라이언트 캡처 유지). `/public/share/{token}` 비로그인 공개 웹뷰(Thymeleaf, OG 태그 포함), ShareRecord에 소감(bookNoteId)/선택 사진(ShareRecordPhoto)/대시보드 스냅샷 데이터 모델 확장 완료)
 - [ ] Step 6. 배포 (AWS EC2 + RDS 또는 Railway)
 
 ---

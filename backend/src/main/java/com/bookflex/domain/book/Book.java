@@ -20,6 +20,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 /** 테이블정의서 Book 매핑 (사용자가 등록한 책의 진행/완독 정보). User 도메인의 CreatedDate/LastModifiedDate 컨벤션과 통일. */
 @Entity
@@ -98,5 +99,19 @@ public class Book {
     public void complete(LocalDate endDate) {
         this.status = BookStatus.DONE;
         this.endDate = endDate == null ? LocalDate.now() : endDate;
+    }
+
+    /**
+     * 시작일~종료일을 양 끝 포함해서 센 완독 일수 (화면설계서 서재 탭의 "9일" 표기와 동일한 계산,
+     * 예: 06.20~06.28 = 9일). 아직 완독 전(endDate 없음)이면 null — Step 5-2 공개 공유 웹뷰에서
+     * 사용. DashboardService에도 동일한 계산 로직이 있지만(완독한 책만 다뤄 endDate가 항상 있음이
+     * 보장된 상태였음), 이미 리뷰를 마친 그 코드는 그대로 두고 이 메서드가 향후 신규 호출부의
+     * 단일 기준이 되도록 한다.
+     */
+    public Long readingDays() {
+        if (endDate == null) {
+            return null;
+        }
+        return ChronoUnit.DAYS.between(startDate, endDate) + 1;
     }
 }

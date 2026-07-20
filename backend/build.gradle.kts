@@ -20,6 +20,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    // Step 5-2: 비로그인 공개 공유 웹뷰(/public/share/{token})를 이 앱 안에서 서버 렌더링하기 위한
+    // 서버사이드 템플릿 엔진 (별도 Next.js 서비스를 새로 만들지 않기로 한 설계 결정에 따름).
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
     implementation("io.jsonwebtoken:jjwt-api:0.12.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")

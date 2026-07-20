@@ -2,6 +2,10 @@ package com.bookflex.domain.share;
 
 import com.bookflex.domain.book.Book;
 import com.bookflex.domain.book.BookRepository;
+import com.bookflex.domain.bookphoto.BookPhoto;
+import com.bookflex.domain.bookphoto.BookPhotoRepository;
+import com.bookflex.domain.booknote.BookNote;
+import com.bookflex.domain.booknote.BookNoteRepository;
 import com.bookflex.domain.group.Group;
 import com.bookflex.domain.group.GroupMember;
 import com.bookflex.domain.group.GroupMemberRepository;
@@ -47,6 +51,12 @@ class ShareRecordControllerTest {
     private BookRepository bookRepository;
 
     @Autowired
+    private BookNoteRepository bookNoteRepository;
+
+    @Autowired
+    private BookPhotoRepository bookPhotoRepository;
+
+    @Autowired
     private GroupRepository groupRepository;
 
     @Autowired
@@ -59,6 +69,8 @@ class ShareRecordControllerTest {
     private String sharerToken;
     private Long bookId;
     private Long myGroupId;
+    private Long noteId;
+    private Long photoId;
 
     @BeforeEach
     void setUp() {
@@ -68,6 +80,9 @@ class ShareRecordControllerTest {
 
         Book book = new Book(sharer, "클린 코드", "로버트 마틴", null, null, null, null, LocalDate.of(2026, 7, 1));
         bookId = bookRepository.save(book).getId();
+
+        noteId = bookNoteRepository.save(new BookNote(book, "인상 깊은 챕터였다.")).getId();
+        photoId = bookPhotoRepository.save(new BookPhoto(book, "https://example.com/photo.jpg", null, null, null)).getId();
 
         Group group = groupRepository.save(new Group(sharer, "내 그룹"));
         groupMemberRepository.save(new GroupMember(group, sharer));
@@ -242,5 +257,160 @@ class ShareRecordControllerTest {
         mockMvc.perform(get("/api/share-records"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
+    }
+
+    @Test
+    void bookNoteId와_photoIds를_지정하면_응답에_소감과_사진이_순서대로_포함된다() throws Exception {
+        String body = objectMapper.writeValueAsString(Map.of(
+                "shareType", "BOOK",
+                "bookId", bookId,
+                "scope", "ALL",
+                "platform", "APP",
+                "bookNoteId", noteId,
+                "photoIds", List.of(photoId)
+        ));
+
+        mockMvc.perform(post("/api/share-records")
+                        .header("Authorization", sharerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.note.noteId").value(noteId))
+                .andExpect(jsonPath("$.note.content").value("인상 깊은 챕터였다."))
+                .andExpect(jsonPath("$.photos[0].photoId").value(photoId))
+                .andExpect(jsonPath("$.photos[0].imageUrl").value("https://example.com/photo.jpg"))
+                .andExpect(jsonPath("$.photos[0].displayOrder").value(0));
+    }
+
+    @Test
+    void bookNoteId가_다른_책_소감이면_400() throws Exception {
+        User sharer = userRepository.findById(sharerId).orElseThrow();
+        Book otherBook = new Book(sharer, "다른 책", "다른 저자", null, null, null, null, LocalDate.of(2026, 7, 1));
+        Long otherBookId = bookRepository.save(otherBook).getId();
+        Long otherNoteId = bookNoteRepository.save(new BookNote(otherBook, "다른 책 소감")).getId();
+
+        String body = objectMapper.writeValueAsString(Map.of(
+                "shareType", "BOOK",
+                "bookId", otherBookId,
+                "scope", "ALL",
+                "platform", "APP",
+                "bookNoteId", noteId
+        ));
+
+        mockMvc.perform(post("/api/share-records")
+                        .header("Authorization", sharerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"));
+    }
+
+    @Test
+    void shareType이_DASHBOARD인데_bookNoteId가_있으면_400() throws Exception {
+        String body = objectMapper.writeValueAsString(Map.of(
+                "shareType", "DASHBOARD",
+                "scope", "ALL",
+                "platform", "APP",
+                "bookNoteId", noteId
+        ));
+
+        mockMvc.perform(post("/api/share-records")
+                        .header("Authorization", sharerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"));
+    }
+
+    @Test
+    void photoIds가_다른_책_사진이면_400() throws Exception {
+        User sharer = userRepository.findById(sharerId).orElseThrow();
+        Book otherBook = new Book(sharer, "다른 책", "다른 저자", null, null, null, null, LocalDate.of(2026, 7, 1));
+        Long otherBookId = bookRepository.save(otherBook).getId();
+        Long otherPhotoId = bookPhotoRepository.save(
+                new BookPhoto(otherBook, "https://example.com/other.jpg", null, null, null)).getId();
+
+        String body = objectMapper.writeValueAsString(Map.of(
+                "shareType", "BOOK",
+                "bookId", otherBookId,
+                "scope", "ALL",
+                "platform", "APP",
+                "photoIds", List.of(otherPhotoId, photoId)
+        ));
+
+        mockMvc.perform(post("/api/share-records")
+                        .header("Authorization", sharerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"));
+    }
+
+    @Test
+    void photoIds가_10장을_넘으면_400() throws Exception {
+        List<Long> elevenPhotoIds = new java.util.ArrayList<>();
+        for (int i = 0; i < 11; i++) {
+            elevenPhotoIds.add(photoId);
+        }
+
+        String body = objectMapper.writeValueAsString(Map.of(
+                "shareType", "BOOK",
+                "bookId", bookId,
+                "scope", "ALL",
+                "platform", "APP",
+                "photoIds", elevenPhotoIds
+        ));
+
+        mockMvc.perform(post("/api/share-records")
+                        .header("Authorization", sharerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"));
+    }
+
+    @Test
+    void DASHBOARD_공유시_대시보드_스냅샷이_저장된다() throws Exception {
+        User sharer = userRepository.findById(sharerId).orElseThrow();
+        Book completedBook = new Book(sharer, "완독한 책", "저자", null, null, "소설",
+                200, LocalDate.of(2026, 7, 1));
+        completedBook.complete(LocalDate.of(2026, 7, 10));
+        bookRepository.save(completedBook);
+
+        String body = objectMapper.writeValueAsString(Map.of(
+                "shareType", "DASHBOARD",
+                "scope", "ALL",
+                "platform", "APP",
+                "dashboardPeriod", "MONTH",
+                "dashboardDate", "2026-07"
+        ));
+
+        mockMvc.perform(post("/api/share-records")
+                        .header("Authorization", sharerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.dashboardSnapshot.periodLabel").value("2026년 7월"))
+                .andExpect(jsonPath("$.dashboardSnapshot.completedBookCount").value(1))
+                .andExpect(jsonPath("$.dashboardSnapshot.totalPagesRead").value(200))
+                .andExpect(jsonPath("$.dashboardSnapshot.topGenre").value("소설"));
+    }
+
+    @Test
+    void shareType이_BOOK인데_dashboardPeriod가_있으면_400() throws Exception {
+        String body = objectMapper.writeValueAsString(Map.of(
+                "shareType", "BOOK",
+                "bookId", bookId,
+                "scope", "ALL",
+                "platform", "APP",
+                "dashboardPeriod", "MONTH"
+        ));
+
+        mockMvc.perform(post("/api/share-records")
+                        .header("Authorization", sharerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"));
     }
 }

@@ -38,7 +38,11 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",
-            "/h2-console/**"
+            "/h2-console/**",
+            // Step 5-2: 비로그인 공개 공유 웹뷰. public_token만 알면 누구나 접근 가능해야 하므로
+            // 인증 예외 경로에 추가한다(기획서 7-4에서 이미 확정된 정책 — 백엔드구축계획 문서에
+            // 남겨뒀던 "공개 웹뷰 경로는 나중에 붙을 때 반드시 함께 인증 예외 처리할 것" 반영).
+            "/public/**"
     };
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
