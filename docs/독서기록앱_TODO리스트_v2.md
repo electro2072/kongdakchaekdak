@@ -19,6 +19,7 @@
 - [ ] **(신규, 2026-07-20)** `gradle test`의 `BookPhotoControllerTest` 통과 확인, 위 AWS 키 작성 후 `gradle bootRun` → Swagger에서 `POST /api/books/{bookId}/photos/presigned-url` 호출 → 받은 `uploadUrl`로 실제 이미지 파일 PUT 업로드 → `POST /api/books/{bookId}/photos`로 레코드 등록까지 엔드투엔드로 한 번 확인 (지금까지는 로컬 서명 로직만 검증됐고 실제 S3 왕복은 검증 전)
 - [ ] **(신규, 2026-07-20)** Step 5 `gradle test`의 `BookNoteControllerTest`/`GroupControllerTest`/`ShareRecordControllerTest` 통과 확인 — 그룹 소유자 탈퇴 불가, 멤버 중복 추가 409, ShareRecord 교차검증(shareType/scope별 400) 케이스 위주로 Swagger/Postman에서도 한 번씩 확인 권장
 - [ ] **(신규, 2026-07-20)** `독서기록앱_테이블정의서.xlsx`에 이번 Step 5에서 추가한 `ShareRecord.user_id`(공유한 사용자) 컬럼 반영 — 원본 스프레드시트에는 아직 없음
+- [ ] **(신규, 2026-07-20)** Step 5-1 `gradle test`의 `DashboardControllerTest` 통과 확인 — 월간/분기별/연간 집계, 완독 0권일 때 격려 문구, `date` 생략 시 이번 달 기본값, 토큰 없이 401 케이스 위주로 Swagger/Postman에서도 `GET /api/dashboard?period=month&date=2026-07` 등으로 한 번씩 확인 권장
 
 ---
 
@@ -75,6 +76,8 @@
 - [x] Step 3. 인증 (이메일/PW · User/Book API 인증 필수화 · 카카오/구글/네이버 OAuth2 코드 구현 · 리소스 소유자 검증 강화 — 모두 완료, 마지막 항목은 2026-07-20. 단 소셜 로그인은 실제 키/로컬 검증 전)
 - [x] Step 4. 이미지 업로드 (S3 presigned URL, BookPhoto API — 2026-07-20 완료, 단 실제 AWS 키/로컬 검증 전)
 - [x] Step 5. 소감/공유 기능 (BookNote, Group, ShareRecord API — 2026-07-20 완료, "기록 전용" 범위. 실제 열람 권한 제어·카드 이미지·공개 웹뷰는 Step 5-2로 분리)
+- [x] Step 5-1. 독서 대시보드(Recap) 통계 (`GET /api/dashboard` — 2026-07-20 완료, 월간/분기별/연간 집계 + 장르 비율 + 6개월 추이 + 하이라이트 + 자동 캡션, 본인 통계만 조회)
+- [ ] Step 5-2. 공유 카드 이미지 + 공개 웹뷰 (의도적으로 분리, 나중에 진행)
 - [ ] Step 6. 배포 (AWS EC2 + RDS 또는 Railway)
 
 ---
