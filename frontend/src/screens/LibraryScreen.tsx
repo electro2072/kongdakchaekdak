@@ -8,60 +8,23 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Search, BookOpen, Camera, PenLine} from 'lucide-react-native';
+import type {MainStackParamList} from '../navigation/types';
+import {MOCK_LIBRARY_BOOKS, type BookStatus} from '../mocks/libraryBooks';
 import {useTheme} from '../theme';
 
-type BookStatus = 'reading' | 'done';
-
-interface LibraryBook {
-  id: string;
-  title: string;
-  author: string;
-  status: BookStatus;
-  dateRangeLabel: string;
-  photoCount: number;
-  hasNote: boolean;
-}
-
-// TODO: GET /api/books 프론트 연동 전이라 화면설계서(Frame 03) 그대로의 mock 데이터를 사용한다.
-const MOCK_BOOKS: LibraryBook[] = [
-  {
-    id: '1',
-    title: '아몬드',
-    author: '손원평',
-    status: 'done',
-    dateRangeLabel: '2026.06.20 ~ 2026.06.28 (9일)',
-    photoCount: 3,
-    hasNote: true,
-  },
-  {
-    id: '2',
-    title: '채식주의자',
-    author: '한강',
-    status: 'reading',
-    dateRangeLabel: '2026.06.25 ~ 진행중',
-    photoCount: 0,
-    hasNote: false,
-  },
-  {
-    id: '3',
-    title: '데미안',
-    author: '헤르만 헤세',
-    status: 'reading',
-    dateRangeLabel: '2026.07.10 ~ 진행중',
-    photoCount: 0,
-    hasNote: false,
-  },
-];
-
-/** Frame 03 · 서재 탭 (목록) — design/hifi_mockup_v1.html 기준. 책 상세(Frame 03.1)는 이후 작업 */
+/** Frame 03 · 서재 탭 (목록) — design/hifi_mockup_v1.html 기준. 카드 탭 시 Frame 03.1(책 상세)로 이동 */
 export function LibraryScreen() {
   const {colors, typography, radii} = useTheme();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<MainStackParamList>>();
 
   const [statusFilter, setStatusFilter] = useState<BookStatus>('reading');
   const [query, setQuery] = useState('');
 
-  const books = MOCK_BOOKS.filter(
+  const books = MOCK_LIBRARY_BOOKS.filter(
     book => book.status === statusFilter && book.title.includes(query.trim()),
   );
 
@@ -153,75 +116,82 @@ export function LibraryScreen() {
               해당하는 책이 없어요
             </Text>
           ) : (
-            books.map(book => (
-              <View
-                key={book.id}
-                style={[
-                  styles.card,
-                  {
-                    backgroundColor: colors.surface,
-                    borderColor: colors.hairline,
-                    borderRadius: radii.card,
-                  },
-                ]}>
-                <View style={[styles.coverBox, {backgroundColor: colors.p50}]}>
-                  <BookOpen size={20} color={colors.p400} />
-                </View>
-                <View style={{flex: 1}}>
-                  <Text
-                    style={[
-                      typography.bodyStrong,
-                      {color: colors.n900, fontSize: 12.5},
-                    ]}>
-                    {book.title} ({book.author})
-                  </Text>
-                  <Text
-                    style={[
-                      typography.caption,
-                      {color: colors.n600, marginVertical: 3, fontSize: 10},
-                    ]}>
-                    {book.dateRangeLabel}
-                  </Text>
-                  <View style={styles.metaRow}>
-                    <View style={styles.metaItem}>
-                      <Camera
-                        size={11}
-                        color={book.photoCount > 0 ? colors.n500 : colors.n400}
-                      />
-                      <Text
-                        style={[
-                          typography.caption,
-                          {
-                            color:
-                              book.photoCount > 0 ? colors.n500 : colors.n400,
-                            fontSize: 9.5,
-                          },
-                        ]}>
-                        {book.photoCount > 0
-                          ? `사진 ${book.photoCount}장`
-                          : '사진 없음'}
-                      </Text>
-                    </View>
-                    <View style={styles.metaItem}>
-                      <PenLine
-                        size={11}
-                        color={book.hasNote ? colors.n500 : colors.n400}
-                      />
-                      <Text
-                        style={[
-                          typography.caption,
-                          {
-                            color: book.hasNote ? colors.n500 : colors.n400,
-                            fontSize: 9.5,
-                          },
-                        ]}>
-                        {book.hasNote ? '소감 있음' : '소감 없음'}
-                      </Text>
+            books.map(book => {
+              const photoCount = book.photos.length;
+              const hasNote = Boolean(book.noteText);
+              return (
+                <TouchableOpacity
+                  key={book.id}
+                  style={[
+                    styles.card,
+                    {
+                      backgroundColor: colors.surface,
+                      borderColor: colors.hairline,
+                      borderRadius: radii.card,
+                    },
+                  ]}
+                  onPress={() =>
+                    navigation.navigate('BookDetail', {bookId: book.id})
+                  }>
+                  <View
+                    style={[styles.coverBox, {backgroundColor: colors.p50}]}>
+                    <BookOpen size={20} color={colors.p400} />
+                  </View>
+                  <View style={{flex: 1}}>
+                    <Text
+                      style={[
+                        typography.bodyStrong,
+                        {color: colors.n900, fontSize: 12.5},
+                      ]}>
+                      {book.title} ({book.author})
+                    </Text>
+                    <Text
+                      style={[
+                        typography.caption,
+                        {color: colors.n600, marginVertical: 3, fontSize: 10},
+                      ]}>
+                      {book.dateRangeLabel}
+                    </Text>
+                    <View style={styles.metaRow}>
+                      <View style={styles.metaItem}>
+                        <Camera
+                          size={11}
+                          color={photoCount > 0 ? colors.n500 : colors.n400}
+                        />
+                        <Text
+                          style={[
+                            typography.caption,
+                            {
+                              color: photoCount > 0 ? colors.n500 : colors.n400,
+                              fontSize: 9.5,
+                            },
+                          ]}>
+                          {photoCount > 0
+                            ? `사진 ${photoCount}장`
+                            : '사진 없음'}
+                        </Text>
+                      </View>
+                      <View style={styles.metaItem}>
+                        <PenLine
+                          size={11}
+                          color={hasNote ? colors.n500 : colors.n400}
+                        />
+                        <Text
+                          style={[
+                            typography.caption,
+                            {
+                              color: hasNote ? colors.n500 : colors.n400,
+                              fontSize: 9.5,
+                            },
+                          ]}>
+                          {hasNote ? '소감 있음' : '소감 없음'}
+                        </Text>
+                      </View>
                     </View>
                   </View>
-                </View>
-              </View>
-            ))
+                </TouchableOpacity>
+              );
+            })
           )}
         </ScrollView>
       </View>
