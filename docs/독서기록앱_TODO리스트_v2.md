@@ -1,6 +1,6 @@
 # ✅ 독서 기록 공유 앱 — 배포까지 TODO 리스트
 
-> 작성일: 2026-07-02 · 최종 업데이트: 2026-07-20
+> 작성일: 2026-07-02 · 최종 업데이트: 2026-07-21
 > 참고 문서: 기획서, 테이블정의서, 화면설계서, 개발현황, 백엔드구축계획
 
 ---
@@ -22,6 +22,9 @@
 - [ ] **(신규, 2026-07-20)** Step 5-1 `gradle test`의 `DashboardControllerTest` 통과 확인 — 월간/분기별/연간 집계, 완독 0권일 때 격려 문구, `date` 생략 시 이번 달 기본값, 토큰 없이 401 케이스 위주로 Swagger/Postman에서도 `GET /api/dashboard?period=month&date=2026-07` 등으로 한 번씩 확인 권장
 - [ ] **(신규, 2026-07-20)** Step 5-2 `gradle test`의 `PublicShareControllerTest`/`ShareRecordControllerTest` 신규 케이스 통과 확인, `gradle bootRun` 후 공유 하나 만들어서 `/public/share/{token}`을 브라우저(시크릿 모드 등 비로그인 상태)로 직접 열어보고, 카카오톡 링크 공유 디버거(https://developers.kakao.com/tool/debugger/sharing)로 OG 태그 미리보기가 정상 노출되는지 확인
 - [ ] **(신규, 2026-07-20)** `독서기록앱_테이블정의서.xlsx`에 Step 5-2에서 추가한 `ShareRecord.book_note_id`/`dashboard_snapshot` 컬럼, 신규 테이블 `ShareRecordPhoto` 반영 — 원본 스프레드시트에는 아직 없음
+- [ ] **(신규, 2026-07-21, 배포 전 블로킹)** `backend/` 디렉터리에서 `gradle wrapper --gradle-version 8.14.3` 실행 후 생성되는 `gradlew`/`gradlew.bat`/`gradle/wrapper/gradle-wrapper.properties`/`gradle/wrapper/gradle-wrapper.jar` 커밋 — 클라우드 세션은 Gradle Plugin Portal 접근이 막혀 있어 이 작업을 대신 못 함, Railway 자동 빌드에 필요
+- [ ] **(신규, 2026-07-21)** Railway 가입(railway.com, GitHub 계정으로) → 새 프로젝트 생성 후 이 저장소 연결(루트 디렉터리를 `backend`로 지정) → "Add Database"로 MySQL 플러그인 추가 → 앱 서비스 Variables 탭에서 환경변수 설정(백엔드구축계획 문서 Step 6 절의 "필요한 환경변수 목록" 표 참고, 최소 `DB_HOST`/`DB_PORT`/`DB_NAME`/`DB_USERNAME`/`DB_PASSWORD`/`JWT_SECRET`/`PUBLIC_BASE_URL`만 채워도 기동은 됨) → 첫 배포 후 `/health` 응답 확인
+- [ ] **(신규, 2026-07-21)** Railway 무료 체험 조건 숙지: 가입 시 $5 크레딧이 30일(또는 소진 시 그 전) 유효, 이후 월 $1 크레딧 Free 플랜으로 자동 전환 — 크레딧 만료 후 30일 안에 유료 전환 안 하면 MySQL 데이터(볼륨) 삭제되니 테스트만 하다가 데이터 날아가지 않게 결제 여부를 그 안에 결정할 것
 
 ---
 
@@ -80,7 +83,7 @@
 - [x] Step 5. 소감/공유 기능 (BookNote, Group, ShareRecord API — 2026-07-20 완료, "기록 전용" 범위. 실제 열람 권한 제어·카드 이미지·공개 웹뷰는 Step 5-2로 분리)
 - [x] Step 5-1. 독서 대시보드(Recap) 통계 (`GET /api/dashboard` — 2026-07-20 완료, 월간/분기별/연간 집계 + 장르 비율 + 6개월 추이 + 하이라이트 + 자동 캡션, 본인 통계만 조회)
 - [x] Step 5-2. 공유 카드 이미지 + 공개 웹뷰 (2026-07-20 완료 — 카드 이미지 서버 생성은 보류(클라이언트 캡처 유지). `/public/share/{token}` 비로그인 공개 웹뷰(Thymeleaf, OG 태그 포함), ShareRecord에 소감(bookNoteId)/선택 사진(ShareRecordPhoto)/대시보드 스냅샷 데이터 모델 확장 완료)
-- [ ] Step 6. 배포 (AWS EC2 + RDS 또는 Railway)
+- [ ] Step 6. 배포 — **Railway로 결정(2026-07-21)**. 배포용 코드 준비(PORT/DB 환경변수 대응) 완료, Gradle Wrapper 생성 + Railway 대시보드 설정은 사용자가 로컬에서 진행 필요 (섹션 0 참고)
 
 ---
 

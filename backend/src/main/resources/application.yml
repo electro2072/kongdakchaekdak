@@ -1,11 +1,19 @@
 server:
-  port: 8080
+  # Step 6(배포, Railway): Railway는 컨테이너에 PORT 환경변수를 주입하고 그 포트로 리슨해야
+  # 외부에서 접속 가능하다(플랫폼이 임의로 포트를 배정함). 로컬 개발/Docker Compose 환경에는
+  # PORT가 없으니 기존 기본값 8080을 그대로 씀 — 로컬 실행 방식은 전혀 안 바뀐다.
+  port: ${PORT:8080}
 
 spring:
   application:
     name: reading-record-app-backend
   datasource:
-    url: jdbc:mysql://localhost:3306/reading_record_app?serverTimezone=UTC&characterEncoding=UTF-8
+    # Step 6(배포, Railway): 호스트/포트/DB명을 분리해서 환경변수로 받도록 바꿈 — 로컬은 기존과
+    # 동일하게 docker-compose의 localhost:3306/reading_record_app을 기본값으로 그대로 쓰고,
+    # Railway에서는 MySQL 플러그인의 MYSQLHOST/MYSQLPORT/MYSQLDATABASE 값을 이 서비스의
+    # DB_HOST/DB_PORT/DB_NAME 변수에 참조 변수(${{MySQL.MYSQLHOST}} 등)로 연결해서 씀
+    # (DB_USERNAME/DB_PASSWORD는 기존 변수명을 그대로 재사용, MYSQLUSER/MYSQLPASSWORD를 참조).
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:reading_record_app}?serverTimezone=UTC&characterEncoding=UTF-8
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
