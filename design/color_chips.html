@@ -2,20 +2,20 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>독서 자랑 어플 — 컬러 칩 (연두 테마) v1</title>
+<title>독서 자랑 어플 — 컬러 칩 (연두 테마) v1.2</title>
 <style>
   :root {
-    --p50:#f0fce3; --p100:#e3f7cc; --p200:#c9ec9d; --p300:#aedd6d; --p400:#93c936;
-    --p500:#7db200; --p600:#699700; --p700:#547a00; --p800:#3d5a00; --p900:#283d00;
+    --p50:#e8fee4; --p100:#d6fbcd; --p200:#aff3a0; --p300:#86e670; --p400:#5bd43d;
+    --p500:#3fbd13; --p600:#34a00f; --p700:#288109; --p800:#1c6005; --p900:#104103;
 
     --n50:#f6f7f3; --n100:#eeefea; --n200:#dadbd6; --n300:#bdbfb8; --n400:#8e9089;
     --n500:#6b6d66; --n600:#52534d; --n700:#3c3e39; --n800:#262723; --n900:#11120f;
 
-    --success:#699700; --warning:#906600; --error:#b6143f; --info:#1d60bc;
+    --success:#34a00f; --warning:#906600; --error:#b6143f; --info:#1d60bc;
 
     /* 다크모드 */
-    --d-p100:#d2e6bc; --d-p200:#abca84; --d-p300:#8bb54e; --d-p400:#71a100;
-    --d-p500:#649000; --d-p600:#598000; --d-p700:#4d7000;
+    --d-p100:#c5eabd; --d-p200:#93d086; --d-p300:#66bd52; --d-p400:#38ab10;
+    --d-p500:#31980b; --d-p600:#2c880c; --d-p700:#247707;
     --d-surface-app:#181a14; --d-surface-card:#242721; --d-border:#373934;
     --d-text-primary:#eaece5; --d-text-secondary:#b6b8b1; --d-text-muted:#7f817b;
     --d-dark-on-btn:#0f1a00;
@@ -108,11 +108,12 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>📗 독서 자랑 어플 — 컬러 팔레트 v1</h1>
-  <p class="sub">메인 테마: 연두색(Yellow-Green) · OKLCH 기반 설계 · WCAG 대비 검증 완료 · 2026-07-21</p>
+  <h1>📗 독서 자랑 어플 — 컬러 팔레트 v1.2</h1>
+  <p class="sub">메인 테마: 연두색(Yellow-Green) · OKLCH 기반 설계 · WCAG 대비 검증 완료 · 2026-07-21 (v1.1: 카테고리 포인트 멀티컬러 추가 · v1.2: primary 그린을 더 생동감 있는 톤으로 재조정)</p>
 
   <h2>1. Primary — 연두 (Brand)</h2>
-  <p class="note">OKLCH hue 128° 고정, 명도(L)만 단계별로 낮춰 밝은 배경용(50~200)부터 진한 텍스트/버튼용(700~900)까지 구성했습니다.</p>
+  <p class="note">OKLCH hue 140°(기존 128°에서 조정, sRGB 안에서 이 명도대에 최대 채도가 나오는 지점), 명도(L)만 단계별로 낮춰 밝은 배경용(50~200)부터 진한 텍스트/버튼용(700~900)까지 구성했습니다.</p>
+  <p class="note">💡 <b>v1.2 변경 이유</b> — 기존 hue 128°는 명도를 낮춰 흰 텍스트 대비(4.5:1)를 맞추다 보니 올리브·카키에 가까운 칙칙한 톤이 됐습니다. 같은 명도에서 채도가 최대로 나오는 hue를 다시 탐색해 140°로 옮기고 채도를 전 단계에서 끌어올렸습니다 — 대비 요건(버튼 700 + 흰 텍스트 4.5:1 이상)은 그대로 유지하면서 훨씬 생기 있는 그린이 됐습니다.</p>
   <div class="ramp" id="primary-ramp"></div>
 
   <h2>2. Neutral — 그레이 (텍스트/배경/구분선)</h2>
@@ -128,13 +129,13 @@
   <p class="note">텍스트 대비는 WCAG AA 기준(본문 4.5:1 / 큰 글자·아이콘 3:1)으로, 색맹 안전성은 dataviz 스킬의 OKLab ΔE 시뮬레이션(Machado-Oliveira-Fernandes 2009)으로 검증했습니다. 아래는 실제 <code>validate_palette.js</code> 실행 결과입니다.</p>
   <table>
     <tr><th>용도</th><th>조합</th><th>대비</th><th>결과</th></tr>
-    <tr><td>버튼 배경(흰 텍스트) — primary-500</td><td><span class="swatch-cell"><span class="dot" style="background:#7db200"></span>#7db200 + 흰색</span></td><td>2.55:1</td><td class="ratio-fail">FAIL — 버튼엔 500 쓰지 말 것</td></tr>
-    <tr><td>버튼 배경(흰 텍스트) — primary-600</td><td><span class="swatch-cell"><span class="dot" style="background:#699700"></span>#699700 + 흰색</span></td><td>3.48:1</td><td class="ratio-warn">WARN — 큰 글자/아이콘 전용</td></tr>
-    <tr><td>버튼 배경(흰 텍스트) — primary-700 ✅</td><td><span class="swatch-cell"><span class="dot" style="background:#547a00"></span>#547a00 + 흰색</span></td><td>5.05:1</td><td class="ratio-pass">PASS — 본문 텍스트도 OK</td></tr>
+    <tr><td>버튼 배경(흰 텍스트) — primary-500</td><td><span class="swatch-cell"><span class="dot" style="background:#3fbd13"></span>#3fbd13 + 흰색</span></td><td>2.47:1</td><td class="ratio-fail">FAIL — 버튼엔 500 쓰지 말 것</td></tr>
+    <tr><td>버튼 배경(흰 텍스트) — primary-600</td><td><span class="swatch-cell"><span class="dot" style="background:#34a00f"></span>#34a00f + 흰색</span></td><td>3.40:1</td><td class="ratio-warn">WARN — 큰 글자/아이콘 전용</td></tr>
+    <tr><td>버튼 배경(흰 텍스트) — primary-700 ✅</td><td><span class="swatch-cell"><span class="dot" style="background:#288109"></span>#288109 + 흰색</span></td><td>4.96:1</td><td class="ratio-pass">PASS — 본문 텍스트도 OK</td></tr>
     <tr><td>본문 텍스트 — neutral-900</td><td><span class="swatch-cell"><span class="dot" style="background:#11120f"></span>#11120f + 흰색</span></td><td>18.80:1</td><td class="ratio-pass">PASS</td></tr>
     <tr><td>보조 텍스트 — neutral-700</td><td><span class="swatch-cell"><span class="dot" style="background:#3c3e39"></span>#3c3e39 + 흰색</span></td><td>10.82:1</td><td class="ratio-pass">PASS</td></tr>
     <tr><td>안내 문구 — neutral-500</td><td><span class="swatch-cell"><span class="dot" style="background:#6b6d66"></span>#6b6d66 + 흰색</span></td><td>5.24:1</td><td class="ratio-pass">PASS</td></tr>
-    <tr><td>상태 - 성공(success)</td><td><span class="swatch-cell"><span class="dot" style="background:#699700"></span>#699700 + 흰색</span></td><td>3.48:1</td><td class="ratio-warn">WARN — 아이콘+라벨 필수</td></tr>
+    <tr><td>상태 - 성공(success)</td><td><span class="swatch-cell"><span class="dot" style="background:#34a00f"></span>#34a00f + 흰색</span></td><td>3.40:1</td><td class="ratio-warn">WARN — 아이콘+라벨 필수</td></tr>
     <tr><td>상태 - 경고(warning)</td><td><span class="swatch-cell"><span class="dot" style="background:#906600"></span>#906600 + 흰색</span></td><td>5.14:1</td><td class="ratio-pass">PASS</td></tr>
     <tr><td>상태 - 오류(error)</td><td><span class="swatch-cell"><span class="dot" style="background:#b6143f"></span>#b6143f + 흰색</span></td><td>6.64:1</td><td class="ratio-pass">PASS</td></tr>
     <tr><td>상태 - 정보(info)</td><td><span class="swatch-cell"><span class="dot" style="background:#1d60bc"></span>#1d60bc + 흰색</span></td><td>6.08:1</td><td class="ratio-pass">PASS</td></tr>
@@ -185,10 +186,10 @@
   </table>
 
   <h2>7. 다크모드 — 연두를 그대로 Primary로 사용</h2>
-  <p class="note">라이트모드와 <b>같은 hue(128°)</b>를 유지하되, 명도(L)만 dark 모드 밴드(OKLCH L 0.48~0.67)에 맞춰 전체적으로 더 밝고 채도 있게 조정했습니다. 즉 "다른 색"이 아니라 같은 연두의 다크모드 버전입니다 — 브랜드 정체성은 그대로 유지됩니다.</p>
+  <p class="note">라이트모드와 <b>같은 hue(140°, v1.2에서 조정)</b>를 유지하되, 명도(L)만 dark 모드 밴드(OKLCH L 0.48~0.67)에 맞춰 전체적으로 더 밝고 채도 있게 조정했습니다. 즉 "다른 색"이 아니라 같은 연두의 다크모드 버전입니다 — 브랜드 정체성은 그대로 유지됩니다.</p>
 
   <div class="dark-section">
-    <h3>Primary 다크 스케일 (hue 128° 동일)</h3>
+    <h3>Primary 다크 스케일 (hue 140° 동일)</h3>
     <div class="ramp" id="dark-primary-ramp"></div>
 
     <h3>상태색 (다크 배경 전용, 라이트모드 색과 다름)</h3>
@@ -199,13 +200,13 @@
     <table>
       <tr><th>용도</th><th>조합</th><th>대비</th><th>결과</th></tr>
       <tr><td>다크 배경 위 본문 텍스트</td><td>#eaece5 / #181a14</td><td>14.73:1</td><td class="ratio-pass">PASS</td></tr>
-      <tr><td>다크 배경 위 링크/강조 텍스트 — primary-400</td><td>#71a100 / #181a14</td><td>5.68:1</td><td class="ratio-pass">PASS</td></tr>
-      <tr><td>다크 배경 위 아이콘 — primary-300</td><td>#8bb54e / #181a14</td><td>7.37:1</td><td class="ratio-pass">PASS</td></tr>
-      <tr><td><b>메인 버튼 배경(primary-500) + 진한 텍스트</b> ⭐</td><td>#0f1a00 / #649000</td><td>4.74:1</td><td class="ratio-pass">PASS — 라이트모드와 반대로 흰 텍스트 대신 진한 텍스트 사용</td></tr>
-      <tr><td>메인 버튼 배경(primary-500) + 흰 텍스트</td><td>#ffffff / #649000</td><td>3.80:1</td><td class="ratio-warn">WARN — 큰 글자만</td></tr>
-      <tr><td>차트용 4단계 ordinal 서브셋</td><td>#78ab00,#669200,#547a00,#436200</td><td>-</td><td class="ratio-pass">validate_palette.js --ordinal --mode dark 전체 PASS</td></tr>
+      <tr><td>다크 배경 위 링크/강조 텍스트 — primary-400</td><td>#38ab10 / #181a14</td><td>5.85:1</td><td class="ratio-pass">PASS</td></tr>
+      <tr><td>다크 배경 위 아이콘 — primary-300</td><td>#66bd52 / #181a14</td><td>7.49:1</td><td class="ratio-pass">PASS</td></tr>
+      <tr><td><b>메인 버튼 배경(primary-500) + 진한 텍스트</b> ⭐</td><td>#0f1a00 / #31980b</td><td>4.82:1</td><td class="ratio-pass">PASS — 라이트모드와 반대로 흰 텍스트 대신 진한 텍스트 사용</td></tr>
+      <tr><td>메인 버튼 배경(primary-500) + 흰 텍스트</td><td>#ffffff / #31980b</td><td>3.73:1</td><td class="ratio-warn">WARN — 큰 글자만</td></tr>
+      <tr><td>차트용 4단계 ordinal 서브셋</td><td>#3db513,#329b0e,#288109,#1f6806</td><td>-</td><td class="ratio-pass">validate_palette.js --ordinal --mode dark 전체 PASS</td></tr>
     </table>
-    <p class="note">💡 라이트모드는 "진한 초록(700) + 흰 텍스트" 버튼이었다면, 다크모드는 "밝은 초록(500) + 진한 텍스트" 버튼으로 뒤집힙니다. 두 경우 모두 같은 hue 128°를 유지하면서 명도만 그 모드에 맞게 재배치한 것 — 이게 dataviz 스킬이 말하는 "다크모드는 자동 반전이 아니라 같은 램프에서 별도로 검증된 자기 단계를 쓴다"는 원칙입니다.</p>
+    <p class="note">💡 라이트모드는 "진한 초록(700) + 흰 텍스트" 버튼이었다면, 다크모드는 "밝은 초록(500) + 진한 텍스트" 버튼으로 뒤집힙니다. 두 경우 모두 같은 hue 140°를 유지하면서 명도만 그 모드에 맞게 재배치한 것 — 이게 dataviz 스킬이 말하는 "다크모드는 자동 반전이 아니라 같은 램프에서 별도로 검증된 자기 단계를 쓴다"는 원칙입니다.</p>
 
     <h3>적용 예시</h3>
     <div class="mock-row">
@@ -240,15 +241,72 @@
     </div>
   </div>
 
+  <h2>8. 카테고리 포인트 멀티컬러 (v1.1 추가, 파스텔톤)</h2>
+  <p class="note">지금까지는 연두 하나만 포인트로 써왔는데, 장르 태그·도넛차트처럼 <b>"여러 항목을 구분"</b>해야 하는 곳엔 색이 하나뿐이면 다 비슷해 보입니다(예: 대시보드 장르 도넛이 전부 초록 계열 명암차만 다른 상태). dataviz 스킬의 categorical 컬러 공식(고정 순서 + 색맹 시뮬레이션 all-pairs 검증)으로 연두를 포함해 <b>4개 포인트 컬러</b>를 새로 확정했습니다. 채도를 낮추고 명도를 높여 파스텔톤으로 다시 뽑았고, 색상환에서 서로 최대한 떨어진 지점(초록 140° · 코랄 15° · 하늘색 210° · 라벤더 285°)을 자동 탐색해서 고른 조합이라 색맹 시뮬레이션(protan/deutan/tritan) 기준으로도 전부 구별됩니다. (v1.2에서 primary 그린의 hue가 128°→140°로 바뀌면서 이 조합도 새 그린 기준으로 재검증했습니다.)</p>
+
+  <h3>라이트모드</h3>
+  <div class="ramp" style="grid-template-columns: repeat(4, 1fr);" id="point-light-ramp"></div>
+
+  <h3>다크모드</h3>
+  <div class="dark-section" style="padding:16px; border-radius:12px;">
+    <div class="ramp" style="grid-template-columns: repeat(4, 1fr);" id="point-dark-ramp"></div>
+  </div>
+
+  <h3>검증 결과 (validate_palette.js --pairs all)</h3>
+  <table>
+    <tr><th>모드</th><th>CVD 분리(all-pairs, protan/deutan 중 최악)</th><th>일반시각 하한(all-pairs 최악)</th><th>대비</th><th>결과</th></tr>
+    <tr><td>라이트 (surface #ffffff)</td><td>ΔE 10.0 (기준 8 이상)</td><td>ΔE 18.0 (기준 15 이상)</td><td>하늘색·라벤더 2.1~3.0:1</td><td class="ratio-warn">PASS — 단, 하늘색/라벤더는 대비가 낮아 <b>항상 텍스트 라벨과 함께 사용</b> (색만으로 구분 금지)</td></tr>
+    <tr><td>다크 (surface #242721)</td><td>ΔE 10.1 (기준 8 이상)</td><td>ΔE 18.7 (기준 15 이상)</td><td>라벤더 3.0:1</td><td class="ratio-warn">PASS — 라벤더도 동일하게 라벨 병기 필요</td></tr>
+  </table>
+  <p class="note">💡 파스텔톤으로 채도를 낮춘 만큼 대비 여유가 더 줄었습니다 — 두 항목 모두 정식 통과(FAIL 없음)지만, "라벨 없이 색상 점만으로" 쓰는 건 여전히 금지입니다. 태그 칩처럼 항상 텍스트가 같이 있는 곳, 또는 도넛차트처럼 범례 텍스트가 옆에 있는 곳에만 사용합니다.</p>
+
+  <h3>적용 예시</h3>
+  <div class="mock-row">
+    <div class="card">
+      <h4>장르 태그 칩</h4>
+      <p>관심분야 / 서재 목록에 장르별 색상 구분</p>
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        <span class="badge" style="background:#e8fee4; color:#288109;">📗 소설</span>
+        <span class="badge" style="background:#ffe8e9; color:#891f34;">📕 에세이</span>
+        <span class="badge" style="background:#d5f5fc; color:#005763;">📘 자기계발</span>
+        <span class="badge" style="background:#ecedff; color:#483c95;">📙 인문</span>
+      </div>
+    </div>
+    <div class="card">
+      <h4>장르 비율 도넛 (변경 전 → 후)</h4>
+      <p>같은 초록 명암 → 실제 구분되는 파스텔 4색</p>
+      <div style="display:flex; gap:14px; align-items:center;">
+        <div style="text-align:center;">
+          <div style="width:56px; height:56px; border-radius:50%; background:conic-gradient(#54cd34 0% 40%, #3bb212 40% 70%, #30950d 70% 90%, #dadbd6 90% 100%);"></div>
+          <div style="font-size:10px; color:var(--n500); margin-top:6px;">변경 전</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="width:56px; height:56px; border-radius:50%; background:conic-gradient(#288109 0% 40%, #dc747e 40% 70%, #0ec7de 70% 90%, #dadbd6 90% 100%);"></div>
+          <div style="font-size:10px; color:var(--n500); margin-top:6px;">변경 후</div>
+        </div>
+      </div>
+    </div>
+    <div class="dark-card">
+      <h4>다크모드 태그 칩</h4>
+      <p>다크 배경에서도 동일하게 라벨 병기</p>
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        <span class="badge" style="background:#0d2008; color:#66bd52;">📗 소설</span>
+        <span class="badge" style="background:#2e0f13; color:#c8787e;">📕 에세이</span>
+        <span class="badge" style="background:#001f24; color:#00a5b9;">📘 자기계발</span>
+        <span class="badge" style="background:#191731; color:#a6a1fd;">📙 인문</span>
+      </div>
+    </div>
+  </div>
+
   <footer>
-    독서 자랑 어플 디자인 시스템 v1 · dataviz 스킬(OKLCH 방법론)로 생성 및 검증 · culori로 색공간 변환, validate_palette.js로 명도/채도/대비/색맹 안전성 자동 검증
+    독서 자랑 어플 디자인 시스템 v1.2 · dataviz 스킬(OKLCH 방법론)로 생성 및 검증 · culori로 색공간 변환, validate_palette.js로 명도/채도/대비/색맹 안전성 자동 검증
   </footer>
 </div>
 
 <script>
-  const primary = {50:"#f0fce3",100:"#e3f7cc",200:"#c9ec9d",300:"#aedd6d",400:"#93c936",500:"#7db200",600:"#699700",700:"#547a00",800:"#3d5a00",900:"#283d00"};
+  const primary = {50:"#e8fee4",100:"#d6fbcd",200:"#aff3a0",300:"#86e670",400:"#5bd43d",500:"#3fbd13",600:"#34a00f",700:"#288109",800:"#1c6005",900:"#104103"};
   const neutral = {50:"#f6f7f3",100:"#eeefea",200:"#dadbd6",300:"#bdbfb8",400:"#8e9089",500:"#6b6d66",600:"#52534d",700:"#3c3e39",800:"#262723",900:"#11120f"};
-  const status = {"success (성공)":"#699700","warning (경고)":"#906600","error (오류)":"#b6143f","info (정보)":"#1d60bc"};
+  const status = {"success (성공)":"#34a00f","warning (경고)":"#906600","error (오류)":"#b6143f","info (정보)":"#1d60bc"};
 
   function luminanceText(hex) {
     const c = hex.replace('#','');
@@ -275,10 +333,15 @@
   renderRamp('neutral-ramp', neutral, '');
   renderRamp('status-ramp', status, '');
 
-  const darkPrimary = {100:"#d2e6bc",200:"#abca84",300:"#8bb54e",400:"#71a100",500:"#649000",600:"#598000",700:"#4d7000"};
+  const darkPrimary = {100:"#c5eabd",200:"#93d086",300:"#66bd52",400:"#38ab10",500:"#31980b",600:"#2c880c",700:"#247707"};
   const darkStatus = {"success (성공)":"#79ab1a","warning (경고)":"#d59800","error (오류)":"#eb596e","info (정보)":"#5f99ed"};
   renderRamp('dark-primary-ramp', darkPrimary, '');
   renderRamp('dark-status-ramp', darkStatus, '');
+
+  const pointLight = {"초록 (primary)":"#288109","코랄":"#dc747e","하늘색":"#0ec7de","라벤더":"#918be5"};
+  const pointDark = {"초록 (primary)":"#31980b","코랄":"#c8787e","하늘색":"#00a5b9","라벤더":"#6b64ba"};
+  renderRamp('point-light-ramp', pointLight, '');
+  renderRamp('point-dark-ramp', pointDark, '');
 </script>
 </body>
 </html>

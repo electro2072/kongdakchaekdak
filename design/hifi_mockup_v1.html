@@ -6,27 +6,29 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/variable/pretendardvariable.min.css">
 <style>
   :root {
-    --p50:#f0fce3; --p100:#e3f7cc; --p200:#c9ec9d; --p300:#aedd6d; --p400:#93c936;
-    --p500:#7db200; --p600:#699700; --p700:#547a00; --p800:#3d5a00; --p900:#283d00;
+    --p50:#e8fee4; --p100:#d6fbcd; --p200:#aff3a0; --p300:#86e670; --p400:#5bd43d;
+    --p500:#3fbd13; --p600:#34a00f; --p700:#288109; --p800:#1c6005; --p900:#104103;
     --n50:#f6f7f3; --n100:#eeefea; --n200:#dadbd6; --n300:#bdbfb8; --n400:#8e9089;
     --n500:#6b6d66; --n600:#52534d; --n700:#3c3e39; --n800:#262723; --n900:#11120f;
-    --success:#699700; --warning:#906600; --error:#b6143f; --info:#1d60bc;
-    --chart1:#8cc22d; --chart2:#75a800; --chart3:#628d00; --chart4:#4f7300;
+    --success:#34a00f; --warning:#906600; --error:#b6143f; --info:#1d60bc;
+    --chart1: var(--p700); --chart2:#dc747e; --chart3:#0ec7de; --chart4:#918be5;
     --surface:#fff; --accent-solid-bg: var(--p700); --on-accent-solid:#fff;
     --warn-bg:#fbf3e2; --warn-text:#5c4300;
+    --hairline: rgba(17,18,15,0.08);
     --font: 'Pretendard Variable', 'Pretendard', -apple-system, "Apple SD Gothic Neo", "Segoe UI", system-ui, sans-serif;
   }
 
-  /* 다크모드 스코프 — 이 클래스를 감싼 프레임 내부에서만 팔레트가 다크 값으로 전환됨 (컬러팔레트 v1 다크 세트 그대로 사용) */
+  /* 다크모드 스코프 — 이 클래스를 감싼 프레임 내부에서만 팔레트가 다크 값으로 전환됨 (컬러팔레트 v1.2 다크 세트 그대로 사용) */
   .dark {
-    --p50:#202b16; --p100:#33421f; --p200:#3f5227; --p300:#8bb54e; --p400:#8bb54e;
-    --p500:#649000; --p600:#598000; --p700:#8bb54e; --p800:#a8cf6f; --p900:#c9e6a3;
+    --p50:#1a2d15; --p100:#274520; --p200:#305528; --p300:#66bd52; --p400:#66bd52;
+    --p500:#31980b; --p600:#2c880c; --p700:#66bd52; --p800:#85d873; --p900:#b2eca6;
     --n50:#1e211b; --n100:#1a1d17; --n200:#373934; --n300:#454741; --n400:#5f625b;
     --n500:#83857e; --n600:#aeb0a9; --n700:#d3d5ce; --n800:#eef0e9; --n900:#f5f6f1;
     --success:#79ab1a; --warning:#d59800; --error:#eb596e; --info:#5f99ed;
-    --chart1:#78ab00; --chart2:#669200; --chart3:#547a00; --chart4:#436200;
-    --surface:#242721; --accent-solid-bg:#649000; --on-accent-solid:#0f1a00;
+    --chart1:#31980b; --chart2:#c8787e; --chart3:#00a5b9; --chart4:#6b64ba;
+    --surface:#242721; --accent-solid-bg:#31980b; --on-accent-solid:#0f1a00;
     --warn-bg:#332911; --warn-text:#e3ae4c;
+    --hairline: rgba(255,255,255,0.09);
     color: var(--n900);
   }
   * { box-sizing: border-box; }
@@ -50,14 +52,16 @@
   .frame-row { display:flex; gap:28px; align-items:flex-start; flex-wrap:wrap; }
   .frame-cap { margin-top:10px; font-size:11px; color:var(--n500); text-align:center; }
 
-  /* 폰 프레임 */
-  .phone-frame { width:300px; height:648px; background:var(--surface); border:1px solid var(--n200); border-radius:32px; position:relative; flex-shrink:0; overflow:hidden; box-shadow:0 8px 24px rgba(17,18,15,0.08); }
-  .statusbar { height:26px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; font-size:11px; font-weight:600; color:var(--n800); }
-  .statusbar .pill { width:26px; height:11px; border:1px solid var(--n400); border-radius:3px; }
-  .screen { padding:14px 18px 0; height:calc(100% - 26px); overflow:hidden; position:relative; }
-  .screen.has-tabbar { height:calc(100% - 26px - 64px); }
+  /* 폰 프레임 — iOS(아이폰) 감성: 큰 코너 라운드 + Dynamic Island + iOS 상태바 아이콘 */
+  .phone-frame { width:300px; height:648px; background:var(--surface); border:1px solid var(--n200); border-radius:46px; position:relative; flex-shrink:0; overflow:hidden; box-shadow:0 8px 24px rgba(17,18,15,0.08); }
+  .statusbar { height:34px; display:flex; align-items:center; justify-content:space-between; padding:0 22px; font-size:12px; font-weight:600; color:var(--n800); font-variant-numeric:tabular-nums; position:relative; }
+  .dynamic-island { position:absolute; top:7px; left:50%; transform:translateX(-50%); width:74px; height:20px; background:#000; border-radius:20px; z-index:5; }
+  .status-icons { display:flex; align-items:center; gap:5px; color:var(--n800); }
+  .status-icons svg { display:block; }
+  .screen { padding:10px 18px 0; height:calc(100% - 34px); overflow:hidden; position:relative; }
+  .screen.has-tabbar { height:calc(100% - 34px - 64px); }
 
-  .tabbar { position:absolute; bottom:0; left:0; right:0; height:64px; border-top:1px solid var(--n200); display:flex; align-items:center; justify-content:space-around; background:var(--surface); }
+  .tabbar { position:absolute; bottom:0; left:0; right:0; height:64px; border-top:1px solid var(--hairline); display:flex; align-items:center; justify-content:space-around; background:color-mix(in srgb, var(--surface) 78%, transparent); backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%); }
   .tabbar .tab-item { display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--n500); }
   .tabbar .tab-item svg { width:22px; height:22px; }
   .tabbar .tab-item span { font-size:10px; }
@@ -65,31 +69,32 @@
 
   h4.scr-title { font-size:16px; font-weight:700; margin:2px 0 14px; }
   .lbl { font-size:11px; color:var(--n600); margin-bottom:6px; }
-  .card { background:var(--surface); border:1px solid var(--n200); border-radius:12px; padding:12px; }
-  .card-accent { background: var(--p50); border:1px solid var(--p200); border-radius:12px; padding:14px; }
-  .card-warn { background:var(--warn-bg); border:1px dashed var(--warning); border-radius:8px; padding:9px 11px; font-size:11px; color:var(--warn-text); display:flex; gap:8px; align-items:flex-start; }
+  .card { background:var(--surface); border:1px solid var(--hairline); border-radius:16px; padding:12px; box-shadow:0 1px 2px rgba(17,18,15,0.04); }
+  .card-accent { background: var(--p50); border:1px solid var(--hairline); border-radius:16px; padding:14px; }
+  .card-warn { background:var(--warn-bg); border:none; border-radius:12px; padding:9px 11px; font-size:11px; color:var(--warn-text); display:flex; gap:8px; align-items:flex-start; }
   .card-warn svg { width:14px; height:14px; flex-shrink:0; margin-top:1px; color: var(--warning); }
 
-  .btn { height:38px; border:1px solid var(--n300); border-radius:9px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; font-weight:600; color:var(--n700); background:var(--surface); }
+  .btn { height:38px; border:1px solid var(--hairline); border-radius:14px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; font-weight:600; color:var(--n700); background:var(--surface); }
   .btn svg { width:15px; height:15px; }
-  .btn-fill { background: var(--n100); border-color: var(--n100); }
-  .btn-primary { background: var(--accent-solid-bg); border-color: var(--accent-solid-bg); color:var(--on-accent-solid); }
+  .btn-fill { background: var(--n100); border-color: transparent; }
+  .btn-primary { background: var(--accent-solid-bg); border-color: transparent; color:var(--on-accent-solid); border-radius:999px; }
   .btn-outline { border-color: var(--p700); color: var(--p700); }
-  .btn-sm { height:30px; font-size:11px; }
+  .btn-sm { height:30px; font-size:11px; border-radius:999px; }
 
-  .chip { height:28px; border:1px solid var(--n300); border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--n700); padding:0 12px; }
-  .chip.selected { background: var(--accent-solid-bg); border-color: var(--accent-solid-bg); color:var(--on-accent-solid); font-weight:600; }
-  .chip.outline-selected { border-color: var(--p700); color: var(--p700); font-weight:600; }
-  .chip.dashed { border-style:dashed; }
+  .chip { height:28px; border:1px solid transparent; background:var(--n100); border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--n700); padding:0 12px; }
+  .chip.selected { background: var(--accent-solid-bg); border-color: transparent; color:var(--on-accent-solid); font-weight:600; }
+  .chip.outline-selected { background:transparent; border-color: var(--p700); color: var(--p700); font-weight:600; }
+  .chip.dashed { background:transparent; border-style:dashed; border-color:var(--n300); }
 
   .img-box { background: var(--p50); border-radius:8px; display:flex; align-items:center; justify-content:center; color: var(--p400); position:relative; }
   .img-box svg { width:40%; height:40%; max-width:28px; max-height:28px; }
   .avatar { border-radius:50%; }
 
-  .radio-row { display:flex; align-items:center; gap:8px; height:32px; border:1px solid var(--n200); border-radius:8px; padding:0 12px; font-size:11.5px; color:var(--n700); }
-  .radio-row.selected { border-color: var(--p700); background: var(--p50); color: var(--p800); font-weight:600; }
-  .radio-dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--n400); flex-shrink:0; }
-  .radio-row.selected .radio-dot { border-color: var(--p700); background: var(--accent-solid-bg); box-shadow: inset 0 0 0 2.5px var(--surface); }
+  .radio-row { display:flex; align-items:center; justify-content:space-between; gap:8px; height:40px; padding:0 2px; font-size:12px; color:var(--n700); border-bottom:1px solid var(--hairline); }
+  .radio-row:last-child { border-bottom:none; }
+  .radio-row.selected { color: var(--p700); font-weight:600; }
+  .radio-check { width:18px; height:18px; color: var(--p700); flex-shrink:0; opacity:0; }
+  .radio-row.selected .radio-check { opacity:1; }
 
   .progress-track { background: var(--n200); border-radius:999px; height:7px; overflow:hidden; }
   .progress-fill { background: var(--accent-solid-bg); height:100%; border-radius:999px; }
@@ -97,10 +102,10 @@
   .icon-badge { width:16px; height:16px; color: var(--n500); }
   .icon-badge.warn { color: var(--warning); }
 
-  .browser-frame { width:340px; background:var(--surface); border:1px solid var(--n200); border-radius:12px; overflow:hidden; flex-shrink:0; box-shadow:0 8px 24px rgba(17,18,15,0.08); }
-  .browser-bar { background: var(--n100); padding:9px 12px; display:flex; align-items:center; gap:7px; border-bottom:1px solid var(--n200); }
+  .browser-frame { width:340px; background:var(--surface); border:1px solid var(--hairline); border-radius:16px; overflow:hidden; flex-shrink:0; box-shadow:0 8px 24px rgba(17,18,15,0.08); }
+  .browser-bar { background: var(--n100); padding:9px 12px; display:flex; align-items:center; gap:7px; border-bottom:1px solid var(--hairline); }
   .browser-bar .dots span { width:7px; height:7px; border-radius:50%; background: var(--n300); display:inline-block; margin-right:4px; }
-  .browser-bar .url { flex:1; background:var(--surface); border-radius:10px; padding:4px 10px; font-size:10.5px; color:var(--n600); border:1px solid var(--n200); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .browser-bar .url { flex:1; background:var(--surface); border-radius:10px; padding:4px 10px; font-size:10.5px; color:var(--n600); border:1px solid var(--hairline); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
   .footer-note { padding:24px 48px 60px; font-size:12px; color:var(--n600); border-top:1px solid var(--n200); background:#fff; line-height:1.7; }
   .footer-note b { color: var(--p800); }
@@ -112,14 +117,16 @@
     <h1>📱 독서 기록 공유 앱 — Hi-Fi 목업 v1</h1>
     <p>화면설계서(wireframe v2-5)의 프레임 구조를 그대로 따라가면서, 디자인 시스템 v1(컬러/타이포/아이콘)을 실제로 입힌 시안입니다.</p>
     <div class="meta">
-      <span>Ver 1.1</span>
+      <span>Ver 1.3</span>
       <span>375 × 812 (iPhone 기준)</span>
       <span>High-fidelity Mockup</span>
       <span>작성일 2026-07-21</span>
     </div>
     <div class="doc-note">
       <b>이 문서와 와이어프레임의 관계</b> — 화면 구조·문구·플로우는 <code>화면설계서_wireframe_v2-5.html</code>과 동일합니다 (프레임 번호도 그대로 대응). 이 문서는 그 구조 위에 실제 컬러 팔레트·Pretendard·Lucide 아이콘만 입힌 것으로, 기능 스펙에 대한 상세 설명(각 요소 번호별 주석)은 원본 와이어프레임을 참고해주세요. 여기서는 시각적으로 어떻게 보이는지에만 집중합니다.<br>
-      <b>v1.1 변경 이력 (2026-07-21)</b> — 각 프레임 오른쪽에 다크모드 짝을 나란히 배치했습니다. 별도 파일이 아니라 같은 프레임 안에서 라이트/다크를 바로 비교할 수 있도록 CSS 변수 스코프(<code>.dark</code>)로 컬러만 전환하는 방식입니다 (마크업은 완전히 동일).
+      <b>v1.1 변경 이력 (2026-07-21)</b> — 각 프레임 오른쪽에 다크모드 짝을 나란히 배치했습니다. 별도 파일이 아니라 같은 프레임 안에서 라이트/다크를 바로 비교할 수 있도록 CSS 변수 스코프(<code>.dark</code>)로 컬러만 전환하는 방식입니다 (마크업은 완전히 동일).<br>
+      <b>v1.2 변경 이력 (2026-07-21)</b> — 프라이머리 그린이 칙칙해 보인다는 피드백에 따라 색상환(hue)을 128°→140°로 옮겨 같은 밝기에서 낼 수 있는 채도를 최대치로 끌어올렸고, 카테고리 구분용 포인트 멀티컬러(코랄·시안·라벤더, 파스텔톤)를 추가해 관심분야 칩과 장르 비율 차트에 반영했습니다.<br>
+      <b>v1.3 변경 이력 (2026-07-21)</b> — "안드로이드보다 아이폰 감성"으로 UI 톤을 조정했습니다: Dynamic Island · iOS 스타일 상태바 아이콘(신호/Wi-Fi/배터리) 추가, 폰 프레임 코너를 더 둥글게, 카드·버튼·탭바에서 딱딱한 테두리 대신 헤어라인 + 그림자로 전환, 하단 탭바에 반투명 블러 적용, 공유 범위 선택 UI를 안드로이드 라디오버튼 대신 iOS식 리스트+체크마크로 교체, 주요 CTA 버튼을 캡슐(pill) 형태로 변경했습니다.
     </div>
   </div>
 
@@ -131,7 +138,7 @@
       <div class="frame-row">
         <div>
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen" style="display:flex; flex-direction:column;">
               <div style="flex:0.9"></div>
               <div style="text-align:center; margin-bottom:10px;">
@@ -150,7 +157,7 @@
         </div>
         <div class="dark">
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen" style="display:flex; flex-direction:column;">
               <div style="flex:0.9"></div>
               <div style="text-align:center; margin-bottom:10px;">
@@ -176,7 +183,7 @@
       <div class="frame-row">
         <div>
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen">
               <div style="margin-bottom:16px;">
                 <div style="font-size:16px; font-weight:700; margin-bottom:4px;">몇 가지만 알려주세요</div>
@@ -199,9 +206,9 @@
                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
                   <div class="chip selected">소설</div>
                   <div class="chip">에세이</div>
-                  <div class="chip selected">자기계발</div>
+                  <div class="chip selected" style="background:#dc747e; border-color:#dc747e; color:#3a0a10;">자기계발</div>
                   <div class="chip">인문</div>
-                  <div class="chip selected">과학</div>
+                  <div class="chip selected" style="background:#0ec7de; border-color:#0ec7de; color:#023a42;">과학</div>
                   <div class="chip">경제·경영</div>
                 </div>
               </div>
@@ -220,7 +227,7 @@
         </div>
         <div class="dark">
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen">
               <div style="margin-bottom:16px;">
                 <div style="font-size:16px; font-weight:700; margin-bottom:4px;">몇 가지만 알려주세요</div>
@@ -243,9 +250,9 @@
                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
                   <div class="chip selected">소설</div>
                   <div class="chip">에세이</div>
-                  <div class="chip selected">자기계발</div>
+                  <div class="chip selected" style="background:#c8787e; border-color:#c8787e; color:#2e0f13;">자기계발</div>
                   <div class="chip">인문</div>
-                  <div class="chip selected">과학</div>
+                  <div class="chip selected" style="background:#00a5b9; border-color:#00a5b9; color:#001f24;">과학</div>
                   <div class="chip">경제·경영</div>
                 </div>
               </div>
@@ -276,7 +283,7 @@
       <div class="frame-row">
         <div>
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen has-tabbar">
               <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
                 <div>
@@ -335,7 +342,7 @@
         </div>
         <div class="dark">
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen has-tabbar">
               <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
                 <div>
@@ -406,7 +413,7 @@
       <div class="frame-row">
         <div>
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen has-tabbar">
               <h4 class="scr-title">서재</h4>
               <div style="display:flex; gap:6px; margin-bottom:12px;">
@@ -450,7 +457,7 @@
         </div>
         <div class="dark">
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen has-tabbar">
               <h4 class="scr-title">서재</h4>
               <div style="display:flex; gap:6px; margin-bottom:12px;">
@@ -496,7 +503,7 @@
         <!-- ============ Frame 03.1 서재 상세 ============ -->
         <div>
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen">
               <div style="display:flex; gap:12px; margin-bottom:16px;">
                 <div class="img-box" style="width:66px; height:90px; flex-shrink:0;">{{icon:book-open}}</div>
@@ -526,7 +533,7 @@
         </div>
         <div class="dark">
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen">
               <div style="display:flex; gap:12px; margin-bottom:16px;">
                 <div class="img-box" style="width:66px; height:90px; flex-shrink:0;">{{icon:book-open}}</div>
@@ -568,7 +575,7 @@
       <div class="frame-row">
         <div>
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen has-tabbar">
               <h4 class="scr-title">공유</h4>
               <div class="card" style="display:flex; gap:8px; align-items:center; margin-bottom:12px;">
@@ -578,9 +585,9 @@
               <div style="margin-bottom:12px;">
                 <div class="lbl">공유 범위</div>
                 <div style="display:flex; flex-direction:column; gap:6px;">
-                  <div class="radio-row"><div class="radio-dot"></div>전체 공개</div>
-                  <div class="radio-row selected"><div class="radio-dot"></div>그룹 선택 — 독서모임(8) · 가족(4)</div>
-                  <div class="radio-row"><div class="radio-dot"></div>인원 직접 선택</div>
+                  <div class="radio-row"><span>전체 공개</span><svg class="radio-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+                  <div class="radio-row selected"><span>그룹 선택 — 독서모임(8) · 가족(4)</span><svg class="radio-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+                  <div class="radio-row"><span>인원 직접 선택</span><svg class="radio-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
                 </div>
               </div>
               <div style="margin-bottom:12px;">
@@ -607,7 +614,7 @@
         </div>
         <div class="dark">
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen has-tabbar">
               <h4 class="scr-title">공유</h4>
               <div class="card" style="display:flex; gap:8px; align-items:center; margin-bottom:12px;">
@@ -617,9 +624,9 @@
               <div style="margin-bottom:12px;">
                 <div class="lbl">공유 범위</div>
                 <div style="display:flex; flex-direction:column; gap:6px;">
-                  <div class="radio-row"><div class="radio-dot"></div>전체 공개</div>
-                  <div class="radio-row selected"><div class="radio-dot"></div>그룹 선택 — 독서모임(8) · 가족(4)</div>
-                  <div class="radio-row"><div class="radio-dot"></div>인원 직접 선택</div>
+                  <div class="radio-row"><span>전체 공개</span><svg class="radio-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+                  <div class="radio-row selected"><span>그룹 선택 — 독서모임(8) · 가족(4)</span><svg class="radio-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+                  <div class="radio-row"><span>인원 직접 선택</span><svg class="radio-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
                 </div>
               </div>
               <div style="margin-bottom:12px;">
@@ -648,7 +655,7 @@
         <!-- ============ Frame 04.1 그룹관리/이력 ============ -->
         <div>
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen">
               <div style="margin-bottom:18px;">
                 <div style="font-size:13px; font-weight:700; margin-bottom:10px;">내 그룹</div>
@@ -678,7 +685,7 @@
         </div>
         <div class="dark">
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen">
               <div style="margin-bottom:18px;">
                 <div style="font-size:13px; font-weight:700; margin-bottom:10px;">내 그룹</div>
@@ -720,7 +727,7 @@
       <div class="frame-row">
         <div>
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen has-tabbar" style="padding-top:20px;">
               <div style="text-align:center; margin-bottom:16px;">
                 <div class="img-box avatar" style="width:60px; height:60px; margin:0 auto 8px;">{{icon:user}}</div>
@@ -761,7 +768,7 @@
         </div>
         <div class="dark">
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen has-tabbar" style="padding-top:20px;">
               <div style="text-align:center; margin-bottom:16px;">
                 <div class="img-box avatar" style="width:60px; height:60px; margin:0 auto 8px;">{{icon:user}}</div>
@@ -804,7 +811,7 @@
         <!-- ============ Frame 05.1 대시보드 Recap ============ -->
         <div>
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen">
               <div style="display:flex; gap:6px; margin-bottom:12px;">
                 <div class="chip" style="flex:1;">월간</div>
@@ -855,7 +862,7 @@
         </div>
         <div class="dark">
           <div class="phone-frame">
-            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
             <div class="screen">
               <div style="display:flex; gap:6px; margin-bottom:12px;">
                 <div class="chip" style="flex:1;">월간</div>
