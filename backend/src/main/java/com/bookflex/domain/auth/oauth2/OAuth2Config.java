@@ -21,8 +21,8 @@ public class OAuth2Config {
     @Bean
     public RestTemplate oauth2RestTemplate(RestTemplateBuilder builder) {
         return builder
-                .connectTimeout(TIMEOUT)
-                .readTimeout(TIMEOUT)
+                .setConnectTimeout(TIMEOUT)
+                .setReadTimeout(TIMEOUT)
                 .build();
     }
 }
