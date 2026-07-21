@@ -12,7 +12,22 @@
     --n500:#6b6d66; --n600:#52534d; --n700:#3c3e39; --n800:#262723; --n900:#11120f;
     --success:#699700; --warning:#906600; --error:#b6143f; --info:#1d60bc;
     --chart1:#8cc22d; --chart2:#75a800; --chart3:#628d00; --chart4:#4f7300;
+    --surface:#fff; --accent-solid-bg: var(--p700); --on-accent-solid:#fff;
+    --warn-bg:#fbf3e2; --warn-text:#5c4300;
     --font: 'Pretendard Variable', 'Pretendard', -apple-system, "Apple SD Gothic Neo", "Segoe UI", system-ui, sans-serif;
+  }
+
+  /* 다크모드 스코프 — 이 클래스를 감싼 프레임 내부에서만 팔레트가 다크 값으로 전환됨 (컬러팔레트 v1 다크 세트 그대로 사용) */
+  .dark {
+    --p50:#202b16; --p100:#33421f; --p200:#3f5227; --p300:#8bb54e; --p400:#8bb54e;
+    --p500:#649000; --p600:#598000; --p700:#8bb54e; --p800:#a8cf6f; --p900:#c9e6a3;
+    --n50:#1e211b; --n100:#1a1d17; --n200:#373934; --n300:#454741; --n400:#5f625b;
+    --n500:#83857e; --n600:#aeb0a9; --n700:#d3d5ce; --n800:#eef0e9; --n900:#f5f6f1;
+    --success:#79ab1a; --warning:#d59800; --error:#eb596e; --info:#5f99ed;
+    --chart1:#78ab00; --chart2:#669200; --chart3:#547a00; --chart4:#436200;
+    --surface:#242721; --accent-solid-bg:#649000; --on-accent-solid:#0f1a00;
+    --warn-bg:#332911; --warn-text:#e3ae4c;
+    color: var(--n900);
   }
   * { box-sizing: border-box; }
   body { margin:0; padding: 0 0 80px; background: var(--n100); font-family: var(--font); color: var(--n900); }
@@ -36,13 +51,13 @@
   .frame-cap { margin-top:10px; font-size:11px; color:var(--n500); text-align:center; }
 
   /* 폰 프레임 */
-  .phone-frame { width:300px; height:648px; background:#fff; border:1px solid var(--n200); border-radius:32px; position:relative; flex-shrink:0; overflow:hidden; box-shadow:0 8px 24px rgba(17,18,15,0.08); }
+  .phone-frame { width:300px; height:648px; background:var(--surface); border:1px solid var(--n200); border-radius:32px; position:relative; flex-shrink:0; overflow:hidden; box-shadow:0 8px 24px rgba(17,18,15,0.08); }
   .statusbar { height:26px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; font-size:11px; font-weight:600; color:var(--n800); }
   .statusbar .pill { width:26px; height:11px; border:1px solid var(--n400); border-radius:3px; }
   .screen { padding:14px 18px 0; height:calc(100% - 26px); overflow:hidden; position:relative; }
   .screen.has-tabbar { height:calc(100% - 26px - 64px); }
 
-  .tabbar { position:absolute; bottom:0; left:0; right:0; height:64px; border-top:1px solid var(--n200); display:flex; align-items:center; justify-content:space-around; background:#fff; }
+  .tabbar { position:absolute; bottom:0; left:0; right:0; height:64px; border-top:1px solid var(--n200); display:flex; align-items:center; justify-content:space-around; background:var(--surface); }
   .tabbar .tab-item { display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--n500); }
   .tabbar .tab-item svg { width:22px; height:22px; }
   .tabbar .tab-item span { font-size:10px; }
@@ -50,20 +65,20 @@
 
   h4.scr-title { font-size:16px; font-weight:700; margin:2px 0 14px; }
   .lbl { font-size:11px; color:var(--n600); margin-bottom:6px; }
-  .card { background:#fff; border:1px solid var(--n200); border-radius:12px; padding:12px; }
+  .card { background:var(--surface); border:1px solid var(--n200); border-radius:12px; padding:12px; }
   .card-accent { background: var(--p50); border:1px solid var(--p200); border-radius:12px; padding:14px; }
-  .card-warn { background:#fbf3e2; border:1px dashed var(--warning); border-radius:8px; padding:9px 11px; font-size:11px; color:#5c4300; display:flex; gap:8px; align-items:flex-start; }
+  .card-warn { background:var(--warn-bg); border:1px dashed var(--warning); border-radius:8px; padding:9px 11px; font-size:11px; color:var(--warn-text); display:flex; gap:8px; align-items:flex-start; }
   .card-warn svg { width:14px; height:14px; flex-shrink:0; margin-top:1px; color: var(--warning); }
 
-  .btn { height:38px; border:1px solid var(--n300); border-radius:9px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; font-weight:600; color:var(--n700); background:#fff; }
+  .btn { height:38px; border:1px solid var(--n300); border-radius:9px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; font-weight:600; color:var(--n700); background:var(--surface); }
   .btn svg { width:15px; height:15px; }
   .btn-fill { background: var(--n100); border-color: var(--n100); }
-  .btn-primary { background: var(--p700); border-color: var(--p700); color:#fff; }
+  .btn-primary { background: var(--accent-solid-bg); border-color: var(--accent-solid-bg); color:var(--on-accent-solid); }
   .btn-outline { border-color: var(--p700); color: var(--p700); }
   .btn-sm { height:30px; font-size:11px; }
 
   .chip { height:28px; border:1px solid var(--n300); border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--n700); padding:0 12px; }
-  .chip.selected { background: var(--p700); border-color: var(--p700); color:#fff; font-weight:600; }
+  .chip.selected { background: var(--accent-solid-bg); border-color: var(--accent-solid-bg); color:var(--on-accent-solid); font-weight:600; }
   .chip.outline-selected { border-color: var(--p700); color: var(--p700); font-weight:600; }
   .chip.dashed { border-style:dashed; }
 
@@ -74,18 +89,18 @@
   .radio-row { display:flex; align-items:center; gap:8px; height:32px; border:1px solid var(--n200); border-radius:8px; padding:0 12px; font-size:11.5px; color:var(--n700); }
   .radio-row.selected { border-color: var(--p700); background: var(--p50); color: var(--p800); font-weight:600; }
   .radio-dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--n400); flex-shrink:0; }
-  .radio-row.selected .radio-dot { border-color: var(--p700); background: var(--p700); box-shadow: inset 0 0 0 2.5px #fff; }
+  .radio-row.selected .radio-dot { border-color: var(--p700); background: var(--accent-solid-bg); box-shadow: inset 0 0 0 2.5px var(--surface); }
 
   .progress-track { background: var(--n200); border-radius:999px; height:7px; overflow:hidden; }
-  .progress-fill { background: var(--p700); height:100%; border-radius:999px; }
+  .progress-fill { background: var(--accent-solid-bg); height:100%; border-radius:999px; }
 
   .icon-badge { width:16px; height:16px; color: var(--n500); }
   .icon-badge.warn { color: var(--warning); }
 
-  .browser-frame { width:340px; background:#fff; border:1px solid var(--n200); border-radius:12px; overflow:hidden; flex-shrink:0; box-shadow:0 8px 24px rgba(17,18,15,0.08); }
+  .browser-frame { width:340px; background:var(--surface); border:1px solid var(--n200); border-radius:12px; overflow:hidden; flex-shrink:0; box-shadow:0 8px 24px rgba(17,18,15,0.08); }
   .browser-bar { background: var(--n100); padding:9px 12px; display:flex; align-items:center; gap:7px; border-bottom:1px solid var(--n200); }
   .browser-bar .dots span { width:7px; height:7px; border-radius:50%; background: var(--n300); display:inline-block; margin-right:4px; }
-  .browser-bar .url { flex:1; background:#fff; border-radius:10px; padding:4px 10px; font-size:10.5px; color:var(--n600); border:1px solid var(--n200); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .browser-bar .url { flex:1; background:var(--surface); border-radius:10px; padding:4px 10px; font-size:10.5px; color:var(--n600); border:1px solid var(--n200); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
   .footer-note { padding:24px 48px 60px; font-size:12px; color:var(--n600); border-top:1px solid var(--n200); background:#fff; line-height:1.7; }
   .footer-note b { color: var(--p800); }
@@ -97,13 +112,14 @@
     <h1>📱 독서 기록 공유 앱 — Hi-Fi 목업 v1</h1>
     <p>화면설계서(wireframe v2-5)의 프레임 구조를 그대로 따라가면서, 디자인 시스템 v1(컬러/타이포/아이콘)을 실제로 입힌 시안입니다.</p>
     <div class="meta">
-      <span>Ver 1.0</span>
+      <span>Ver 1.1</span>
       <span>375 × 812 (iPhone 기준)</span>
       <span>High-fidelity Mockup</span>
       <span>작성일 2026-07-21</span>
     </div>
     <div class="doc-note">
-      <b>이 문서와 와이어프레임의 관계</b> — 화면 구조·문구·플로우는 <code>화면설계서_wireframe_v2-5.html</code>과 동일합니다 (프레임 번호도 그대로 대응). 이 문서는 그 구조 위에 실제 컬러 팔레트·Pretendard·Lucide 아이콘만 입힌 것으로, 기능 스펙에 대한 상세 설명(각 요소 번호별 주석)은 원본 와이어프레임을 참고해주세요. 여기서는 시각적으로 어떻게 보이는지에만 집중합니다.
+      <b>이 문서와 와이어프레임의 관계</b> — 화면 구조·문구·플로우는 <code>화면설계서_wireframe_v2-5.html</code>과 동일합니다 (프레임 번호도 그대로 대응). 이 문서는 그 구조 위에 실제 컬러 팔레트·Pretendard·Lucide 아이콘만 입힌 것으로, 기능 스펙에 대한 상세 설명(각 요소 번호별 주석)은 원본 와이어프레임을 참고해주세요. 여기서는 시각적으로 어떻게 보이는지에만 집중합니다.<br>
+      <b>v1.1 변경 이력 (2026-07-21)</b> — 각 프레임 오른쪽에 다크모드 짝을 나란히 배치했습니다. 별도 파일이 아니라 같은 프레임 안에서 라이트/다크를 바로 비교할 수 있도록 CSS 변수 스코프(<code>.dark</code>)로 컬러만 전환하는 방식입니다 (마크업은 완전히 동일).
     </div>
   </div>
 
@@ -131,6 +147,25 @@
             </div>
           </div>
           <div class="frame-cap">↳ 와이어프레임 Frame 01 대응</div>
+        </div>
+        <div class="dark">
+          <div class="phone-frame">
+            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="screen" style="display:flex; flex-direction:column;">
+              <div style="flex:0.9"></div>
+              <div style="text-align:center; margin-bottom:10px;">
+                <div class="img-box" style="width:64px; height:64px; border-radius:18px; margin:0 auto 14px;">{{icon:book-open}}</div>
+                <div style="font-size:18px; font-weight:800;">독서 자랑</div>
+                <div style="font-size:11.5px; color:var(--n600); margin-top:5px;">오늘 읽은 한 페이지를 자랑해보세요</div>
+              </div>
+              <div style="flex:0.9"></div>
+              <div class="btn btn-fill" style="margin-bottom:10px;">네이버로 시작하기</div>
+              <div class="btn btn-fill" style="margin-bottom:10px;">카카오로 시작하기</div>
+              <div class="btn" style="margin-bottom:22px;">Google로 시작하기</div>
+              <div style="text-align:center; font-size:11px; color:var(--n500); text-decoration:underline;">비회원으로 둘러보기</div>
+            </div>
+          </div>
+          <div class="frame-cap">↳ 와이어프레임 Frame 01 대응 · 다크모드</div>
         </div>
       </div>
     </div>
@@ -183,6 +218,50 @@
           </div>
           <div class="frame-cap">↳ 와이어프레임 Frame 01.1 대응</div>
         </div>
+        <div class="dark">
+          <div class="phone-frame">
+            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="screen">
+              <div style="margin-bottom:16px;">
+                <div style="font-size:16px; font-weight:700; margin-bottom:4px;">몇 가지만 알려주세요</div>
+                <div style="font-size:11px; color:var(--n600);">닉네임 외 모든 정보는 선택이에요</div>
+              </div>
+              <div style="margin-bottom:14px;">
+                <div class="lbl">닉네임 (필수)</div>
+                <div style="height:36px; border-radius:8px; background:var(--n50); border:1px solid var(--n300);"></div>
+              </div>
+              <div style="margin-bottom:14px;">
+                <div class="lbl">성별</div>
+                <div style="display:flex; gap:6px;">
+                  <div class="chip" style="flex:1;">여성</div>
+                  <div class="chip selected" style="flex:1;">남성</div>
+                  <div class="chip" style="flex:1;">선택 안 함</div>
+                </div>
+              </div>
+              <div style="margin-bottom:14px;">
+                <div class="lbl">관심 분야 <span style="color:var(--n400);">· 중복선택</span></div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                  <div class="chip selected">소설</div>
+                  <div class="chip">에세이</div>
+                  <div class="chip selected">자기계발</div>
+                  <div class="chip">인문</div>
+                  <div class="chip selected">과학</div>
+                  <div class="chip">경제·경영</div>
+                </div>
+              </div>
+              <div style="margin-bottom:16px;">
+                <div class="lbl">속한 독서모임이 있나요? <span style="color:var(--n400);">· 선택</span></div>
+                <div class="chip dashed" style="justify-content:space-between; padding:0 10px 0 12px;">
+                  <span style="color:var(--n400);">모임 이름으로 검색</span>
+                  <span style="color:var(--p700); font-weight:700;">＋ 추가</span>
+                </div>
+                <div style="margin-top:7px;"><span class="chip outline-selected">책벙개 ✕</span></div>
+              </div>
+              <div class="btn btn-primary">시작하기</div>
+            </div>
+          </div>
+          <div class="frame-cap">↳ 와이어프레임 Frame 01.1 대응 · 다크모드</div>
+        </div>
       </div>
     </div>
 
@@ -210,10 +289,10 @@
               <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
                 <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">월</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto;"></div></div>
                 <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">화</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto;"></div></div>
-                <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">수</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto; background:var(--p700); color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center;">18</div></div>
+                <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">수</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto; background:var(--accent-solid-bg); color:var(--on-accent-solid); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center;">18</div></div>
                 <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">목</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto;"></div></div>
                 <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">금</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto;"></div></div>
-                <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">토</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto; background:#fbf3e2;"></div></div>
+                <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">토</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto; background:var(--warn-bg);"></div></div>
                 <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">일</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto;"></div></div>
               </div>
 
@@ -253,6 +332,65 @@
             </div>
           </div>
           <div class="frame-cap">↳ 와이어프레임 Frame 02 대응</div>
+        </div>
+        <div class="dark">
+          <div class="phone-frame">
+            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="screen has-tabbar">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+                <div>
+                  <div style="font-size:17px; font-weight:800;">이번달 독서 일정</div>
+                  <div style="font-size:11px; color:var(--n600); margin-top:4px;">2026년 7월 · 지금까지 3권 완독</div>
+                </div>
+                <div style="color:var(--n600);">{{icon:bell}}</div>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+                <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">월</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto;"></div></div>
+                <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">화</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto;"></div></div>
+                <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">수</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto; background:var(--accent-solid-bg); color:var(--on-accent-solid); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center;">18</div></div>
+                <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">목</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto;"></div></div>
+                <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">금</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto;"></div></div>
+                <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">토</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto; background:var(--warn-bg);"></div></div>
+                <div style="text-align:center;"><div style="font-size:10px; color:var(--n500); margin-bottom:6px;">일</div><div style="width:24px; height:24px; border-radius:50%; margin:0 auto;"></div></div>
+              </div>
+
+              <div class="card-accent" style="margin-bottom:12px;">
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                  <div class="img-box" style="width:42px; height:58px; flex-shrink:0;">{{icon:book-open}}</div>
+                  <div style="flex:1;">
+                    <div style="font-size:13px; font-weight:700; line-height:1.4;">오늘은 『아몬드』를<br>마저 읽을 차례예요!</div>
+                    <div style="font-size:10.5px; color:var(--n600); margin-top:5px;">어제 62p까지 읽었어요 · 진행률 62%</div>
+                  </div>
+                </div>
+                <div class="progress-track" style="margin-bottom:10px;"><div class="progress-fill" style="width:62%;"></div></div>
+                <div class="btn btn-outline btn-sm">이어서 읽기</div>
+              </div>
+
+              <div class="card" style="margin-bottom:12px;">
+                <div style="display:flex; align-items:center; gap:7px; margin-bottom:6px; color:var(--warning);">
+                  {{icon:calendar-days}}
+                  <div style="font-size:12.5px; font-weight:700; color:var(--n900);">이번주 독서모임 일정이 있어요!</div>
+                </div>
+                <div style="font-size:10.5px; color:var(--n600);">7월 20일(토) 14:00 · 독서모임 "책벙개"</div>
+              </div>
+
+              <div class="btn btn-outline" style="margin-bottom:12px;">{{icon:plus}} 새 책 등록하기</div>
+
+              <div style="font-size:11.5px; color:var(--n600); margin-bottom:8px;">읽고 있는 책 · 2</div>
+              <div style="display:flex; gap:10px;">
+                <div class="img-box" style="width:54px; height:74px;">{{icon:book-open}}</div>
+                <div class="img-box" style="width:54px; height:74px;">{{icon:book-open}}</div>
+              </div>
+            </div>
+            <div class="tabbar">
+              <div class="tab-item active">{{icon:calendar-days}}<span>일정</span></div>
+              <div class="tab-item">{{icon:library}}<span>서재</span></div>
+              <div class="tab-item">{{icon:share-2}}<span>공유</span></div>
+              <div class="tab-item">{{icon:user}}<span>프로필</span></div>
+            </div>
+          </div>
+          <div class="frame-cap">↳ 와이어프레임 Frame 02 대응 · 다크모드</div>
         </div>
       </div>
     </div>
@@ -310,6 +448,50 @@
           </div>
           <div class="frame-cap">↳ 와이어프레임 Frame 03 대응</div>
         </div>
+        <div class="dark">
+          <div class="phone-frame">
+            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="screen has-tabbar">
+              <h4 class="scr-title">서재</h4>
+              <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <div class="chip selected" style="flex:1;">읽고 있는 책</div>
+                <div class="chip" style="flex:1;">읽은 책</div>
+              </div>
+              <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <div style="flex:1; height:32px; border-radius:8px; background:var(--n50); border:1px solid var(--n200); display:flex; align-items:center; padding:0 10px; gap:6px; color:var(--n400);">{{icon:search}}<span style="font-size:10.5px;">책 제목으로 검색</span></div>
+                <div class="chip" style="flex-shrink:0;">최근순 ▾</div>
+              </div>
+              <div class="card" style="display:flex; gap:10px; margin-bottom:8px;">
+                <div class="img-box" style="width:42px; height:58px; flex-shrink:0;">{{icon:book-open}}</div>
+                <div style="flex:1;">
+                  <div style="font-size:12.5px; font-weight:700;">아몬드 (손원평)</div>
+                  <div style="font-size:10px; color:var(--n600); margin:3px 0;">2026.06.20 ~ 2026.06.28 (9일)</div>
+                  <div style="display:flex; gap:10px; font-size:9.5px; color:var(--n500);">
+                    <span style="display:flex; align-items:center; gap:3px;">{{icon:camera}} 사진 3장</span>
+                    <span style="display:flex; align-items:center; gap:3px;">{{icon:pen-line}} 소감 있음</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card" style="display:flex; gap:10px;">
+                <div class="img-box" style="width:42px; height:58px; flex-shrink:0;">{{icon:book-open}}</div>
+                <div style="flex:1;">
+                  <div style="font-size:12.5px; font-weight:700;">채식주의자 (한강)</div>
+                  <div style="font-size:10px; color:var(--n600); margin:3px 0;">2026.06.25 ~ 진행중</div>
+                  <div style="display:flex; gap:10px; font-size:9.5px; color:var(--n400);">
+                    <span>사진 없음</span><span>소감 없음</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tabbar">
+              <div class="tab-item">{{icon:calendar-days}}<span>일정</span></div>
+              <div class="tab-item active">{{icon:library}}<span>서재</span></div>
+              <div class="tab-item">{{icon:share-2}}<span>공유</span></div>
+              <div class="tab-item">{{icon:user}}<span>프로필</span></div>
+            </div>
+          </div>
+          <div class="frame-cap">↳ 와이어프레임 Frame 03 대응 · 다크모드</div>
+        </div>
 
         <!-- ============ Frame 03.1 서재 상세 ============ -->
         <div>
@@ -341,6 +523,36 @@
             </div>
           </div>
           <div class="frame-cap">↳ 와이어프레임 Frame 03.1 대응</div>
+        </div>
+        <div class="dark">
+          <div class="phone-frame">
+            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="screen">
+              <div style="display:flex; gap:12px; margin-bottom:16px;">
+                <div class="img-box" style="width:66px; height:90px; flex-shrink:0;">{{icon:book-open}}</div>
+                <div style="flex:1; padding-top:2px;">
+                  <div style="font-size:14px; font-weight:700;">아몬드</div>
+                  <div style="font-size:11px; color:var(--n600); margin:3px 0 8px;">손원평</div>
+                  <div style="font-size:10px; color:var(--n600);">읽은 기간<br><b style="color:var(--n900); font-size:11px;">2026.06.20 ~ 2026.06.28 (9일)</b></div>
+                </div>
+              </div>
+              <div style="margin-bottom:14px;">
+                <div class="lbl" style="display:flex; align-items:center; gap:5px;">{{icon:camera}} 장소 사진</div>
+                <div style="display:flex; gap:7px;">
+                  <div style="text-align:center;"><div class="img-box" style="width:66px; height:66px;">{{icon:image}}</div><div style="font-size:9px; color:var(--n500); margin-top:3px;">홍대 카페</div></div>
+                  <div style="text-align:center;"><div class="img-box" style="width:66px; height:66px;">{{icon:image}}</div><div style="font-size:9px; color:var(--n500); margin-top:3px;">출근길</div></div>
+                  <div style="text-align:center;"><div class="img-box" style="width:66px; height:66px;">{{icon:image}}</div><div style="font-size:9px; color:var(--n500); margin-top:3px;">자기 전</div></div>
+                </div>
+              </div>
+              <div style="margin-bottom:16px;">
+                <div class="lbl" style="display:flex; align-items:center; gap:5px;">{{icon:pen-line}} 소감</div>
+                <div class="card" style="font-size:10.5px; color:var(--n700); line-height:1.6;">"인상 깊었던 부분은..."</div>
+              </div>
+              <div class="btn btn-outline" style="margin-bottom:10px;">{{icon:check-circle}} 다 읽었어요 (완독 처리)</div>
+              <div class="btn btn-primary">{{icon:share-2}} 이 책 공유하기</div>
+            </div>
+          </div>
+          <div class="frame-cap">↳ 와이어프레임 Frame 03.1 대응 · 다크모드</div>
         </div>
       </div>
     </div>
@@ -393,6 +605,45 @@
           </div>
           <div class="frame-cap">↳ 와이어프레임 Frame 04 대응</div>
         </div>
+        <div class="dark">
+          <div class="phone-frame">
+            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="screen has-tabbar">
+              <h4 class="scr-title">공유</h4>
+              <div class="card" style="display:flex; gap:8px; align-items:center; margin-bottom:12px;">
+                <div class="img-box" style="width:32px; height:44px; flex-shrink:0;">{{icon:book-open}}</div>
+                <div style="font-size:12px; font-weight:700;">공유할 기록: 아몬드</div>
+              </div>
+              <div style="margin-bottom:12px;">
+                <div class="lbl">공유 범위</div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <div class="radio-row"><div class="radio-dot"></div>전체 공개</div>
+                  <div class="radio-row selected"><div class="radio-dot"></div>그룹 선택 — 독서모임(8) · 가족(4)</div>
+                  <div class="radio-row"><div class="radio-dot"></div>인원 직접 선택</div>
+                </div>
+              </div>
+              <div style="margin-bottom:12px;">
+                <div class="lbl">공유 카드 미리보기</div>
+                <div class="card-accent" style="text-align:center;">
+                  <div class="img-box" style="width:42px; height:58px; margin:0 auto 6px;">{{icon:book-open}}</div>
+                  <div style="font-size:10.5px;">"인상 깊었던..." · 9일간 완독 📖</div>
+                </div>
+              </div>
+              <div class="card-warn" style="margin-bottom:12px;">{{icon:bell}}이 링크를 아는 사람은 누구나 볼 수 있어요</div>
+              <div style="display:flex; gap:6px;">
+                <div class="btn btn-primary" style="flex:1;">{{icon:share-2}} 앱 내 공유</div>
+                <div class="btn" style="flex:1;">{{icon:message-circle}} SNS 공유</div>
+              </div>
+            </div>
+            <div class="tabbar">
+              <div class="tab-item">{{icon:calendar-days}}<span>일정</span></div>
+              <div class="tab-item">{{icon:library}}<span>서재</span></div>
+              <div class="tab-item active">{{icon:share-2}}<span>공유</span></div>
+              <div class="tab-item">{{icon:user}}<span>프로필</span></div>
+            </div>
+          </div>
+          <div class="frame-cap">↳ 와이어프레임 Frame 04 대응 · 다크모드</div>
+        </div>
 
         <!-- ============ Frame 04.1 그룹관리/이력 ============ -->
         <div>
@@ -424,6 +675,36 @@
             </div>
           </div>
           <div class="frame-cap">↳ 와이어프레임 Frame 04.1 대응</div>
+        </div>
+        <div class="dark">
+          <div class="phone-frame">
+            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="screen">
+              <div style="margin-bottom:18px;">
+                <div style="font-size:13px; font-weight:700; margin-bottom:10px;">내 그룹</div>
+                <div class="card" style="display:flex; gap:9px; align-items:center; margin-bottom:8px;">
+                  <div style="width:28px; height:28px; border-radius:50%; background:var(--p50); display:flex; align-items:center; justify-content:center; color:var(--p700);">{{icon:users}}</div>
+                  <div style="flex:1; font-size:11.5px;">독서모임 <span style="color:var(--n500);">· 8명</span></div>
+                  <div class="chip btn-sm" style="height:26px;">관리</div>
+                </div>
+                <div class="card" style="display:flex; gap:9px; align-items:center; margin-bottom:8px;">
+                  <div style="width:28px; height:28px; border-radius:50%; background:var(--p50); display:flex; align-items:center; justify-content:center; color:var(--p700);">{{icon:users}}</div>
+                  <div style="flex:1; font-size:11.5px;">가족 <span style="color:var(--n500);">· 4명</span></div>
+                  <div class="chip btn-sm" style="height:26px;">관리</div>
+                </div>
+                <div class="btn btn-outline btn-sm">{{icon:plus}} 새 그룹 만들기</div>
+              </div>
+              <div>
+                <div style="font-size:13px; font-weight:700; margin-bottom:10px;">공유 이력</div>
+                <div style="font-size:11px; line-height:2.3; color:var(--n700);">
+                  <div style="display:flex; align-items:center; gap:6px;">{{icon:book-open}} 아몬드 → 독서모임(8명) · 07/09</div>
+                  <div style="display:flex; align-items:center; gap:6px;">{{icon:bar-chart}} 3분기 리캡 → 전체공개 · 07/05</div>
+                  <div style="display:flex; align-items:center; gap:6px;">{{icon:book-open}} 채식주의자 → 인스타그램 · 07/01</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="frame-cap">↳ 와이어프레임 Frame 04.1 대응 · 다크모드</div>
         </div>
       </div>
     </div>
@@ -478,6 +759,47 @@
           </div>
           <div class="frame-cap">↳ 와이어프레임 Frame 05 대응</div>
         </div>
+        <div class="dark">
+          <div class="phone-frame">
+            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="screen has-tabbar" style="padding-top:20px;">
+              <div style="text-align:center; margin-bottom:16px;">
+                <div class="img-box avatar" style="width:60px; height:60px; margin:0 auto 8px;">{{icon:user}}</div>
+                <div style="font-size:14px; font-weight:700;">익명의 독서가</div>
+                <div style="font-size:10.5px; color:var(--n500); margin-top:3px;">한줄소개 (선택)</div>
+              </div>
+              <div class="btn" style="margin-bottom:16px;">프로필 편집</div>
+              <div style="display:flex; gap:8px; margin-bottom:16px;">
+                <div class="card" style="flex:1; text-align:center;">
+                  <div style="font-size:10px; color:var(--n500);">읽은 책</div>
+                  <div style="font-size:17px; font-weight:800; color:var(--p700);">12권</div>
+                </div>
+                <div class="card" style="flex:1; text-align:center;">
+                  <div style="font-size:10px; color:var(--n500);">공유한 기록</div>
+                  <div style="font-size:17px; font-weight:800; color:var(--p700);">5건</div>
+                </div>
+              </div>
+              <div class="card-accent" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="color:var(--p700);">{{icon:bar-chart}}</div>
+                  <div>
+                    <div style="font-size:12px; font-weight:700;">독서 대시보드</div>
+                    <div style="font-size:10px; color:var(--n600);">이번 분기 리캡 보기</div>
+                  </div>
+                </div>
+                <div style="color:var(--p700);">{{icon:chevron-right}}</div>
+              </div>
+              <div class="btn">{{icon:log-out}} 로그아웃</div>
+            </div>
+            <div class="tabbar">
+              <div class="tab-item">{{icon:calendar-days}}<span>일정</span></div>
+              <div class="tab-item">{{icon:library}}<span>서재</span></div>
+              <div class="tab-item">{{icon:share-2}}<span>공유</span></div>
+              <div class="tab-item active">{{icon:user}}<span>프로필</span></div>
+            </div>
+          </div>
+          <div class="frame-cap">↳ 와이어프레임 Frame 05 대응 · 다크모드</div>
+        </div>
 
         <!-- ============ Frame 05.1 대시보드 Recap ============ -->
         <div>
@@ -531,6 +853,57 @@
           </div>
           <div class="frame-cap">↳ 와이어프레임 Frame 05.1 대응</div>
         </div>
+        <div class="dark">
+          <div class="phone-frame">
+            <div class="statusbar"><span>9:41</span><div class="pill"></div></div>
+            <div class="screen">
+              <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <div class="chip" style="flex:1;">월간</div>
+                <div class="chip selected" style="flex:1;">분기별</div>
+                <div class="chip" style="flex:1;">연간</div>
+              </div>
+              <div style="display:flex; gap:8px; margin-bottom:14px;">
+                <div class="card" style="flex:1; text-align:center;">
+                  <div style="font-size:10px; color:var(--n500); margin-bottom:4px;">완독 수</div>
+                  <div style="font-size:18px; font-weight:800;">5권</div>
+                </div>
+                <div class="card" style="flex:1; text-align:center;">
+                  <div style="font-size:10px; color:var(--n500); margin-bottom:4px;">읽은 페이지</div>
+                  <div style="font-size:18px; font-weight:800;">1,480p</div>
+                </div>
+              </div>
+              <div style="margin-bottom:14px;">
+                <div class="lbl">장르 비율</div>
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <div style="width:58px; height:58px; border-radius:50%; flex-shrink:0; background:conic-gradient(var(--chart1) 0% 40%, var(--chart2) 40% 70%, var(--chart3) 70% 90%, var(--n200) 90% 100%);"></div>
+                  <div style="flex:1; font-size:10.5px; line-height:2; color:var(--n700);">
+                    <div><span style="display:inline-block; width:8px; height:8px; border-radius:2px; background:var(--chart1); margin-right:6px;"></span>소설 40%</div>
+                    <div><span style="display:inline-block; width:8px; height:8px; border-radius:2px; background:var(--chart2); margin-right:6px;"></span>에세이 30%</div>
+                    <div><span style="display:inline-block; width:8px; height:8px; border-radius:2px; background:var(--chart3); margin-right:6px;"></span>자기계발 20%</div>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-bottom:14px;">
+                <div class="lbl">월별 완독 추이</div>
+                <div style="display:flex; align-items:flex-end; gap:8px; height:44px;">
+                  <div style="flex:1; background:var(--p100); border-radius:3px 3px 0 0; height:40%;"></div>
+                  <div style="flex:1; background:var(--p100); border-radius:3px 3px 0 0; height:70%;"></div>
+                  <div style="flex:1; background:var(--p700); border-radius:3px 3px 0 0; height:100%;"></div>
+                  <div style="flex:1; background:var(--p100); border-radius:3px 3px 0 0; height:55%;"></div>
+                  <div style="flex:1; background:var(--p100); border-radius:3px 3px 0 0; height:25%;"></div>
+                </div>
+              </div>
+              <div class="card-accent" style="margin-bottom:12px; padding:10px 12px;">
+                <div style="font-size:10.5px; line-height:1.8;">✨ 이번 분기 가장 많이 읽은 장르는 <b>소설</b><br>📖 가장 오래 곱씹은 책은 <b>『아몬드』(9일)</b></div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <div class="btn" style="flex:1;">{{icon:image}} 이미지 저장</div>
+                <div class="btn btn-primary" style="flex:1;">공유 탭으로 {{icon:chevron-right}}</div>
+              </div>
+            </div>
+          </div>
+          <div class="frame-cap">↳ 와이어프레임 Frame 05.1 대응 · 다크모드</div>
+        </div>
       </div>
     </div>
 
@@ -565,6 +938,28 @@
           </div>
           <div class="frame-cap">↳ 와이어프레임 Frame 06 대응</div>
         </div>
+        <div class="dark">
+          <div class="browser-frame">
+            <div class="browser-bar">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <div class="url">bookflex.app/share/8f2a91c...</div>
+            </div>
+            <div style="padding:20px;">
+              <div class="img-box" style="width:100%; height:160px; margin-bottom:14px;">{{icon:book-open}}</div>
+              <div style="margin-bottom:12px;">
+                <div style="font-size:15px; font-weight:800; margin-bottom:4px;">아몬드 · 손원평</div>
+                <div style="font-size:11px; color:var(--n600);">2026.06.20 ~ 2026.06.28 (9일)</div>
+              </div>
+              <div style="display:flex; gap:6px; margin-bottom:9px;">
+                <div class="img-box" style="width:58px; height:58px;">{{icon:image}}</div>
+                <div class="img-box" style="width:58px; height:58px;">{{icon:image}}</div>
+                <div class="img-box" style="width:58px; height:58px;">{{icon:image}}</div>
+              </div>
+              <div style="font-size:11.5px; color:var(--n700); line-height:1.6;">"인상 깊었던 부분은..."</div>
+            </div>
+          </div>
+          <div class="frame-cap">↳ 와이어프레임 Frame 06 대응 · 다크모드</div>
+        </div>
 
         <!-- ============ Frame 06.1 공유 웹페이지(대시보드형) ============ -->
         <div>
@@ -584,6 +979,23 @@
           </div>
           <div class="frame-cap">↳ 와이어프레임 Frame 06.1 대응</div>
         </div>
+        <div class="dark">
+          <div class="browser-frame">
+            <div class="browser-bar">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <div class="url">bookflex.app/share/c91ff02...</div>
+            </div>
+            <div style="padding:20px;">
+              <div class="card-accent" style="text-align:center; padding:20px;">
+                <div style="color:var(--p700); margin-bottom:10px;">{{icon:bar-chart}}</div>
+                <div style="font-size:13px; font-weight:700; margin-bottom:10px;">3분기 리캡 · 5권 완독</div>
+                <div style="width:64px; height:64px; border-radius:50%; margin:0 auto 10px; background:conic-gradient(var(--chart1) 0% 40%, var(--chart2) 40% 70%, var(--chart3) 70% 90%, var(--n200) 90% 100%);"></div>
+                <div style="font-size:10.5px; color:var(--n600);">병렬독서도 독서다 🔥</div>
+              </div>
+            </div>
+          </div>
+          <div class="frame-cap">↳ 와이어프레임 Frame 06.1 대응 · 다크모드</div>
+        </div>
       </div>
     </div>
 
@@ -591,7 +1003,7 @@
 
   <div class="footer-note">
     ※ 이 문서는 <b>디자인 시스템 v1</b>(컬러 팔레트 · Pretendard · Lucide 아이콘)을 적용한 <b>Hi-Fi 목업</b>입니다. 화면 구조·기능 스펙에 대한 상세 주석은 원본 와이어프레임(<code>화면설계서_wireframe_v2-5.html</code>)을 참고해주세요.<br>
-    ※ 폰트는 CDN으로 불러왔고, 아이콘은 Lucide SVG를 그대로 인라인 삽입했습니다. 다크모드 버전은 아직 미포함 — 필요 시 별도로 만들 수 있습니다.
+    ※ 폰트는 CDN으로 불러왔고, 아이콘은 Lucide SVG를 그대로 인라인 삽입했습니다. 각 프레임 오른쪽의 어두운 톤 화면이 다크모드 짝입니다(컬러 팔레트 v1의 다크 세트 그대로 적용, 마크업은 라이트와 동일).
   </div>
 
 <script>

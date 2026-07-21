@@ -12,7 +12,7 @@
 |---|---|
 | `color_chips.html` | 연두 테마 컬러 팔레트 v1 — 라이트/다크 스와치, 대비 검증 결과, 버튼/배지/카드 적용 예시 |
 | `typography_and_icons.html` | Pretendard 타입 스케일 + Lucide 아이콘 24종 가이드 |
-| `hifi_mockup_v1.html` | `../docs/독서기록공유앱_화면설계서_wireframe_v2-5.html`의 11개 프레임에 디자인 시스템을 입힌 Hi-Fi 목업 |
+| `hifi_mockup_v1.html` | `../docs/독서기록공유앱_화면설계서_wireframe_v2-5.html`의 11개 프레임에 디자인 시스템을 입힌 Hi-Fi 목업. v1.1부터 각 프레임 오른쪽에 다크모드 짝을 나란히 배치(별도 파일 아님, CSS 변수 스코프 `.dark`로 컬러만 전환하고 마크업은 동일) |
 | `gen_palette.js`, `gen_dark*.mjs`, `gen_status.mjs`, `check_contrast.mjs`, `check_status.mjs`, `search_warning.mjs` | 컬러 값을 도출/검증하는 데 쓴 스크립트 (참고/재현용 기록) |
 
 ## 스크립트 실행에 대한 주의
