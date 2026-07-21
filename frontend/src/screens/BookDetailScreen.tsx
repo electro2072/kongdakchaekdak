@@ -7,7 +7,12 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import {useRoute, type RouteProp} from '@react-navigation/native';
+import {
+  useNavigation,
+  useRoute,
+  type RouteProp,
+} from '@react-navigation/native';
+import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {
   BookOpen,
   Camera,
@@ -24,6 +29,8 @@ import {useTheme} from '../theme';
 export function BookDetailScreen() {
   const {colors, typography, radii} = useTheme();
   const route = useRoute<RouteProp<MainStackParamList, 'BookDetail'>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const book = MOCK_LIBRARY_BOOKS.find(b => b.id === route.params.bookId);
 
   // TODO: PATCH /api/books/{id}/complete 연동 전이라 로컬 state로만 완독 처리 여부를 표시한다.
@@ -159,7 +166,13 @@ export function BookDetailScreen() {
           style={[
             styles.primaryButton,
             {backgroundColor: colors.accentSolidBg, borderRadius: radii.pill},
-          ]}>
+          ]}
+          onPress={() =>
+            navigation.navigate('Tabs', {
+              screen: 'Share',
+              params: {bookId: book.id},
+            })
+          }>
           <Share2 size={15} color={colors.onAccentSolid} />
           <Text style={[typography.button, {color: colors.onAccentSolid}]}>
             이 책 공유하기

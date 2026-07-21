@@ -4,11 +4,15 @@ export type AuthStackParamList = {
   Signup: undefined;
 };
 
-/** 로그인 후 하단 탭 (기획서 3장 기준: 일정/서재/공유/프로필) */
+/**
+ * 로그인 후 하단 탭 (기획서 3장 기준: 일정/서재/공유/프로필).
+ * Share는 서재 탭 책 상세(Frame 03.1)의 "이 책 공유하기" 버튼에서
+ * bookId를 들고 진입할 수도, 탭을 직접 눌러 진입할 수도 있어 둘 다 optional.
+ */
 export type MainTabParamList = {
   Schedule: undefined;
   Library: undefined;
-  Share: undefined;
+  Share: {bookId?: string} | undefined;
   Profile: undefined;
 };
 
@@ -17,6 +21,11 @@ export type MainTabParamList = {
  * 탭바 없이 전체화면으로 보여준다 (와이어프레임상 Frame 03.1에는 탭바가 없음).
  */
 export type MainStackParamList = {
-  Tabs: undefined;
+  Tabs:
+    | {
+        screen?: keyof MainTabParamList;
+        params?: MainTabParamList[keyof MainTabParamList];
+      }
+    | undefined;
   BookDetail: {bookId: string};
 };
