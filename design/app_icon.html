@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>콩닥책닥 — 앱 아이콘 (확정) v2</title>
+<title>콩닥책닥 — 앱 아이콘 (확정) v2.1</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/variable/pretendardvariable.min.css">
 <style>
   :root {
@@ -38,17 +38,19 @@
 <body>
 
 <div class="doc-header">
-  <h1>🔤 콩닥책닥 — 앱 아이콘 (확정) v2</h1>
+  <h1>🔤 콩닥책닥 — 앱 아이콘 (확정) v2.1</h1>
   <p>"콩닥 / 책닥" 두 줄 워드마크형 아이콘 — 쑥송편 그린 배경 + 크림 텍스트. 실제 iOS/Android 에셋을 이 파일에서 바로 추출합니다.</p>
   <div class="meta">
-    <span>Ver 2 (확정)</span>
-    <span>작성일 2026-08-27</span>
+    <span>Ver 2.1 (확정)</span>
+    <span>최초 작성 2026-08-27</span>
+    <span>최종 수정 2026-08-27</span>
     <span>App Icon — Final</span>
   </div>
   <div class="doc-note">
     <b>v1 → v2 교체 경위</b> — 앱 이름이 <b>"콩닥책닥"</b>으로 확정된 뒤, 아이콘을 "콩닥 / 책닥" 두 줄 텍스트로 만들어보고 싶다는 요청에 따라 3가지 색상 조합(크림 배경+그린 텍스트 / 그린 배경+크림 텍스트 / 진한 그린 배경+크림 텍스트)을 시안으로 그려 비교했습니다(<code>app_icon_text_concept_v1.html</code>). 그중 <b>그린 배경 + 크림 텍스트(B안)</b>를 선택해 이 파일로 확정했습니다.<br>
     <b>기존 쑥송편 아이콘(v1, 2026-08-09 확정)은 폐기하지 않고 보관합니다</b> — <code>deprecated/app_icon_songpyeon_v1_archived.html</code> 및 <code>deprecated/assets/icon/</code>에 그대로 남아있고(2026-08-27, <code>design/deprecated/</code> 폴더로 이동 정리됨), 다만 실제 앱 아이콘 자리에서는 이 v2로 완전히 교체됩니다.<br>
-    <b>작은 사이즈 가독성 참고</b> — 4글자 2줄 텍스트라 29px 같은 아주 작은 사이즈에서는 다소 뭉쳐 보일 수 있음을 비교 시안 단계에서 미리 확인·공유했고, 그중 가장 대비가 강한 조합(B안)으로 결정된 것입니다.
+    <b>작은 사이즈 가독성 참고</b> — 4글자 2줄 텍스트라 29px 같은 아주 작은 사이즈에서는 다소 뭉쳐 보일 수 있음을 비교 시안 단계에서 미리 확인·공유했고, 그중 가장 대비가 강한 조합(B안)으로 결정된 것입니다.<br>
+    <b>v2.1 변경 이력 (2026-08-27) — iOS 다크·Tinted 아이콘 변형 추가</b> — iOS 18부터 사용자가 홈 화면 아이콘 모양을 라이트/다크/틴트(Tinted) 중에서 고를 수 있어서(설정 → 홈 화면 커스터마이징), Apple이 세 가지를 별도 이미지로 요구합니다. <b>다크</b>는 배경을 기존 쑥송편 그린(<code>#7D8F5D</code>)보다 훨씬 어두운, 팔레트에 이미 있는 <code>--p900</code>(<code>#1e2903</code>)로 교체하고 텍스트는 그대로 크림(<code>#f7f1e4</code>) 유지 — 새 색을 만들지 않고 기존 팔레트 토큰을 재사용했습니다. <b>틴트드</b>는 Apple 가이드대로 색을 전부 빼고 <b>그레이스케일</b>로 제공해야 시스템이 사용자가 고른 임의의 틴트 컬러를 얹었을 때 항상 자연스럽습니다 — 원래 배경/텍스트 색의 <b>지각 휘도(luminance)</b>를 계산해서 배경은 <code>#848484</code>(원래 그린과 같은 밝기의 회색), 텍스트는 <code>#f1f1f1</code>(원래 크림과 같은 밝기의 회색)로 변환해 명암 대비를 그대로 유지했습니다. 레이아웃(텍스트 위치·크기)은 라이트 버전과 완전히 동일 — 색만 다릅니다. Android는 이 다크/틴트 개념이 없어서(대신 "테마 아이콘"이라는 별도 기능이 있는데, 이번 요청 범위 밖이라 진행하지 않았습니다) iOS 전용 변형입니다.
   </div>
 </div>
 
@@ -82,6 +84,14 @@
       <div class="icon-mask" style="width:120px;height:120px;"><svg viewBox="0 0 432 432" width="120" height="120" class="clone-safezone-check"></svg></div>
       <div class="label">안전영역(66% 원) 확인용<br>(빨간 원 = 실제 배포엔 없음)</div>
     </div>
+    <div class="preview-card">
+      <div class="icon-mask" style="width:120px;height:120px;"><svg viewBox="0 0 200 200" width="120" height="120" class="clone-dark"></svg></div>
+      <div class="label">iOS 다크 아이콘</div>
+    </div>
+    <div class="preview-card">
+      <div class="icon-mask" style="width:120px;height:120px;"><svg viewBox="0 0 200 200" width="120" height="120" class="clone-tinted"></svg></div>
+      <div class="label">iOS 틴트드 아이콘<br>(그레이스케일 원본)</div>
+    </div>
   </div>
 
   <h2 class="section-title">실제 내보내기 요소 (1024px / 432px 원본 크기)</h2>
@@ -102,11 +112,24 @@
     <div id="android-fg-432" style="width:432px;height:432px;"></div>
   </div>
 
+  <div class="export-block">
+    <div class="cap">④ iOS 다크 아이콘 원본 — 1024×1024, 알파 없음. 배경 <code>--p900</code>(#1e2903), 텍스트는 기존과 동일한 크림</div>
+    <div id="ios-dark-1024" style="width:1024px;height:1024px;"></div>
+  </div>
+
+  <div class="export-block">
+    <div class="cap">⑤ iOS 틴트드 아이콘 원본 — 1024×1024, 알파 없음, 그레이스케일(색 없음). 시스템이 사용자가 고른 틴트 컬러를 이 위에 얹습니다</div>
+    <div id="ios-tinted-1024" style="width:1024px;height:1024px;"></div>
+  </div>
+
 </div>
 
 <script>
   const BG_COLOR = "#7D8F5D";   // 쑥송편 그린 (기존 아이콘과 동일 브랜드 그린)
   const TEXT_COLOR = "#f7f1e4"; // 크림 (기존 아이콘 배경색을 텍스트에 재사용)
+  const DARK_BG_COLOR = "#1e2903";   // --p900, 팔레트에 이미 있는 가장 어두운 그린 (iOS 다크 아이콘용)
+  const TINTED_BG_COLOR = "#848484"; // BG_COLOR와 같은 지각 휘도(luminance)로 변환한 회색 (iOS 틴트드 아이콘용)
+  const TINTED_TEXT_COLOR = "#f1f1f1"; // TEXT_COLOR와 같은 지각 휘도로 변환한 회색
   const FONT_WEIGHT = 800;
   const FONT_FAMILY = "'Pretendard Variable','Pretendard',sans-serif";
 
@@ -138,6 +161,14 @@
 
   const html200 = iconMarkup200();
   const htmlFg = iconMarkupTransparentFg();
+  const html200Dark = `
+    <rect x="0" y="0" width="200" height="200" fill="${DARK_BG_COLOR}"/>
+    ${textGroup(TEXT_COLOR)}
+  `;
+  const html200Tinted = `
+    <rect x="0" y="0" width="200" height="200" fill="${TINTED_BG_COLOR}"/>
+    ${textGroup(TINTED_TEXT_COLOR)}
+  `;
 
   document.getElementById('prev-1x').innerHTML = html200;
   document.querySelectorAll('.clone').forEach(el => el.innerHTML = html200);
@@ -145,6 +176,8 @@
   document.querySelectorAll('.clone-safezone-check').forEach(el => el.innerHTML =
     `<rect x="0" y="0" width="432" height="432" fill="${BG_COLOR}"/>${htmlFg}<circle cx="216" cy="216" r="142.5" fill="none" stroke="red" stroke-width="3"/>`
   );
+  document.querySelectorAll('.clone-dark').forEach(el => el.innerHTML = html200Dark);
+  document.querySelectorAll('.clone-tinted').forEach(el => el.innerHTML = html200Tinted);
 
   // ① iOS 1024 원본
   document.getElementById('ios-1024').innerHTML =
@@ -157,6 +190,14 @@
   // ③ Android 전경 레이어 (432, 투명 배경)
   document.getElementById('android-fg-432').innerHTML =
     `<svg viewBox="0 0 432 432" width="432" height="432">${htmlFg}</svg>`;
+
+  // ④ iOS 다크 1024 원본
+  document.getElementById('ios-dark-1024').innerHTML =
+    `<svg viewBox="0 0 200 200" width="1024" height="1024">${html200Dark}</svg>`;
+
+  // ⑤ iOS 틴트드 1024 원본 (그레이스케일)
+  document.getElementById('ios-tinted-1024').innerHTML =
+    `<svg viewBox="0 0 200 200" width="1024" height="1024">${html200Tinted}</svg>`;
 </script>
 
 </body>
