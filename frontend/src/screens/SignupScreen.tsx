@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import {Plus, X} from 'lucide-react-native';
+import {Plus, X, AlertCircle} from 'lucide-react-native';
 import {useAuth} from '../navigation/AuthContext';
 import {useTheme} from '../theme';
 
@@ -27,11 +27,16 @@ const INTEREST_OPTIONS = [
   '경제·경영',
 ];
 
+const MIN_NICKNAME_LENGTH = 2;
+
 /**
  * Frame 01.1 · 회원가입 (design/hifi_mockup_v1.html 기준)
  * 닉네임만 필수, 나머지(성별/관심분야/독서모임)는 전부 선택 입력.
  * 백엔드 회원가입 연동(Step 3 OAuth 완료 후)이 아직 없어서, 지금은 로컬 state만 관리하고
  * "시작하기"를 누르면 mock 로그인 처리되어 하단 탭으로 진입한다.
+ *
+ * 닉네임 필드는 Frame 01.2(폼 검증 에러) 패턴을 그대로 따른다 — 실제 중복 확인은
+ * 백엔드 연동 전이라 아직 없고, 여기서는 최소 글자수만 클라이언트에서 검증한다.
  */
 export function SignupScreen() {
   const {login} = useAuth();
@@ -44,6 +49,14 @@ export function SignupScreen() {
   const [interests, setInterests] = useState<string[]>([]);
   const [groupQuery, setGroupQuery] = useState('');
   const [groups, setGroups] = useState<string[]>([]);
+
+  const trimmedNickname = nickname.trim();
+  const nicknameError =
+    nickname.length > 0 && trimmedNickname.length < MIN_NICKNAME_LENGTH
+      ? `닉네임은 ${MIN_NICKNAME_LENGTH}자 이상 입력해주세요`
+      : null;
+  const canSubmit =
+    trimmedNickname.length >= MIN_NICKNAME_LENGTH;
 
   const toggleInterest = (item: string) => {
     setInterests(prev =>
@@ -86,12 +99,24 @@ export function SignupScreen() {
               styles.input,
               {
                 backgroundColor: colors.n50,
-                borderColor: colors.n300,
+                borderColor: nicknameError ? colors.error : colors.n300,
                 color: colors.n900,
                 borderRadius: radii.sm,
               },
             ]}
           />
+          {nicknameError ? (
+            <View style={styles.fieldErrorRow}>
+              <AlertCircle size={12} color={colors.error} />
+              <Text
+                style={[
+                  typography.caption,
+                  {color: colors.error, fontSize: 11, marginLeft: 4},
+                ]}>
+                {nicknameError}
+              </Text>
+            </View>
+          ) : null}
         </Field>
 
         <Field label="성별">
@@ -221,10 +246,10 @@ export function SignupScreen() {
         style={[
           styles.primaryButton,
           {backgroundColor: colors.accentSolidBg, borderRadius: radii.pill},
-          !nickname.trim() && {opacity: 0.5},
+          !canSubmit && {opacity: 0.5},
         ]}
         onPress={login}
-        disabled={!nickname.trim()}>
+        disabled={!canSubmit}>
         <Text style={[typography.button, {color: colors.onAccentSolid}]}>
           시작하기
         </Text>
@@ -276,6 +301,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 12,
     fontSize: 14,
+  },
+  fieldErrorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 5,
   },
   chip: {
     height: 28,
