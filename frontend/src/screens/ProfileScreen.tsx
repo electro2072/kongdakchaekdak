@@ -12,23 +12,24 @@ import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {User, BarChart3, ChevronRight, LogOut} from 'lucide-react-native';
 import type {MainStackParamList} from '../navigation/types';
 import {useAuth} from '../navigation/AuthContext';
+import {useProfile} from '../navigation/ProfileContext';
 import {ProfileStatCard} from '../components/ProfileStatCard';
-import {MOCK_PROFILE} from '../mocks/profile';
 import {useTheme} from '../theme';
 
 /**
  * Frame 05 · 프로필 탭 — design/hifi_mockup_v1.html 기준
  * (claude/독서기록앱_프론트요청_디자인시스템v2동기화_v1.md 답변의 실제 마크업 반영).
  *
- * 이번 범위 제외(설계 문서 10장): 프로필 편집 화면(Frame 05.2) — 아직 없어서 "프로필 편집"
- * 버튼은 배치만 하고 onPress를 연결하지 않는다. "로그아웃"/"독서 대시보드" 진입은 기존
- * AuthContext/신규 DashboardScreen이 이미 있어서 실제로 연결한다.
+ * 닉네임/한줄소개는 ProfileContext(mock-first, PATCH /api/users/{id} 연동 전)에서 가져온다 —
+ * "프로필 편집" 화면(Frame 05.2)에서 저장하면 여기 바로 반영된다.
+ * "로그아웃"/"독서 대시보드" 진입은 기존 AuthContext/DashboardScreen과 실제로 연결한다.
  */
 export function ProfileScreen() {
   const {colors, typography, radii} = useTheme();
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const {logout} = useAuth();
+  const {profile} = useProfile();
 
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: colors.surface}]}>
@@ -40,28 +41,32 @@ export function ProfileScreen() {
             <User size={28} color={colors.p400} />
           </View>
           <Text style={[typography.h2, {color: colors.n900, marginTop: 10}]}>
-            {MOCK_PROFILE.nickname}
+            {profile.nickname}
           </Text>
-          <Text style={[typography.caption, {color: colors.n600, marginTop: 4}]}>
-            {MOCK_PROFILE.bio}
-          </Text>
+          {profile.bio ? (
+            <Text
+              style={[typography.caption, {color: colors.n600, marginTop: 4}]}>
+              {profile.bio}
+            </Text>
+          ) : null}
         </View>
 
         <TouchableOpacity
           style={[
             styles.outlineButton,
             {borderColor: colors.hairline, borderRadius: radii.md},
-          ]}>
+          ]}
+          onPress={() => navigation.navigate('ProfileEdit')}>
           <Text style={[typography.button, {color: colors.n700}]}>
             프로필 편집
           </Text>
         </TouchableOpacity>
 
         <View style={styles.statRow}>
-          <ProfileStatCard label="읽은 책" value={MOCK_PROFILE.booksReadCount} />
+          <ProfileStatCard label="읽은 책" value={profile.booksReadCount} />
           <ProfileStatCard
             label="공유한 기록"
-            value={MOCK_PROFILE.sharedRecordsCount}
+            value={profile.sharedRecordsCount}
           />
         </View>
 

@@ -8,8 +8,11 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import {Plus, X, AlertCircle} from 'lucide-react-native';
-import {useAuth} from '../navigation/AuthContext';
+import {useNavigation} from '@react-navigation/native';
+import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {User, AlertCircle} from 'lucide-react-native';
+import type {MainStackParamList} from '../navigation/types';
+import {useProfile} from '../navigation/ProfileContext';
 import {
   GENDER_OPTIONS,
   INTEREST_OPTIONS,
@@ -19,34 +22,32 @@ import {
 import {useTheme} from '../theme';
 
 /**
- * Frame 01.1 · 회원가입 (design/hifi_mockup_v1.html 기준)
- * 닉네임만 필수, 나머지(성별/관심분야/독서모임)는 전부 선택 입력.
- * 백엔드 회원가입 연동(Step 3 OAuth 완료 후)이 아직 없어서, 지금은 로컬 state만 관리하고
- * "시작하기"를 누르면 mock 로그인 처리되어 하단 탭으로 진입한다.
+ * Frame 05.2 · 프로필 편집 — claude/독서기록앱_디자인시스템_Hifi목업_v1.md(v1.3.2) 기준:
+ * 원형 아바타 placeholder + "사진 변경", 닉네임, 한줄소개(선택), 성별 칩(단일선택),
+ * 관심분야 칩(중복선택), "저장하기" 버튼.
  *
- * 닉네임 필드는 Frame 01.2(폼 검증 에러) 패턴을 그대로 따른다 — 실제 중복 확인은
- * 백엔드 연동 전이라 아직 없고, 여기서는 최소 글자수만 클라이언트에서 검증한다.
- *
- * 성별/관심분야 옵션은 프로필 편집(Frame 05.2)과 정확히 같은 목록을 써야 해서
- * constants/profileOptions.ts 한 곳에만 정의하고 두 화면이 함께 가져다 쓴다.
+ * PATCH /api/users/{id}는 있지만 관심분야(interests)를 채우는 DTO 연동은 백엔드가 아직
+ * 안 붙여놔서(개발현황.md 28번 항목) 이번에도 mock-first로 간다 — 저장하면 ProfileContext의
+ * 로컬 state만 갱신하고 화면을 뒤로 돌아간다. 사진 변경은 이미지 피커 라이브러리 선정이
+ * 필요한 별도 작업이라 이번 범위에서 제외(버튼만 배치, onPress 없음).
  */
-export function SignupScreen() {
-  const {login} = useAuth();
+export function ProfileEditScreen() {
   const {colors, typography, radii} = useTheme();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const {profile, updateProfile} = useProfile();
 
-  const [nickname, setNickname] = useState('');
-  const [gender, setGender] = useState<GenderKey | null>(null);
-  const [interests, setInterests] = useState<string[]>([]);
-  const [groupQuery, setGroupQuery] = useState('');
-  const [groups, setGroups] = useState<string[]>([]);
+  const [nickname, setNickname] = useState(profile.nickname);
+  const [bio, setBio] = useState(profile.bio);
+  const [gender, setGender] = useState<GenderKey | null>(profile.gender);
+  const [interests, setInterests] = useState<string[]>(profile.interests);
 
   const trimmedNickname = nickname.trim();
   const nicknameError =
     nickname.length > 0 && trimmedNickname.length < MIN_NICKNAME_LENGTH
       ? `닉네임은 ${MIN_NICKNAME_LENGTH}자 이상 입력해주세요`
       : null;
-  const canSubmit =
-    trimmedNickname.length >= MIN_NICKNAME_LENGTH;
+  const canSubmit = trimmedNickname.length >= MIN_NICKNAME_LENGTH;
 
   const toggleInterest = (item: string) => {
     setInterests(prev =>
@@ -54,29 +55,34 @@ export function SignupScreen() {
     );
   };
 
-  const addGroup = () => {
-    const trimmed = groupQuery.trim();
-    if (!trimmed || groups.includes(trimmed)) {
+  const handleSave = () => {
+    if (!canSubmit) {
       return;
     }
-    setGroups(prev => [...prev, trimmed]);
-    setGroupQuery('');
-  };
-
-  const removeGroup = (group: string) => {
-    setGroups(prev => prev.filter(g => g !== group));
+    updateProfile({
+      nickname: trimmedNickname,
+      bio: bio.trim(),
+      gender,
+      interests,
+    });
+    navigation.goBack();
   };
 
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: colors.surface}]}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={{marginBottom: 16}}>
-          <Text style={[typography.h3, {color: colors.n900, marginBottom: 4}]}>
-            몇 가지만 알려주세요
-          </Text>
-          <Text style={[typography.caption, {color: colors.n600}]}>
-            닉네임 외 모든 정보는 선택이에요
-          </Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        <View style={styles.avatarBlock}>
+          <View style={[styles.avatar, {backgroundColor: colors.p50}]}>
+            <User size={28} color={colors.p400} />
+          </View>
+          {/* TODO: 이미지 피커 라이브러리(react-native-image-picker 등) 선정 후 연결 — 이번 범위 제외 */}
+          <TouchableOpacity>
+            <Text style={[typography.caption, {color: colors.p700, fontWeight: '600'}]}>
+              사진 변경
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <Field label="닉네임 (필수)">
@@ -107,6 +113,24 @@ export function SignupScreen() {
               </Text>
             </View>
           ) : null}
+        </Field>
+
+        <Field label="한줄소개" hint="선택">
+          <TextInput
+            value={bio}
+            onChangeText={setBio}
+            placeholder="나를 짧게 소개해보세요"
+            placeholderTextColor={colors.n400}
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.n50,
+                borderColor: colors.n300,
+                color: colors.n900,
+                borderRadius: radii.sm,
+              },
+            ]}
+          />
         </Field>
 
         <Field label="성별">
@@ -175,61 +199,6 @@ export function SignupScreen() {
             })}
           </View>
         </Field>
-
-        <Field label="속한 독서모임이 있나요?" hint="선택">
-          <View
-            style={[
-              styles.groupSearch,
-              {borderRadius: radii.pill, borderColor: colors.n300},
-            ]}>
-            <TextInput
-              value={groupQuery}
-              onChangeText={setGroupQuery}
-              placeholder="모임 이름으로 검색"
-              placeholderTextColor={colors.n400}
-              style={[typography.caption, {flex: 1, color: colors.n900}]}
-              onSubmitEditing={addGroup}
-            />
-            <TouchableOpacity onPress={addGroup}>
-              <View style={styles.addGroupBtn}>
-                <Plus size={14} color={colors.p700} />
-                <Text
-                  style={[
-                    typography.caption,
-                    {color: colors.p700, fontWeight: '700', marginLeft: 2},
-                  ]}>
-                  추가
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-          {groups.length > 0 && (
-            <View style={[styles.row, styles.wrap, {marginTop: 7}]}>
-              {groups.map(group => (
-                <View
-                  key={group}
-                  style={[
-                    styles.chip,
-                    styles.groupChip,
-                    {borderRadius: radii.pill, borderColor: colors.p700},
-                  ]}>
-                  <Text
-                    style={[
-                      typography.caption,
-                      {color: colors.p700, fontWeight: '600'},
-                    ]}>
-                    {group}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => removeGroup(group)}
-                    style={{marginLeft: 6}}>
-                    <X size={12} color={colors.p700} />
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
-          )}
-        </Field>
       </ScrollView>
 
       <TouchableOpacity
@@ -238,10 +207,10 @@ export function SignupScreen() {
           {backgroundColor: colors.accentSolidBg, borderRadius: radii.pill},
           !canSubmit && {opacity: 0.5},
         ]}
-        onPress={login}
+        onPress={handleSave}
         disabled={!canSubmit}>
         <Text style={[typography.button, {color: colors.onAccentSolid}]}>
-          시작하기
+          저장하기
         </Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -276,8 +245,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   scrollContent: {
-    paddingTop: 12,
+    paddingTop: 16,
     paddingBottom: 12,
+  },
+  avatarBlock: {
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 20,
+  },
+  avatar: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   row: {
     flexDirection: 'row',
@@ -302,26 +283,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  groupSearch: {
-    height: 36,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    paddingLeft: 12,
-    paddingRight: 4,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  addGroupBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-  },
-  groupChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    backgroundColor: 'transparent',
   },
   primaryButton: {
     height: 44,

@@ -8,6 +8,7 @@ import React from 'react';
 import {StatusBar} from 'react-native';
 import {enableScreens} from 'react-native-screens';
 import {AuthProvider} from './src/navigation/AuthContext';
+import {ProfileProvider} from './src/navigation/ProfileContext';
 import {RootNavigator} from './src/navigation/RootNavigator';
 import {useTheme} from './src/theme';
 
@@ -18,11 +19,13 @@ function App(): React.JSX.Element {
 
   return (
     <AuthProvider>
-      <StatusBar
-        barStyle={isDark ? 'light-content' : 'dark-content'}
-        backgroundColor={colors.surface}
-      />
-      <RootNavigator />
+      <ProfileProvider>
+        <StatusBar
+          barStyle={isDark ? 'light-content' : 'dark-content'}
+          backgroundColor={colors.surface}
+        />
+        <RootNavigator />
+      </ProfileProvider>
     </AuthProvider>
   );
 }

@@ -32,4 +32,6 @@ export type MainStackParamList = {
   BookSearch: undefined;
   /** Frame 05.1 독서 대시보드(Recap) — 프로필 탭 "이번 분기 리캡 보기" 카드에서 진입, 탭바 없이 전체화면 */
   Dashboard: undefined;
+  /** Frame 05.2 프로필 편집 — 프로필 탭 "프로필 편집" 버튼에서 진입, 탭바 없이 전체화면 */
+  ProfileEdit: undefined;
 };
