@@ -92,6 +92,19 @@ description: >-
 - 실제 에뮬레이터 실행(`npm run android`)은 사용자 로컬 환경이 필요하다. 시나리오에 "수동 확인
   필요" 항목으로 표시하고, 사용자가 요청하면 절차만 안내한다.
 
+## D. 디자인 정합성 — 프론트 구현 ↔ `design/` 대조
+
+`docs/test/scenarios/design-conformance.md` 를 따른다.
+
+- **토큰 대조(자동/정적, 최우선)**: `frontend/src/theme/colors.ts`·`typography.ts`의 상수를
+  `design/color_chips.html`(기준 팔레트, v2 쑥송편)·`typography_and_icons.html`의 `--var` 값과
+  1:1 hex/숫자 비교. 램프·상태색·포인트색·시맨틱 토큰·타입 스케일.
+- **화면별 구조 대조(수동/반자동)**: `design/hifi_mockup_v1.html`의 각 프레임 ↔ 대응 화면.
+  픽셀이 아니라 "요소가 다 있는가 / 그룹핑·순서가 같은가 / 상태 변형(빈/로딩/에러)을 다루는가".
+- **시각 회귀**: 테스터는 `hifi_mockup_v1.html`을 브라우저로 렌더해 참조 이미지를 만들 수 있다.
+  픽셀 비교는 사용자의 에뮬레이터 스크린샷이 필요 — 자동화는 E2E 도구 결정(연동 후)과 함께 논의.
+- `design/`의 각 파일 안 `doc-note`(버전 changelog)가 실제 소스 — claude.ai 문서와 어긋날 수 있다.
+
 # 자율성 규칙 (중요)
 
 - 테스트 실행(빌드·서버 기동·API 호출)과 `docs/test/` 문서 작성은 자유롭게 한다.
@@ -110,7 +123,8 @@ docs/test/
  ├─ report-template.md            # 리포트 작성 틀
  ├─ scenarios/
  │   ├─ backend-api.md            # 백엔드 API 블랙박스 시나리오 (도메인별)
- │   └─ frontend.md               # 프론트 화면·네비게이션 시나리오
+ │   ├─ frontend.md               # 프론트 화면·네비게이션 시나리오
+ │   └─ design-conformance.md     # 프론트 구현 ↔ design/ 토큰·화면 대조
  ├─ requests/
  │   └─ 테스트코드작성요청_vN.md   # 개발 에이전트에게 보내는 테스트 코드 형식 요청서
  └─ reports/

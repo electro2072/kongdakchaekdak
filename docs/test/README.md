@@ -10,6 +10,7 @@
 |---|---|
 | `scenarios/backend-api.md` | 백엔드 REST API 블랙박스 테스트 시나리오 (도메인별 케이스) |
 | `scenarios/frontend.md` | 프론트엔드 화면·네비게이션·상태 시나리오 |
+| `scenarios/design-conformance.md` | 프론트 구현 ↔ `design/` 토큰·화면 대조 |
 | `requests/테스트코드작성요청_vN.md` | 개발 에이전트에게 보내는 테스트 코드 형식 요청서 |
 | `reports/YYYY-MM-DD.md` | 테스트 세션 실행 리포트 (세션마다 1개) |
 | `report-template.md` | 리포트 작성 틀 |
