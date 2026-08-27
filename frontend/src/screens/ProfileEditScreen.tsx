@@ -30,6 +30,10 @@ import {useTheme} from '../theme';
  * 안 붙여놔서(개발현황.md 28번 항목) 이번에도 mock-first로 간다 — 저장하면 ProfileContext의
  * 로컬 state만 갱신하고 화면을 뒤로 돌아간다. 사진 변경은 이미지 피커 라이브러리 선정이
  * 필요한 별도 작업이라 이번 범위에서 제외(버튼만 배치, onPress 없음).
+ *
+ * 주요 인터랙션 요소에 testID를 달아뒀다 — 이 저장소 테스트가 @testing-library/react-native 없이
+ * react-test-renderer만 쓰기 때문에(__tests__/bookService.test.ts, App.test.tsx 참고), 옵션 목록
+ * 순서에 의존하지 않고 안정적으로 요소를 찾을 수 있게 하기 위함(__tests__/ProfileEditScreen.test.tsx).
  */
 export function ProfileEditScreen() {
   const {colors, typography, radii} = useTheme();
@@ -87,6 +91,7 @@ export function ProfileEditScreen() {
 
         <Field label="닉네임 (필수)">
           <TextInput
+            testID="nickname-input"
             value={nickname}
             onChangeText={setNickname}
             placeholder="닉네임을 입력해주세요"
@@ -117,6 +122,7 @@ export function ProfileEditScreen() {
 
         <Field label="한줄소개" hint="선택">
           <TextInput
+            testID="bio-input"
             value={bio}
             onChangeText={setBio}
             placeholder="나를 짧게 소개해보세요"
@@ -140,6 +146,7 @@ export function ProfileEditScreen() {
               return (
                 <TouchableOpacity
                   key={option.key}
+                  testID={`gender-chip-${option.key}`}
                   style={[
                     styles.chip,
                     {
@@ -174,6 +181,7 @@ export function ProfileEditScreen() {
               return (
                 <TouchableOpacity
                   key={item}
+                  testID={`interest-chip-${item}`}
                   style={[
                     styles.chip,
                     {
@@ -202,6 +210,7 @@ export function ProfileEditScreen() {
       </ScrollView>
 
       <TouchableOpacity
+        testID="save-button"
         style={[
           styles.primaryButton,
           {backgroundColor: colors.accentSolidBg, borderRadius: radii.pill},

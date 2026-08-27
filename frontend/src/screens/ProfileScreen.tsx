@@ -23,6 +23,8 @@ import {useTheme} from '../theme';
  * 닉네임/한줄소개는 ProfileContext(mock-first, PATCH /api/users/{id} 연동 전)에서 가져온다 —
  * "프로필 편집" 화면(Frame 05.2)에서 저장하면 여기 바로 반영된다.
  * "로그아웃"/"독서 대시보드" 진입은 기존 AuthContext/DashboardScreen과 실제로 연결한다.
+ *
+ * 주요 인터랙션 요소에 testID를 달아뒀다 — __tests__/ProfileScreen.test.tsx 참고.
  */
 export function ProfileScreen() {
   const {colors, typography, radii} = useTheme();
@@ -52,6 +54,7 @@ export function ProfileScreen() {
         </View>
 
         <TouchableOpacity
+          testID="edit-profile-button"
           style={[
             styles.outlineButton,
             {borderColor: colors.hairline, borderRadius: radii.md},
@@ -71,6 +74,7 @@ export function ProfileScreen() {
         </View>
 
         <TouchableOpacity
+          testID="dashboard-card"
           style={[
             styles.dashboardCard,
             {
@@ -90,6 +94,7 @@ export function ProfileScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
+          testID="logout-button"
           style={[
             styles.outlineButton,
             {borderColor: colors.hairline, borderRadius: radii.md},
