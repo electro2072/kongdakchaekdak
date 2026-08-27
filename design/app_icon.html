@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>콩닥책닥 — 앱 아이콘 (확정) v1</title>
+<title>콩닥책닥 — 앱 아이콘 (확정) v2</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/variable/pretendardvariable.min.css">
 <style>
   :root {
@@ -38,17 +38,17 @@
 <body>
 
 <div class="doc-header">
-  <h1>🥮 콩닥책닥 — 앱 아이콘 (확정) v1</h1>
-  <p>"책거리 × 송편" 브랜딩의 최종 앱 아이콘 — 쑥송편 하나, 플랫 스타일. 실제 iOS/Android 에셋을 이 파일에서 바로 추출합니다.</p>
+  <h1>🔤 콩닥책닥 — 앱 아이콘 (확정) v2</h1>
+  <p>"콩닥 / 책닥" 두 줄 워드마크형 아이콘 — 쑥송편 그린 배경 + 크림 텍스트. 실제 iOS/Android 에셋을 이 파일에서 바로 추출합니다.</p>
   <div class="meta">
-    <span>Ver 1 (확정)</span>
-    <span>작성일 2026-08-09</span>
+    <span>Ver 2 (확정)</span>
+    <span>작성일 2026-08-27</span>
     <span>App Icon — Final</span>
   </div>
   <div class="doc-note">
-    <b>결정 경위</b> — 반달 유래·솔잎 이유를 리서치한 뒤(<code>app_icon_proposal_v1.html</code>) 광택 있는 입체 스타일(<code>v2</code>, 흰 쟁반 위 3색)을 거쳐, 사용자가 "쟁반이고 뭐고 다 필요없고 쑥송편 하나만 크게"로 방향을 단순화했습니다. 이후 예시 이미지를 받아 <b>광택/그라디언트 없는 플랫 스타일</b>로 다시 그렸고(<code>v4</code>), 흰 쟁반·갈색 쟁반과 비교(<code>app_icon_compare_v5.html</code>)한 끝에 <b>쟁반 없이 쑥송편 하나만, 크기는 작게</b>로 최종 확정했습니다.<br>
-    <b>기존 book-open 글리프 아이콘(v1, 2026-07-21)을 완전히 대체합니다.</b><br>
-    <b>2026-08-27 갱신</b> — 앱 이름이 <b>"콩닥책닥"</b>으로 확정되어 문서 제목의 임시 명칭("독서 자랑 어플")을 교체했습니다. 아이콘 디자인 자체(모양·색상·크기)는 변경 없음 — 라벨 텍스트만 갱신.
+    <b>v1 → v2 교체 경위</b> — 앱 이름이 <b>"콩닥책닥"</b>으로 확정된 뒤, 아이콘을 "콩닥 / 책닥" 두 줄 텍스트로 만들어보고 싶다는 요청에 따라 3가지 색상 조합(크림 배경+그린 텍스트 / 그린 배경+크림 텍스트 / 진한 그린 배경+크림 텍스트)을 시안으로 그려 비교했습니다(<code>app_icon_text_concept_v1.html</code>). 그중 <b>그린 배경 + 크림 텍스트(B안)</b>를 선택해 이 파일로 확정했습니다.<br>
+    <b>기존 쑥송편 아이콘(v1, 2026-08-09 확정)은 폐기하지 않고 보관합니다</b> — <code>deprecated/app_icon_songpyeon_v1_archived.html</code> 및 <code>deprecated/assets/icon/</code>에 그대로 남아있고(2026-08-27, <code>design/deprecated/</code> 폴더로 이동 정리됨), 다만 실제 앱 아이콘 자리에서는 이 v2로 완전히 교체됩니다.<br>
+    <b>작은 사이즈 가독성 참고</b> — 4글자 2줄 텍스트라 29px 같은 아주 작은 사이즈에서는 다소 뭉쳐 보일 수 있음을 비교 시안 단계에서 미리 확인·공유했고, 그중 가장 대비가 강한 조합(B안)으로 결정된 것입니다.
   </div>
 </div>
 
@@ -78,6 +78,10 @@
       </div>
       <div class="label">Android 전경 레이어<br>(투명 배경 확인)</div>
     </div>
+    <div class="preview-card">
+      <div class="icon-mask" style="width:120px;height:120px;"><svg viewBox="0 0 432 432" width="120" height="120" class="clone-safezone-check"></svg></div>
+      <div class="label">안전영역(66% 원) 확인용<br>(빨간 원 = 실제 배포엔 없음)</div>
+    </div>
   </div>
 
   <h2 class="section-title">실제 내보내기 요소 (1024px / 432px 원본 크기)</h2>
@@ -89,42 +93,45 @@
   </div>
 
   <div class="export-block">
-    <div class="cap">② Android adaptive icon — 배경 레이어, 432×432, 풀블리드</div>
+    <div class="cap">② Android adaptive icon — 배경 레이어, 432×432, 풀블리드 (쑥송편 그린 단색)</div>
     <div id="android-bg-432" style="width:432px;height:432px;"></div>
   </div>
 
   <div class="export-block">
-    <div class="cap">③ Android adaptive icon — 전경 레이어, 432×432, 투명 배경 + 안전영역(66% 원) 안에 배치</div>
+    <div class="cap">③ Android adaptive icon — 전경 레이어, 432×432, 투명 배경 + 안전영역(66% 원) 안에 텍스트만 배치</div>
     <div id="android-fg-432" style="width:432px;height:432px;"></div>
   </div>
 
 </div>
 
 <script>
-  const SHAPE_D = "M185,100 C178,65 110,8 60,10 C15,12 0,55 5,95 C10,140 55,155 100,145 C140,138 180,110 185,100 Z";
-  const SEAM_D = "M25,110 Q75,150 120,120 T175,95";
-  const BG_COLOR = "#f7f1e4";
-  const mugwortFill = "#7D8F5D";
-  const mugwortSeam = "#4f5c3a";
+  const BG_COLOR = "#7D8F5D";   // 쑥송편 그린 (기존 아이콘과 동일 브랜드 그린)
+  const TEXT_COLOR = "#f7f1e4"; // 크림 (기존 아이콘 배경색을 텍스트에 재사용)
+  const FONT_WEIGHT = 800;
+  const FONT_FAMILY = "'Pretendard Variable','Pretendard',sans-serif";
+
+  function textGroup(fill) {
+    return `
+      <text x="100" y="88" text-anchor="middle" font-family="${FONT_FAMILY}" font-weight="${FONT_WEIGHT}" font-size="46" fill="${fill}" letter-spacing="-1">콩닥</text>
+      <text x="100" y="136" text-anchor="middle" font-family="${FONT_FAMILY}" font-weight="${FONT_WEIGHT}" font-size="46" fill="${fill}" letter-spacing="-1">책닥</text>
+    `;
+  }
 
   // ---- 200x200 기준 아이콘 (미리보기용, iOS 1024 원본과 동일 비율) ----
   function iconMarkup200() {
     return `
       <rect x="0" y="0" width="200" height="200" fill="${BG_COLOR}"/>
-      <g transform="translate(30,38) scale(0.76)">
-        <path d="${SHAPE_D}" fill="${mugwortFill}"/>
-        <path d="${SEAM_D}" stroke="${mugwortSeam}" stroke-width="6" fill="none" stroke-linecap="round"/>
-      </g>
+      <g id="txt-200">${textGroup(TEXT_COLOR)}</g>
     `;
   }
 
-  // ---- 432x432 기준, 투명 배경, 66% 안전영역 안에 들어가는 전경 레이어 ----
+  // ---- 432x432 기준, 투명 배경, 66% 안전영역(반지름 142.5px) 안에 들어가는 전경 레이어 ----
+  // 텍스트 그룹의 실측 bbox(200 기준): x=55,y=46,width=91,height=100 → 중심(100.5, 96), 반대각선 67.6
+  // 목표: 반대각선 * scale ≈ 128 (반지름 142.5의 약 90% — 여유 있게) → scale ≈ 1.9
   function iconMarkupTransparentFg() {
-    // 원본 shape bbox: 대략 185x147. 216,216 중심으로 안전영역(반지름 142) 안에 들어가도록 scale 1.18
     return `
-      <g transform="translate(216,216) scale(1.18) translate(-92.5,-73.5)">
-        <path d="${SHAPE_D}" fill="${mugwortFill}"/>
-        <path d="${SEAM_D}" stroke="${mugwortSeam}" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <g transform="translate(216,216) scale(1.9) translate(-100,-96)">
+        ${textGroup(TEXT_COLOR)}
       </g>
     `;
   }
@@ -135,6 +142,9 @@
   document.getElementById('prev-1x').innerHTML = html200;
   document.querySelectorAll('.clone').forEach(el => el.innerHTML = html200);
   document.querySelectorAll('.clone-fg-transparent').forEach(el => el.innerHTML = htmlFg);
+  document.querySelectorAll('.clone-safezone-check').forEach(el => el.innerHTML =
+    `<rect x="0" y="0" width="432" height="432" fill="${BG_COLOR}"/>${htmlFg}<circle cx="216" cy="216" r="142.5" fill="none" stroke="red" stroke-width="3"/>`
+  );
 
   // ① iOS 1024 원본
   document.getElementById('ios-1024').innerHTML =
