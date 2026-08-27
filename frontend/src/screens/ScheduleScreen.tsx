@@ -7,7 +7,10 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Bell, BookOpen, CalendarDays, Plus} from 'lucide-react-native';
+import type {MainStackParamList} from '../navigation/types';
 import {useTheme} from '../theme';
 
 type DayState = 'normal' | 'today' | 'meeting';
@@ -36,6 +39,8 @@ const READING_NOW_COUNT = 2;
 /** Frame 02 · 일정 탭 (design/hifi_mockup_v1.html 기준: 이번달 독서 일정, 캘린더 스트립, 오늘의 리딩 카드) */
 export function ScheduleScreen() {
   const {colors, typography, radii} = useTheme();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<MainStackParamList>>();
 
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: colors.surface}]}>
@@ -183,7 +188,8 @@ export function ScheduleScreen() {
           style={[
             styles.addButton,
             {borderColor: colors.p700, borderRadius: radii.md},
-          ]}>
+          ]}
+          onPress={() => navigation.navigate('BookSearch')}>
           <Plus size={15} color={colors.p700} />
           <Text style={[typography.button, {color: colors.p700}]}>
             새 책 등록하기

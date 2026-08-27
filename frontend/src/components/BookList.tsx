@@ -1,7 +1,10 @@
 import React from "react";
-import { FlatList, View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { FlatList, View, StyleSheet } from "react-native";
+import { SearchX } from "lucide-react-native";
 import { Book } from "../types/book";
 import { BookListItem } from "./BookListItem";
+import { EmptyState } from "./EmptyState";
+import { LoadingSkeleton } from "./LoadingSkeleton";
 
 interface BookListProps {
   books: Book[];
@@ -13,17 +16,19 @@ interface BookListProps {
 export function BookList({ books, isLoading, onSelectBook }: BookListProps) {
   if (isLoading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator />
+      <View style={styles.padded}>
+        <LoadingSkeleton count={4} />
       </View>
     );
   }
 
   if (books.length === 0) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>검색 결과가 없습니다.</Text>
-      </View>
+      <EmptyState
+        icon={SearchX}
+        title="검색 결과가 없어요"
+        description="다른 검색어로 다시 시도해보세요"
+      />
     );
   }
 
@@ -37,11 +42,7 @@ export function BookList({ books, isLoading, onSelectBook }: BookListProps) {
 }
 
 const styles = StyleSheet.create({
-  center: {
-    padding: 32,
-    alignItems: "center",
-  },
-  emptyText: {
-    color: "#999",
+  padded: {
+    padding: 12,
   },
 });

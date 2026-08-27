@@ -7,6 +7,8 @@ interface UseBookSearchResult {
   books: Book[];
   isLoading: boolean;
   error: string | null;
+  /** 마지막으로 실행한 검색어. 에러 화면의 "다시 시도" 버튼이 같은 검색을 재실행할 때 쓴다. */
+  lastQuery: string;
   search: (query: string, providerId?: BookProviderId) => Promise<void>;
 }
 
@@ -15,10 +17,13 @@ export function useBookSearch(): UseBookSearchResult {
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastQuery, setLastQuery] = useState("");
 
   const search = useCallback(async (query: string, providerId?: BookProviderId) => {
+    setLastQuery(query);
     if (!query.trim()) {
       setBooks([]);
+      setError(null);
       return;
     }
     setIsLoading(true);
@@ -34,5 +39,5 @@ export function useBookSearch(): UseBookSearchResult {
     }
   }, []);
 
-  return { books, isLoading, error, search };
+  return { books, isLoading, error, lastQuery, search };
 }

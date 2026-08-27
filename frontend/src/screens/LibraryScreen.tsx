@@ -13,6 +13,7 @@ import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Search, BookOpen, Camera, PenLine} from 'lucide-react-native';
 import type {MainStackParamList} from '../navigation/types';
 import {MOCK_LIBRARY_BOOKS, type BookStatus} from '../mocks/libraryBooks';
+import {EmptyState} from '../components/EmptyState';
 import {useTheme} from '../theme';
 
 /** Frame 03 · 서재 탭 (목록) — design/hifi_mockup_v1.html 기준. 카드 탭 시 Frame 03.1(책 상세)로 이동 */
@@ -108,13 +109,13 @@ export function LibraryScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.list}>
           {books.length === 0 ? (
-            <Text
-              style={[
-                typography.caption,
-                {color: colors.n600, textAlign: 'center', marginTop: 40},
-              ]}>
-              해당하는 책이 없어요
-            </Text>
+            <EmptyState
+              icon={Search}
+              title="해당하는 책이 없어요"
+              description="다른 검색어나 필터로 다시 찾아보세요"
+              actionLabel="책 등록하기"
+              onAction={() => navigation.navigate('BookSearch')}
+            />
           ) : (
             books.map(book => {
               const photoCount = book.photos.length;
