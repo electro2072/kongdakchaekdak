@@ -3,6 +3,7 @@ package com.bookflex.domain.group;
 import com.bookflex.common.exception.DuplicateResourceException;
 import com.bookflex.common.exception.ForbiddenException;
 import com.bookflex.common.exception.ResourceNotFoundException;
+import com.bookflex.common.logging.AuditLogger;
 import com.bookflex.domain.group.dto.GroupCreateRequest;
 import com.bookflex.domain.group.dto.GroupMemberAddRequest;
 import com.bookflex.domain.group.dto.GroupMemberResponse;
@@ -30,6 +31,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final UserRepository userRepository;
+    private final AuditLogger auditLogger;
 
     @Transactional
     public GroupResponse create(GroupCreateRequest request, Long currentUserId) {
@@ -38,6 +40,7 @@ public class GroupService {
         Group group = groupRepository.save(new Group(owner, request.name()));
         groupMemberRepository.save(new GroupMember(group, owner));
 
+        auditLogger.event("GROUP_CREATED", currentUserId, "groupId=" + group.getId() + ", name=" + request.name());
         return GroupResponse.from(group, 1);
     }
 
@@ -75,6 +78,7 @@ public class GroupService {
 
         groupMemberRepository.deleteByGroupId(groupId);
         groupRepository.delete(group);
+        auditLogger.event("GROUP_DELETED", currentUserId, "groupId=" + groupId);
     }
 
     @Transactional

@@ -2,13 +2,18 @@ package com.bookflex.domain.user;
 
 import com.bookflex.domain.common.Genre;
 import com.bookflex.domain.common.GenreConverter;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
@@ -20,6 +25,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.EntityListeners;
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * 테이블정의서 User 매핑.
@@ -29,10 +36,16 @@ import java.time.LocalDateTime;
  * CRUD 동작을 먼저 검증하기 위한 임시 조치이며, Step 3에서 OAuth2 연동 시 이 완화를
  * 다시 검토해야 한다.</p>
  *
- * <p>(social_provider, social_id) 조합에는 unique 제약을 걸어 이메일/PW 중복 가입 및
- * 향후 동일 소셜 계정 중복 가입을 DB 레벨에서도 막는다. NULL 값은 MySQL/H2 모두 유니크
- * 제약에서 서로 다른 값으로 취급되므로, 아직 두 컬럼이 비어 있는 기존 Step 2 테스트 데이터와는
- * 충돌하지 않는다.</p>
+ * <p>(social_provider, social_id) 조합에는 unique 제약을 걸어 동일 소셜 계정 중복 가입을
+ * DB 레벨에서도 막는다.</p>
+ *
+ * <p>제품 결정(2026-07-22): 서버가 비밀번호 등 인증 정보를 직접 보관하지 않기로 하면서
+ * 이메일/PW 로그인은 완전히 제거되었다(2026-08-27, 코드에 남아있던 것을 뒤늦게 발견해서
+ * 이번에 실제로 삭제함) — 이 엔티티는 카카오/구글/네이버 소셜 로그인만 지원한다
+ * ({@link #forSocialLogin}). 참고로 기존에 있던 {@code password_hash} 컬럼은 이 변경으로
+ * 더 이상 애플리케이션에서 쓰이지 않지만, {@code ddl-auto: update} 특성상 DB 테이블에는
+ * 그대로 남아있을 수 있다 — 필요하면 수동으로 컬럼을 정리해야 한다.</p>
+ *
  * <p>관심분야(2026-08-27 추가, {@link #interests}): 회원가입(Frame 01.1)·프로필 편집
  * (Frame 05.2) 화면이 다중선택으로 입력받는 값을 저장한다. 디자이너 에이전트가
  * {@code hifi_mockup_v1.html} 실제 마크업을 확인해 회신한 고정 6개 카테고리
@@ -73,15 +86,13 @@ public class User {
     @Column(name = "social_id", length = 100)
     private String socialId;
 
-    /**
-     * Step 3(인증) 판단 사항: 테이블정의서에는 없는 컬럼이지만, "이메일/PW로 먼저 인증 구조를
-     * 검증한 뒤 카카오→구글→네이버 OAuth2 순으로 붙인다"는 백엔드구축계획 순서를 따르기 위해 추가함.
-     * 이메일/PW 로그인은 socialProvider="local", socialId=이메일 로 저장하고(별도 email 컬럼을
-     * 새로 만들지 않고 기존 social_id를 재사용), 이 필드에 비밀번호 해시(BCrypt)만 별도 보관한다.
-     * 실제 소셜 로그인(카카오 등) 사용자는 이 필드가 계속 null.
-     */
-    @Column(name = "password_hash", length = 255)
-    private String passwordHash;
+    // 테이블정의서에는 없던 컬럼 — 관심분야 다중선택(2026-08-27 추가). 회원당 최대 6개(전체
+    // 카테고리 수)이므로 별도 순서 보장은 불필요, 응답 시 일관된 순서를 위해 LinkedHashSet 사용.
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "user_interests", joinColumns = @JoinColumn(name = "user_id"))
+    @Convert(converter = GenreConverter.class)
+    @Column(name = "genre", length = 20)
+    private Set<Genre> interests = new LinkedHashSet<>();
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)
@@ -102,19 +113,9 @@ public class User {
     }
 
     /**
-     * 이메일/PW 회원가입 전용 팩토리. socialProvider="local", socialId=이메일 로 저장한다
-     * (클래스 상단 Javadoc 참고). 비밀번호는 반드시 인코딩(BCrypt 등)된 값을 전달해야 한다.
-     */
-    public static User forLocalSignup(String nickname, String email, String encodedPassword) {
-        User user = new User(nickname, null, null, null, "local", email);
-        user.passwordHash = encodedPassword;
-        return user;
-    }
-
-    /**
      * 소셜 로그인(카카오/구글/네이버) 최초 가입 전용 팩토리. {@code socialProvider}는
      * "kakao"/"google"/"naver", {@code socialId}는 각 제공자가 내려주는 고유 사용자 식별자
-     * (카카오 id, 구글 sub, 네이버 id)를 문자열로 저장한다. passwordHash는 계속 null로 남는다.
+     * (카카오 id, 구글 sub, 네이버 id)를 문자열로 저장한다.
      */
     public static User forSocialLogin(String nickname, String socialProvider, String socialId) {
         return new User(nickname, null, null, null, socialProvider, socialId);

@@ -29,6 +29,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @MockBean으로 대체해서 "제공자가 이런 사용자 정보를 돌려줬다"는 상황만 가정하고 그 뒤
  * (신규가입/기존회원 매칭/토큰발급) 로직만 검증한다. 실제 카카오/구글/네이버 연동 자체는
  * .env에 키를 넣고 로컬에서 모바일 앱과 함께 수동으로 확인해야 한다.
+ *
+ * <p>{@code 토큰_없이_me_조회하면_401}은 원래 AuthControllerTest(이메일/PW 로그인 테스트)에
+ * 있었으나, 이메일/PW 로그인이 완전히 삭제되면서(2026-08-27) 이 클래스로 옮겨 커버리지를
+ * 유지했다 — {@code /api/auth/me}는 소셜 로그인 사용자도 그대로 쓰는 공통 엔드포인트다.</p>
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -138,6 +142,13 @@ class SocialAuthControllerTest {
         mockMvc.perform(post("/api/auth/kakao").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("VALIDATION_FAILED"));
+    }
+
+    @Test
+    void 토큰_없이_me_조회하면_401() throws Exception {
+        mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
     }
 
     private Long extractUserId(String tokenResponseJson) throws Exception {

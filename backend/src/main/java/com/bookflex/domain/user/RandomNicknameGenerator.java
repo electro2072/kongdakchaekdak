@@ -6,8 +6,8 @@ import java.security.SecureRandom;
 
 /**
  * 닉네임 미입력 시 자동 배정하는 랜덤 닉네임 생성기 (예: "책벌레1234").
- * User CRUD(UserService), 이메일/PW 가입(AuthService), 소셜 로그인 최초 가입(SocialAuthService)
- * 세 곳에서 공통으로 사용해서 로직이 흩어지지 않게 한다.
+ * User CRUD(UserService), 소셜 로그인 최초 가입(SocialAuthService) 두 곳에서 공통으로
+ * 사용해서 로직이 흩어지지 않게 한다.
  */
 @Component
 public class RandomNicknameGenerator {

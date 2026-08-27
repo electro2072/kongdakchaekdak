@@ -1,6 +1,7 @@
 package com.bookflex.security;
 
 import com.bookflex.common.exception.ErrorResponse;
+import com.bookflex.common.logging.SecurityEventLogger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,10 +23,13 @@ import java.io.IOException;
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private final ObjectMapper objectMapper;
+    private final SecurityEventLogger securityEventLogger;
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                           AuthenticationException authException) throws IOException {
+        securityEventLogger.unauthenticatedAccess(request.getMethod(), request.getRequestURI());
+
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");

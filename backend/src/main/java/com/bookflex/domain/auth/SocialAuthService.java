@@ -1,5 +1,7 @@
 package com.bookflex.domain.auth;
 
+import com.bookflex.common.logging.AuditLogger;
+import com.bookflex.common.logging.SecurityEventLogger;
 import com.bookflex.domain.auth.dto.TokenResponse;
 import com.bookflex.domain.auth.oauth2.GoogleOAuthClient;
 import com.bookflex.domain.auth.oauth2.KakaoOAuthClient;
@@ -11,6 +13,8 @@ import com.bookflex.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 /**
  * 카카오 → 구글 → 네이버 소셜 로그인 (Step 3 두 번째 단계). 모바일 앱이 각 제공자 SDK로
@@ -37,6 +41,8 @@ public class SocialAuthService {
     private final KakaoOAuthClient kakaoOAuthClient;
     private final GoogleOAuthClient googleOAuthClient;
     private final NaverOAuthClient naverOAuthClient;
+    private final AuditLogger auditLogger;
+    private final SecurityEventLogger securityEventLogger;
 
     @Transactional
     public TokenResponse loginWithKakao(String accessToken) {
@@ -54,15 +60,22 @@ public class SocialAuthService {
     }
 
     private TokenResponse loginWithProvider(String provider, SocialUserInfo socialUserInfo) {
-        User user = userRepository.findBySocialProviderAndSocialId(provider, socialUserInfo.providerUserId())
-                .orElseGet(() -> {
-                    String nickname = (socialUserInfo.nicknameHint() == null || socialUserInfo.nicknameHint().isBlank())
-                            ? randomNicknameGenerator.generate()
-                            : socialUserInfo.nicknameHint();
-                    User newUser = User.forSocialLogin(nickname, provider, socialUserInfo.providerUserId());
-                    return userRepository.save(newUser);
-                });
+        Optional<User> existing = userRepository.findBySocialProviderAndSocialId(
+                provider, socialUserInfo.providerUserId());
 
+        User user;
+        if (existing.isPresent()) {
+            user = existing.get();
+        } else {
+            String nickname = (socialUserInfo.nicknameHint() == null || socialUserInfo.nicknameHint().isBlank())
+                    ? randomNicknameGenerator.generate()
+                    : socialUserInfo.nicknameHint();
+            User newUser = User.forSocialLogin(nickname, provider, socialUserInfo.providerUserId());
+            user = userRepository.save(newUser);
+            auditLogger.event("USER_SIGNUP", user.getId(), "provider=" + provider);
+        }
+
+        securityEventLogger.loginSuccess(provider, user.getId());
         return authService.issueToken(user.getId());
     }
 }

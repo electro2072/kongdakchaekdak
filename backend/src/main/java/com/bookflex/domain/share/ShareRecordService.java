@@ -3,6 +3,7 @@ package com.bookflex.domain.share;
 import com.bookflex.common.exception.ForbiddenException;
 import com.bookflex.common.exception.InvalidRequestException;
 import com.bookflex.common.exception.ResourceNotFoundException;
+import com.bookflex.common.logging.AuditLogger;
 import com.bookflex.domain.book.Book;
 import com.bookflex.domain.book.BookRepository;
 import com.bookflex.domain.bookphoto.BookPhoto;
@@ -64,6 +65,7 @@ public class ShareRecordService {
     private final GroupMemberRepository groupMemberRepository;
     private final DashboardService dashboardService;
     private final ObjectMapper objectMapper;
+    private final AuditLogger auditLogger;
 
     @Transactional
     public ShareRecordResponse create(ShareRecordCreateRequest request, Long currentUserId) {
@@ -91,6 +93,8 @@ public class ShareRecordService {
             shareRecordPhotoRepository.save(new ShareRecordPhoto(record, photos.get(i), i));
         }
 
+        auditLogger.event("SHARE_CREATED", currentUserId,
+                "shareRecordId=" + record.getId() + ", shareType=" + request.shareType() + ", scope=" + request.scope());
         return toResponse(record);
     }
 
@@ -112,6 +116,7 @@ public class ShareRecordService {
         shareRecordTargetRepository.deleteByShareRecordId(id);
         shareRecordPhotoRepository.deleteByShareRecordId(id);
         shareRecordRepository.delete(record);
+        auditLogger.event("SHARE_DELETED", currentUserId, "shareRecordId=" + id);
     }
 
     private ShareRecordResponse toResponse(ShareRecord record) {

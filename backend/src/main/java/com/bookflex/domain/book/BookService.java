@@ -2,6 +2,7 @@ package com.bookflex.domain.book;
 
 import com.bookflex.common.exception.ForbiddenException;
 import com.bookflex.common.exception.ResourceNotFoundException;
+import com.bookflex.common.logging.AuditLogger;
 import com.bookflex.domain.book.dto.BookCreateRequest;
 import com.bookflex.domain.book.dto.BookResponse;
 import com.bookflex.domain.book.dto.BookUpdateRequest;
@@ -21,6 +22,7 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final AuditLogger auditLogger;
 
     @Transactional
     public BookResponse create(BookCreateRequest request, Long currentUserId) {
@@ -41,7 +43,9 @@ public class BookService {
                 request.totalPages(),
                 request.startDate()
         );
-        return BookResponse.from(bookRepository.save(book));
+        Book saved = bookRepository.save(book);
+        auditLogger.event("BOOK_REGISTERED", currentUserId, "bookId=" + saved.getId() + ", title=" + saved.getTitle());
+        return BookResponse.from(saved);
     }
 
     public BookResponse getById(Long id) {
@@ -76,6 +80,7 @@ public class BookService {
         Book book = findBookOrThrow(id);
         requireOwner(book, currentUserId);
         book.complete(endDate);
+        auditLogger.event("BOOK_COMPLETED", currentUserId, "bookId=" + id + ", endDate=" + endDate);
         return BookResponse.from(book);
     }
 
@@ -84,6 +89,7 @@ public class BookService {
         Book book = findBookOrThrow(id);
         requireOwner(book, currentUserId);
         bookRepository.delete(book);
+        auditLogger.event("BOOK_DELETED", currentUserId, "bookId=" + id);
     }
 
     private Book findBookOrThrow(Long id) {

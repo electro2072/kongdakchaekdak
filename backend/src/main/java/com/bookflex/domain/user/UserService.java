@@ -2,6 +2,7 @@ package com.bookflex.domain.user;
 
 import com.bookflex.common.exception.ForbiddenException;
 import com.bookflex.common.exception.ResourceNotFoundException;
+import com.bookflex.common.logging.AuditLogger;
 import com.bookflex.domain.user.dto.UserCreateRequest;
 import com.bookflex.domain.user.dto.UserResponse;
 import com.bookflex.domain.user.dto.UserUpdateRequest;
@@ -18,6 +19,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RandomNicknameGenerator randomNicknameGenerator;
+    private final AuditLogger auditLogger;
 
     @Transactional
     public UserResponse create(UserCreateRequest request) {
@@ -34,7 +36,9 @@ public class UserService {
                 request.socialId()
         );
 
-        return UserResponse.from(userRepository.save(user));
+        User saved = userRepository.save(user);
+        auditLogger.event("USER_CREATED", saved.getId(), null);
+        return UserResponse.from(saved);
     }
 
     public UserResponse getById(Long id) {
@@ -60,6 +64,7 @@ public class UserService {
         requireOwner(id, currentUserId);
         User user = findUserOrThrow(id);
         userRepository.delete(user);
+        auditLogger.event("USER_DELETED", currentUserId, "targetUserId=" + id);
     }
 
     // 본인 계정만 수정/삭제할 수 있도록 강제한다. 다른 회원의 프로필 조회(getById/getAll)는
