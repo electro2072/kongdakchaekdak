@@ -6,6 +6,7 @@ import com.bookflex.domain.booknote.BookNote;
 import com.bookflex.domain.booknote.BookNoteRepository;
 import com.bookflex.domain.bookphoto.BookPhoto;
 import com.bookflex.domain.bookphoto.BookPhotoRepository;
+import com.bookflex.domain.common.Genre;
 import com.bookflex.domain.share.dto.DashboardSnapshotResponse;
 import com.bookflex.domain.user.User;
 import com.bookflex.domain.user.UserRepository;
@@ -69,7 +70,7 @@ class PublicShareControllerTest {
     void setUp() {
         sharer = userRepository.save(new User("책벌레", null, null, null, "kakao", "public-share-test-social-id"));
         book = new Book(sharer, "달러구트 꿈 백화점", "이미예", "https://example.com/cover.jpg",
-                null, "소설", 300, LocalDate.of(2026, 7, 1));
+                null, Genre.NOVEL, 300, LocalDate.of(2026, 7, 1));
         book.complete(LocalDate.of(2026, 7, 9));
         book = bookRepository.save(book);
     }

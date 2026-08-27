@@ -182,7 +182,7 @@ class BookControllerTest {
 
         String updateBody = objectMapper.writeValueAsString(Map.of(
                 "title", "해킹된 제목", "author", "해커",
-                "coverImage", "", "isbn", "", "genre", "", "totalPages", 0
+                "coverImage", "", "isbn", "", "totalPages", 0
         ));
         mockMvc.perform(put("/api/books/{id}", otherBookId)
                         .header("Authorization", bearerToken)

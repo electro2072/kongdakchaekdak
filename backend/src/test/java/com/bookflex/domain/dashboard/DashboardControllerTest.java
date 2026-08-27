@@ -2,6 +2,7 @@ package com.bookflex.domain.dashboard;
 
 import com.bookflex.domain.book.Book;
 import com.bookflex.domain.book.BookRepository;
+import com.bookflex.domain.common.Genre;
 import com.bookflex.domain.user.User;
 import com.bookflex.domain.user.UserRepository;
 import com.bookflex.security.JwtProvider;
@@ -55,13 +56,13 @@ class DashboardControllerTest {
         Long userId = userRepository.save(user).getId();
         bearerToken = "Bearer " + jwtProvider.generateToken(userId);
 
-        saveCompletedBook(user, "가장 빠른 책", "소설", 300, LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 3));
-        saveCompletedBook(user, "가장 느린 책", "소설", null, LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 20));
+        saveCompletedBook(user, "가장 빠른 책", Genre.NOVEL, 300, LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 3));
+        saveCompletedBook(user, "가장 느린 책", Genre.NOVEL, null, LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 20));
         saveCompletedBook(user, "장르 없는 책", null, 150, LocalDate.of(2026, 7, 5), LocalDate.of(2026, 7, 10));
-        saveCompletedBook(user, "6월 책", "소설", 250, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 15));
+        saveCompletedBook(user, "6월 책", Genre.NOVEL, 250, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 15));
     }
 
-    private void saveCompletedBook(User user, String title, String genre, Integer totalPages,
+    private void saveCompletedBook(User user, String title, Genre genre, Integer totalPages,
                                     LocalDate startDate, LocalDate endDate) {
         Book book = new Book(user, title, "저자", null, null, genre, totalPages, startDate);
         book.complete(endDate);

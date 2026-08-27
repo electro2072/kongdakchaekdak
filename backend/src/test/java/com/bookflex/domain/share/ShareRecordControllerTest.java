@@ -6,6 +6,7 @@ import com.bookflex.domain.bookphoto.BookPhoto;
 import com.bookflex.domain.bookphoto.BookPhotoRepository;
 import com.bookflex.domain.booknote.BookNote;
 import com.bookflex.domain.booknote.BookNoteRepository;
+import com.bookflex.domain.common.Genre;
 import com.bookflex.domain.group.Group;
 import com.bookflex.domain.group.GroupMember;
 import com.bookflex.domain.group.GroupMemberRepository;
@@ -372,7 +373,7 @@ class ShareRecordControllerTest {
     @Test
     void DASHBOARD_공유시_대시보드_스냅샷이_저장된다() throws Exception {
         User sharer = userRepository.findById(sharerId).orElseThrow();
-        Book completedBook = new Book(sharer, "완독한 책", "저자", null, null, "소설",
+        Book completedBook = new Book(sharer, "완독한 책", "저자", null, null, Genre.NOVEL,
                 200, LocalDate.of(2026, 7, 1));
         completedBook.complete(LocalDate.of(2026, 7, 10));
         bookRepository.save(completedBook);
