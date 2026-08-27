@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -169,5 +170,92 @@ class UserControllerTest {
         mockMvc.perform(get("/api/users/{id}", 1L))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
+    }
+
+    // 2026-08-27: User.interests(관심분야, Set<Genre>)가 회원가입/프로필수정 DTO에 실제로
+    // 연동됐지만(개발현황.md 30번) 이 계약을 검증하는 테스트가 없었던 것을 테스터가 지적함
+    // (테스트코드작성요청_v1.md) — 아래 4개로 등록 시 반영/6개 밖 값 거부/빈 배열=전체 해제/
+    // 필드 생략=변경 없음(User.updateInterests 시맨틱) 네 가지를 각각 커버한다.
+
+    @Test
+    void 관심분야를_지정해서_가입하면_응답에_반영된다() throws Exception {
+        String body = objectMapper.writeValueAsString(java.util.Map.of(
+                "nickname", "장르덕후",
+                "interests", java.util.List.of("소설", "과학")
+        ));
+
+        mockMvc.perform(post("/api/users")
+                        .header("Authorization", bearerToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.interests.length()").value(2))
+                .andExpect(jsonPath("$.interests", containsInAnyOrder("소설", "과학")));
+    }
+
+    @Test
+    void 등록되지_않은_관심분야_값이면_400() throws Exception {
+        // "판타지"는 디자인이 확정한 6개 카테고리(소설/에세이/자기계발/인문/과학/경제·경영)에 없음.
+        String body = objectMapper.writeValueAsString(java.util.Map.of(
+                "nickname", "잘못된입력",
+                "interests", java.util.List.of("판타지")
+        ));
+
+        mockMvc.perform(post("/api/users")
+                        .header("Authorization", bearerToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("MALFORMED_REQUEST"));
+    }
+
+    @Test
+    void 관심분야를_빈_배열로_수정하면_전체_해제된다() throws Exception {
+        String createBody = objectMapper.writeValueAsString(java.util.Map.of(
+                "nickname", "해제될사람",
+                "interests", java.util.List.of("인문", "경제·경영")
+        ));
+        String response = mockMvc.perform(post("/api/users")
+                        .header("Authorization", bearerToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createBody))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.interests.length()").value(2))
+                .andReturn().getResponse().getContentAsString();
+        Long id = objectMapper.readTree(response).get("id").asLong();
+
+        String updateBody = objectMapper.writeValueAsString(java.util.Map.of("interests", java.util.List.of()));
+        mockMvc.perform(patch("/api/users/{id}", id)
+                        .header("Authorization", bearerToken(id))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.interests").isEmpty());
+    }
+
+    @Test
+    void 관심분야_필드를_생략하고_수정하면_기존_값이_유지된다() throws Exception {
+        // User.updateInterests(Set)의 null=변경없음 시맨틱 — interests 키 자체를 요청 바디에서
+        // 생략하면(다른 필드만 수정) 기존 관심분야가 그대로 남아야 한다.
+        String createBody = objectMapper.writeValueAsString(java.util.Map.of(
+                "nickname", "유지될사람",
+                "interests", java.util.List.of("에세이")
+        ));
+        String response = mockMvc.perform(post("/api/users")
+                        .header("Authorization", bearerToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createBody))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        Long id = objectMapper.readTree(response).get("id").asLong();
+
+        String updateBody = objectMapper.writeValueAsString(java.util.Map.of("bio", "관심분야는 안 건드림"));
+        mockMvc.perform(patch("/api/users/{id}", id)
+                        .header("Authorization", bearerToken(id))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.bio").value("관심분야는 안 건드림"))
+                .andExpect(jsonPath("$.interests", containsInAnyOrder("에세이")));
     }
 }

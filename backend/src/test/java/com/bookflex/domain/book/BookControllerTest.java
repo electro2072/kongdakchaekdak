@@ -202,4 +202,74 @@ class BookControllerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("FORBIDDEN"));
     }
+
+    // 2026-08-27: Book.genre가 자유 String에서 Genre enum(6개 고정 카테고리)으로 바뀐 뒤
+    // (개발현황.md 30번) 정작 이 계약을 검증하는 테스트가 없었던 것을 테스터가 지적함
+    // (테스트코드작성요청_v1.md) — 아래 3개로 등록/수정 시 한글 라벨이 그대로 왕복되는지와
+    // 6개 밖의 값이면 400으로 거부되는지를 커버한다.
+
+    @Test
+    void 장르를_지정해서_등록하면_한글_라벨_그대로_응답된다() throws Exception {
+        String body = objectMapper.writeValueAsString(Map.of(
+                "userId", userId,
+                "title", "코스모스",
+                "author", "칼 세이건",
+                "startDate", "2026-07-01",
+                "genre", "과학"
+        ));
+
+        mockMvc.perform(post("/api/books")
+                        .header("Authorization", bearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.genre").value("과학"));
+    }
+
+    @Test
+    void 등록되지_않은_장르_값이면_400() throws Exception {
+        // "판타지"는 디자인이 확정한 6개 카테고리(소설/에세이/자기계발/인문/과학/경제·경영)에 없음.
+        String body = objectMapper.writeValueAsString(Map.of(
+                "userId", userId,
+                "title", "알 수 없는 장르의 책",
+                "author", "익명",
+                "startDate", "2026-07-01",
+                "genre", "판타지"
+        ));
+
+        mockMvc.perform(post("/api/books")
+                        .header("Authorization", bearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("MALFORMED_REQUEST"))
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void 장르_수정이_반영된다() throws Exception {
+        String createBody = objectMapper.writeValueAsString(Map.of(
+                "userId", userId,
+                "title", "미움받을 용기",
+                "author", "기시미 이치로",
+                "startDate", "2026-07-01",
+                "genre", "자기계발"
+        ));
+        String response = mockMvc.perform(post("/api/books")
+                        .header("Authorization", bearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createBody))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        Long bookId = objectMapper.readTree(response).get("id").asLong();
+
+        String updateBody = objectMapper.writeValueAsString(Map.of("genre", "에세이"));
+        mockMvc.perform(put("/api/books/{id}", bookId)
+                        .header("Authorization", bearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.genre").value("에세이"))
+                .andExpect(jsonPath("$.title").value("미움받을 용기"));
+    }
 }

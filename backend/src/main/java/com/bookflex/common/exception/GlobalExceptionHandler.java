@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -76,6 +77,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest()
                 .body(ErrorResponse.of(HttpStatus.BAD_REQUEST.value(), "VALIDATION_FAILED",
                         "요청 값이 올바르지 않습니다.", fieldErrors));
+    }
+
+    /**
+     * 요청 본문(JSON) 자체를 파싱/역직렬화할 수 없는 경우 — 문법이 깨졌거나, {@code Genre} 같은
+     * enum 필드에 6개 고정 카테고리 밖의 값(예: {@code "판타지"})이 들어온 경우가 대표적이다.
+     * {@code Genre.fromLabel(String)}이 던지는 {@link IllegalArgumentException}이 Jackson
+     * 역직렬화 과정에서 이 예외로 감싸져 올라온다.
+     *
+     * <p><b>(2026-08-27 추가)</b> 이 핸들러가 없으면 이런 요청은 아래 catch-all
+     * {@link #handleUnexpected}에 걸려 500으로 응답됐다 — 클라이언트 입력 오류인데 서버 오류로
+     * 잘못 분류되는 문제였다(테스터 요청서 `테스트코드작성요청_v1.md`의 "enum 라벨 오류 → 400"
+     * 계약과도 불일치). 이제 다른 검증 실패와 동일하게 400으로 응답한다.</p>
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleMalformedRequest(HttpMessageNotReadableException ex) {
+        log.warn("요청 본문을 읽을 수 없음: {}", ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(ErrorResponse.of(HttpStatus.BAD_REQUEST.value(), "MALFORMED_REQUEST",
+                        "요청 본문을 읽을 수 없습니다. 필드 값과 형식을 확인해주세요."));
     }
 
     /**
