@@ -1,5 +1,7 @@
 package com.bookflex.domain.user;
 
+import com.bookflex.domain.common.Genre;
+import com.bookflex.domain.common.GenreConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -31,6 +33,14 @@ import java.time.LocalDateTime;
  * 향후 동일 소셜 계정 중복 가입을 DB 레벨에서도 막는다. NULL 값은 MySQL/H2 모두 유니크
  * 제약에서 서로 다른 값으로 취급되므로, 아직 두 컬럼이 비어 있는 기존 Step 2 테스트 데이터와는
  * 충돌하지 않는다.</p>
+ * <p>관심분야(2026-08-27 추가, {@link #interests}): 회원가입(Frame 01.1)·프로필 편집
+ * (Frame 05.2) 화면이 다중선택으로 입력받는 값을 저장한다. 디자이너 에이전트가
+ * {@code hifi_mockup_v1.html} 실제 마크업을 확인해 회신한 고정 6개 카테고리
+ * ({@link Genre})만 허용한다(자유 입력 아님) —
+ * {@code claude/독서기록앱_백엔드요청_디자인_관심분야장르확인_v1.md} 참고. 이번 라운드는
+ * 엔티티 계층만 먼저 구현한 것으로, 회원가입/프로필 수정 API가 실제로 이 필드를 채우도록
+ * 하는 서비스·DTO 연동은 아직 없다({@code domain/user/dto}가 이 세션 도구의 폴더 깊이
+ * 제한으로 못 읽는 상태라 다음 라운드로 미룸, 개발현황.md 27번 항목 참고).</p>
  */
 @Entity
 @Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = {"social_provider", "social_id"}))
@@ -123,5 +133,18 @@ public class User {
         if (gender != null) {
             this.gender = gender;
         }
+    }
+
+    /**
+     * 관심분야를 통째로 교체한다(부분 추가/삭제가 아니라 항상 전체 목록을 다시 받는 방식 —
+     * 화면(Frame 05.2)도 "선택된 칩 목록"을 통째로 보여주고 저장하는 구조라 이쪽이 더 단순함).
+     * {@code null}은 무시(변경 없음), 빈 Set은 "관심분야 전체 해제"로 허용한다.
+     */
+    public void updateInterests(Set<Genre> interests) {
+        if (interests == null) {
+            return;
+        }
+        this.interests.clear();
+        this.interests.addAll(interests);
     }
 }
