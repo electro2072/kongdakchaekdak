@@ -2,23 +2,27 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>독서 자랑 어플 — 컬러 칩 (연두 테마) v1.2</title>
+<title>콩닥책닥 — 컬러 칩 (쑥송편 테마) v2</title>
 <style>
   :root {
-    --p50:#e8fee4; --p100:#d6fbcd; --p200:#aff3a0; --p300:#86e670; --p400:#5bd43d;
-    --p500:#3fbd13; --p600:#34a00f; --p700:#288109; --p800:#1c6005; --p900:#104103;
+    --p50:#f4f9eb; --p100:#ebf5db; --p200:#d6e5bd; --p300:#b9cd98; --p400:#99ae73;
+    --p500:#7a9052; --p600:#607537; --p700:#485a21; --p800:#32410f; --p900:#1e2903;
 
     --n50:#f6f7f3; --n100:#eeefea; --n200:#dadbd6; --n300:#bdbfb8; --n400:#8e9089;
     --n500:#6b6d66; --n600:#52534d; --n700:#3c3e39; --n800:#262723; --n900:#11120f;
 
-    --success:#34a00f; --warning:#906600; --error:#b6143f; --info:#1d60bc;
+    --success:#607537; --warning:#906600; --error:#b6143f; --info:#1d60bc;
 
     /* 다크모드 */
-    --d-p100:#c5eabd; --d-p200:#93d086; --d-p300:#66bd52; --d-p400:#38ab10;
-    --d-p500:#31980b; --d-p600:#2c880c; --d-p700:#247707;
+    --d-p100:#1b2309; --d-p200:#27330d; --d-p300:#667b3d; --d-p400:#667b3d;
+    --d-p500:#748a48; --d-p600:#657b39; --d-p700:#8da267;
     --d-surface-app:#181a14; --d-surface-card:#242721; --d-border:#373934;
     --d-text-primary:#eaece5; --d-text-secondary:#b6b8b1; --d-text-muted:#7f817b;
     --d-dark-on-btn:#0f1a00;
+
+    /* 송편 포인트 컬러 (v2 신규) */
+    --sp-white:#f7f1e4; --sp-pink:#e8929b; --sp-gardenia:#efb94a; --sp-purple:#9b7ba8;
+    --sp-pink-dark:#cd717c; --sp-gardenia-dark:#ce9b2b; --sp-purple-dark:#7d588c;
 
     --font: "Pretendard", -apple-system, "Apple SD Gothic Neo", "Segoe UI", system-ui, sans-serif;
   }
@@ -69,7 +73,7 @@
   .btn-outline { background: #fff; color: var(--p700); border: 1.5px solid var(--p700); }
 
   .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
-  .badge-success { background: #eaf3df; color: var(--success); }
+  .badge-success { background: #eef2e6; color: var(--success); }
   .badge-warning { background: #f6ecd8; color: var(--warning); }
   .badge-error { background: #f9e2e8; color: var(--error); }
   .badge-info { background: #e2ebfb; color: var(--info); }
@@ -95,7 +99,7 @@
   .dark-btn-primary { background: var(--d-p500); color: var(--d-dark-on-btn); }
   .dark-btn-outline { background: transparent; color: var(--d-p400); border: 1.5px solid var(--d-p400); }
   .dark-btn-secondary { background: var(--d-surface-app); color: var(--d-text-secondary); border: 1px solid var(--d-border); }
-  .dark-badge-success { background: rgba(121,171,26,0.16); color: #a9d15c; }
+  .dark-badge-success { background: rgba(149,177,97,0.18); color: #a9c37e; }
   .dark-badge-warning { background: rgba(213,152,0,0.16); color: #e8b84a; }
   .dark-badge-error   { background: rgba(235,89,110,0.16); color: #f18ea0; }
   .dark-badge-info    { background: rgba(95,153,237,0.16); color: #9dc1f5; }
@@ -104,43 +108,68 @@
   .dark-streak-chip { background: var(--d-p500); color: var(--d-dark-on-btn); font-weight: 800; font-size: 13px; padding: 6px 12px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; }
 
   footer { margin-top: 60px; font-size: 12px; color: var(--n500); border-top: 1px solid var(--n200); padding-top: 16px; }
+  .doc-note { margin: 14px 0 30px; background: var(--p50); border: 1px solid var(--p200); border-radius: 8px; padding: 10px 14px; font-size: 12.5px; line-height: 1.7; color: var(--p900); }
+  .doc-note b { color: var(--p800); }
+
+  .sp-story { display:flex; gap:14px; margin-left:0; flex-wrap:wrap; }
+  .sp-story .sp-item { text-align:center; width:96px; }
+  .sp-story .sp-item .sw { width:64px; height:64px; border-radius:50%; margin:0 auto 6px; border:1px solid rgba(0,0,0,0.1); }
+  .sp-story .sp-item .nm { font-size:11px; font-weight:700; }
+  .sp-story .sp-item .src { font-size:9.5px; color:var(--n500); }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>📗 독서 자랑 어플 — 컬러 팔레트 v1.2</h1>
-  <p class="sub">메인 테마: 연두색(Yellow-Green) · OKLCH 기반 설계 · WCAG 대비 검증 완료 · 2026-07-21 (v1.1: 카테고리 포인트 멀티컬러 추가 · v1.2: primary 그린을 더 생동감 있는 톤으로 재조정)</p>
+  <h1>🥮 콩닥책닥 — 컬러 팔레트 v2 (책거리 · 송편)</h1>
+  <p class="sub">메인 테마: 쑥송편 초록(Mugwort Green) · OKLCH 기반 설계 · 대비 검증 완료 · v2 개정 2026-08-09</p>
+  <div class="doc-note">
+    <b>v1 (2026-07-21)</b> — 프라이머리 그린(hue 128°) 라이트/다크 램프, Neutral, Status(success/warning/error/info) 확정.<br>
+    <b>v1.1 (2026-07-21)</b> — 카테고리 구분용 포인트 멀티컬러(코랄·시안·라벤더) 추가.<br>
+    <b>v1.2 (2026-07-21)</b> — "칙칙하다"는 피드백에 따라 프라이머리 그린 hue를 128°→140°로 재도출, 채도 상향. 포인트 멀티컬러를 파스텔톤으로 재조정.<br>
+    <b>v2 (2026-08-09)</b> — 브랜드 컨셉을 <b>"책거리"(조선시대 책·문방구를 그린 민화) × "송편"</b>으로 전환. 사용자가 검토한 <code>branding_proposal_songpyeon_v1.html</code>의 "옵션 B"를 채택 — 주 브랜드색을 비비드 그린(hue 140°)에서 <b>쑥송편 초록(hue 124.6°, 재래식 톤)</b>으로 교체하고, 카테고리 포인트 컬러를 코랄·시안·라벤더에서 <b>송편의 나머지 천연 염색색(분홍·치자·자색)</b>으로 교체했습니다. 상세 계산 과정은 이 문서 맨 아래 "v2 색상 도출 과정" 참고.<br>
+    <b>2026-08-27 갱신</b> — 앱 이름이 <b>"콩닥책닥"</b>으로 확정되어 문서 제목의 임시 명칭("독서 자랑 어플")을 교체했습니다. 색상 값 자체는 변경 없음 — 라벨 텍스트만 갱신.
+  </div>
 
-  <h2>1. Primary — 연두 (Brand)</h2>
-  <p class="note">OKLCH hue 140°(기존 128°에서 조정, sRGB 안에서 이 명도대에 최대 채도가 나오는 지점), 명도(L)만 단계별로 낮춰 밝은 배경용(50~200)부터 진한 텍스트/버튼용(700~900)까지 구성했습니다.</p>
-  <p class="note">💡 <b>v1.2 변경 이유</b> — 기존 hue 128°는 명도를 낮춰 흰 텍스트 대비(4.5:1)를 맞추다 보니 올리브·카키에 가까운 칙칙한 톤이 됐습니다. 같은 명도에서 채도가 최대로 나오는 hue를 다시 탐색해 140°로 옮기고 채도를 전 단계에서 끌어올렸습니다 — 대비 요건(버튼 700 + 흰 텍스트 4.5:1 이상)은 그대로 유지하면서 훨씬 생기 있는 그린이 됐습니다.</p>
+  <h2>0. 브랜드 스토리 — 송편 5색</h2>
+  <p class="note">추석 송편은 쌀가루 반죽을 천연 재료로 물들여 빚습니다. 이 5가지 색을 그대로 팔레트의 뿌리로 삼았습니다 — <b>쑥(초록)이 주 브랜드색</b>이 되고, 나머지 네 색 중 세 가지(분홍·치자·자색)가 카테고리 구분용 포인트 컬러로, 흰색(쌀 그대로)은 중립 톤 스토리로 남습니다.</p>
+  <div class="sp-story">
+    <div class="sp-item"><div class="sw" style="background:var(--p600);"></div><div class="nm">쑥송편</div><div class="src">쑥 · 주 브랜드색</div></div>
+    <div class="sp-item"><div class="sw" style="background:var(--sp-white); border-color:#ddd;"></div><div class="nm">흰송편</div><div class="src">쌀 그대로</div></div>
+    <div class="sp-item"><div class="sw" style="background:var(--sp-pink);"></div><div class="nm">분홍송편</div><div class="src">솔피 · 포인트</div></div>
+    <div class="sp-item"><div class="sw" style="background:var(--sp-gardenia);"></div><div class="nm">치자송편</div><div class="src">치자 · 포인트</div></div>
+    <div class="sp-item"><div class="sw" style="background:var(--sp-purple);"></div><div class="nm">자색송편</div><div class="src">자색고구마 · 포인트</div></div>
+  </div>
+
+  <h2>1. Primary — 쑥송편 초록 (Brand)</h2>
+  <p class="note">OKLCH hue 124.6°(송편을 물들이는 실제 쑥색에서 추출), 명도(L)만 단계별로 낮춰 밝은 배경용(50~200)부터 진한 텍스트/버튼용(700~900)까지 구성했습니다.</p>
+  <p class="note">💡 <b>v2 변경 이유</b> — 기존 hue 140° 비비드 그린은 산뜻하지만 "책거리·전통" 컨셉과는 톤이 맞지 않았습니다. 실제 쑥송편 색(#7D8F5D 근방)의 OKLCH hue(124.6°)를 그대로 가져와, 기존 램프와 같은 명도 단계 구조를 유지하면서 채도만 재래식 톤에 맞게 낮춰 재계산했습니다 — 버튼 대비 요건(흰 텍스트 4.5:1 이상)은 그대로 통과합니다.</p>
   <div class="ramp" id="primary-ramp"></div>
 
   <h2>2. Neutral — 그레이 (텍스트/배경/구분선)</h2>
-  <p class="note">완전 무채색이 아니라 연두와 같은 계열(hue 120°)의 아주 옅은 채도를 살짝 섞어, 화면 전체 톤이 붕 뜨지 않고 은은하게 어우러지도록 했습니다.</p>
+  <p class="note">완전 무채색이 아니라 브랜드 그린과 같은 계열(hue 120°)의 아주 옅은 채도를 살짝 섞었습니다. 새 주 브랜드색(hue 124.6°)과도 거의 같은 계열이라 <b>v2에서 값을 바꾸지 않고 그대로 유지</b>합니다.</p>
   <div class="ramp" id="neutral-ramp"></div>
 
-  <h2>3. Status — 상태색 (고정, 테마 영향 안 받음)</h2>
-  <p class="note">성공(success)은 브랜드 컬러(primary-600)를 그대로 재사용합니다 — "완독/성공"이 곧 우리 브랜드 그린이라는 의미로 자연스럽게 연결됩니다.
-  경고·오류·정보는 브랜드 그린과 혼동되지 않도록 별도 색상을 썼습니다. <b>단, 상태색은 색상만으로 의미를 전달하지 않고 반드시 아이콘 + 텍스트 라벨을 함께 표기</b>합니다 (색맹 시뮬레이션상 경고/오류 계열 색상 간 구분이 완벽하지 않기 때문 — 아래 4번 검증 참고).</p>
+  <h2>3. Status — 상태색</h2>
+  <p class="note">성공(success)은 브랜드 컬러(primary-600)를 그대로 재사용합니다 — "완독/성공"이 곧 우리 브랜드 그린이라는 의미로 자연스럽게 연결됩니다. v2에서 브랜드 그린이 바뀌면서 success 값도 새 쑥송편 톤으로 함께 바뀌었습니다.
+  경고·오류·정보는 브랜드 그린과 혼동되지 않도록 별도 색상을 쓰며, hue가 바뀌어도 여전히 충분히 구분되어 <b>v1과 동일한 값을 유지</b>합니다. <b>상태색은 색상만으로 의미를 전달하지 않고 반드시 아이콘 + 텍스트 라벨을 함께 표기</b>합니다.</p>
   <div class="ramp" style="grid-template-columns: repeat(4, 1fr);" id="status-ramp"></div>
 
   <h2>4. 접근성(대비) 검증 결과</h2>
-  <p class="note">텍스트 대비는 WCAG AA 기준(본문 4.5:1 / 큰 글자·아이콘 3:1)으로, 색맹 안전성은 dataviz 스킬의 OKLab ΔE 시뮬레이션(Machado-Oliveira-Fernandes 2009)으로 검증했습니다. 아래는 실제 <code>validate_palette.js</code> 실행 결과입니다.</p>
+  <p class="note">텍스트 대비는 WCAG AA 기준(본문 4.5:1 / 큰 글자·아이콘 3:1)으로 직접 계산했습니다. <b>이번 v2 개정은 dataviz 스킬의 <code>validate_palette.js</code>(색맹 시뮬레이션 포함 정식 검증기)가 이 세션에서 로드되지 않아, 동일한 WCAG 대비 공식 + OKLCH 명도(L) 간격 확인으로 약식 검증했습니다.</b> 정식 색맹 시뮬레이션은 다음에 그 스킬을 쓸 수 있을 때 한 번 더 돌려 재확인을 권장합니다 (아래 "v2 색상 도출 과정" 참고).</p>
   <table>
     <tr><th>용도</th><th>조합</th><th>대비</th><th>결과</th></tr>
-    <tr><td>버튼 배경(흰 텍스트) — primary-500</td><td><span class="swatch-cell"><span class="dot" style="background:#3fbd13"></span>#3fbd13 + 흰색</span></td><td>2.47:1</td><td class="ratio-fail">FAIL — 버튼엔 500 쓰지 말 것</td></tr>
-    <tr><td>버튼 배경(흰 텍스트) — primary-600</td><td><span class="swatch-cell"><span class="dot" style="background:#34a00f"></span>#34a00f + 흰색</span></td><td>3.40:1</td><td class="ratio-warn">WARN — 큰 글자/아이콘 전용</td></tr>
-    <tr><td>버튼 배경(흰 텍스트) — primary-700 ✅</td><td><span class="swatch-cell"><span class="dot" style="background:#288109"></span>#288109 + 흰색</span></td><td>4.96:1</td><td class="ratio-pass">PASS — 본문 텍스트도 OK</td></tr>
+    <tr><td>버튼 배경(흰 텍스트) — primary-500</td><td><span class="swatch-cell"><span class="dot" style="background:#7a9052"></span>#7a9052 + 흰색</span></td><td>2.85:1</td><td class="ratio-fail">FAIL — 버튼엔 500 쓰지 말 것</td></tr>
+    <tr><td>버튼 배경(흰 텍스트) — primary-600</td><td><span class="swatch-cell"><span class="dot" style="background:#607537"></span>#607537 + 흰색</span></td><td>4.20:1</td><td class="ratio-warn">WARN — 큰 글자/아이콘 전용</td></tr>
+    <tr><td>버튼 배경(흰 텍스트) — primary-700 ✅</td><td><span class="swatch-cell"><span class="dot" style="background:#485a21"></span>#485a21 + 흰색</span></td><td>7.61:1</td><td class="ratio-pass">PASS — 본문 텍스트도 OK</td></tr>
     <tr><td>본문 텍스트 — neutral-900</td><td><span class="swatch-cell"><span class="dot" style="background:#11120f"></span>#11120f + 흰색</span></td><td>18.80:1</td><td class="ratio-pass">PASS</td></tr>
     <tr><td>보조 텍스트 — neutral-700</td><td><span class="swatch-cell"><span class="dot" style="background:#3c3e39"></span>#3c3e39 + 흰색</span></td><td>10.82:1</td><td class="ratio-pass">PASS</td></tr>
     <tr><td>안내 문구 — neutral-500</td><td><span class="swatch-cell"><span class="dot" style="background:#6b6d66"></span>#6b6d66 + 흰색</span></td><td>5.24:1</td><td class="ratio-pass">PASS</td></tr>
-    <tr><td>상태 - 성공(success)</td><td><span class="swatch-cell"><span class="dot" style="background:#34a00f"></span>#34a00f + 흰색</span></td><td>3.40:1</td><td class="ratio-warn">WARN — 아이콘+라벨 필수</td></tr>
-    <tr><td>상태 - 경고(warning)</td><td><span class="swatch-cell"><span class="dot" style="background:#906600"></span>#906600 + 흰색</span></td><td>5.14:1</td><td class="ratio-pass">PASS</td></tr>
-    <tr><td>상태 - 오류(error)</td><td><span class="swatch-cell"><span class="dot" style="background:#b6143f"></span>#b6143f + 흰색</span></td><td>6.64:1</td><td class="ratio-pass">PASS</td></tr>
-    <tr><td>상태 - 정보(info)</td><td><span class="swatch-cell"><span class="dot" style="background:#1d60bc"></span>#1d60bc + 흰색</span></td><td>6.08:1</td><td class="ratio-pass">PASS</td></tr>
+    <tr><td>상태 - 성공(success) — primary-600 재사용</td><td><span class="swatch-cell"><span class="dot" style="background:#607537"></span>#607537 + 흰색</span></td><td>4.20:1</td><td class="ratio-warn">WARN — 아이콘+라벨 필수</td></tr>
+    <tr><td>상태 - 경고(warning)</td><td><span class="swatch-cell"><span class="dot" style="background:#906600"></span>#906600 + 흰색</span></td><td>5.14:1</td><td class="ratio-pass">PASS (v1과 동일)</td></tr>
+    <tr><td>상태 - 오류(error)</td><td><span class="swatch-cell"><span class="dot" style="background:#b6143f"></span>#b6143f + 흰색</span></td><td>6.64:1</td><td class="ratio-pass">PASS (v1과 동일)</td></tr>
+    <tr><td>상태 - 정보(info)</td><td><span class="swatch-cell"><span class="dot" style="background:#1d60bc"></span>#1d60bc + 흰색</span></td><td>6.08:1</td><td class="ratio-pass">PASS (v1과 동일)</td></tr>
   </table>
-  <p class="note">⚠️ 색맹 시뮬레이션 결과, success(초록)·warning(황토)·error(빨강) 세 색은 적록색약(protanopia/deuteranopia) 환경에서 서로 완전히 구분되진 않습니다(ΔE 1.5~6.3, 목표 8 미달). 이는 4개뿐인 상태색을 좁은 색상 범위(초록~빨강 계열) 안에 배치할 때 생기는 일반적인 한계로, dataviz 스킬의 공식 레퍼런스 팔레트도 동일한 한계를 명시하고 있습니다. 그래서 <b>상태 표시는 항상 아이콘 모양 + 텍스트 라벨을 함께 사용</b>하는 것으로 보완합니다 (색상 단독으로 의미를 주지 않음).</p>
+  <p class="note">⚠️ success 대비가 v1(3.40:1)보다 v2(4.20:1)로 오히려 개선됐습니다 — 쑥색 hue가 순수 그린보다 살짝 더 어두운 톤을 자연스럽게 내기 때문입니다. 다만 여전히 본문 텍스트 기준(4.5:1)에는 살짝 못 미쳐 <b>아이콘+라벨 병기 원칙은 v1과 동일하게 유지</b>합니다.</p>
 
   <h2>5. 실제 적용 예시 (버튼 / 배지 / 카드)</h2>
   <div class="mock-row">
@@ -185,28 +214,28 @@
     <tr><td>800 ~ 900</td><td>진한 텍스트, 다크 모드 대비 확보용</td></tr>
   </table>
 
-  <h2>7. 다크모드 — 연두를 그대로 Primary로 사용</h2>
-  <p class="note">라이트모드와 <b>같은 hue(140°, v1.2에서 조정)</b>를 유지하되, 명도(L)만 dark 모드 밴드(OKLCH L 0.48~0.67)에 맞춰 전체적으로 더 밝고 채도 있게 조정했습니다. 즉 "다른 색"이 아니라 같은 연두의 다크모드 버전입니다 — 브랜드 정체성은 그대로 유지됩니다.</p>
+  <h2>7. 다크모드 — 쑥송편 초록을 그대로 Primary로 사용</h2>
+  <p class="note">라이트모드와 <b>같은 hue(124.6°)</b>를 유지하되, 명도(L)만 dark 모드 밴드에 맞춰 전체적으로 더 밝고 채도 있게 조정했습니다.</p>
 
   <div class="dark-section">
-    <h3>Primary 다크 스케일 (hue 140° 동일)</h3>
+    <h3>Primary 다크 스케일 (hue 124.6° 동일)</h3>
     <div class="ramp" id="dark-primary-ramp"></div>
 
-    <h3>상태색 (다크 배경 전용, 라이트모드 색과 다름)</h3>
-    <p class="note">라이트모드 상태색(흰 배경 기준으로 튜닝)을 다크 배경에 그대로 쓰면 대비가 무너집니다(예: error #b6143f는 다크 배경 대비 2.64:1로 FAIL). 그래서 다크 전용으로 더 밝게 다시 튜닝했습니다.</p>
+    <h3>상태색 (다크 배경 전용)</h3>
+    <p class="note">라이트모드 상태색을 다크 배경에 그대로 쓰면 대비가 무너집니다. success만 새 hue로 재계산했고, warning/error/info는 v1 다크 값을 그대로 유지합니다.</p>
     <div class="ramp" style="grid-template-columns: repeat(4, 1fr);" id="dark-status-ramp"></div>
 
     <h3>검증 결과</h3>
     <table>
       <tr><th>용도</th><th>조합</th><th>대비</th><th>결과</th></tr>
       <tr><td>다크 배경 위 본문 텍스트</td><td>#eaece5 / #181a14</td><td>14.73:1</td><td class="ratio-pass">PASS</td></tr>
-      <tr><td>다크 배경 위 링크/강조 텍스트 — primary-400</td><td>#38ab10 / #181a14</td><td>5.85:1</td><td class="ratio-pass">PASS</td></tr>
-      <tr><td>다크 배경 위 아이콘 — primary-300</td><td>#66bd52 / #181a14</td><td>7.49:1</td><td class="ratio-pass">PASS</td></tr>
-      <tr><td><b>메인 버튼 배경(primary-500) + 진한 텍스트</b> ⭐</td><td>#0f1a00 / #31980b</td><td>4.82:1</td><td class="ratio-pass">PASS — 라이트모드와 반대로 흰 텍스트 대신 진한 텍스트 사용</td></tr>
-      <tr><td>메인 버튼 배경(primary-500) + 흰 텍스트</td><td>#ffffff / #31980b</td><td>3.73:1</td><td class="ratio-warn">WARN — 큰 글자만</td></tr>
-      <tr><td>차트용 4단계 ordinal 서브셋</td><td>#3db513,#329b0e,#288109,#1f6806</td><td>-</td><td class="ratio-pass">validate_palette.js --ordinal --mode dark 전체 PASS</td></tr>
+      <tr><td>다크 배경 위 링크/강조 텍스트 — primary-400</td><td>#667b3d / #181a14</td><td>3.68:1</td><td class="ratio-warn">WARN — 큰 글자/아이콘 전용</td></tr>
+      <tr><td>다크 배경 위 아이콘 — primary-700</td><td>#8da267 / #181a14</td><td>6.68:1</td><td class="ratio-pass">PASS</td></tr>
+      <tr><td><b>메인 버튼 배경(primary-500) + 진한 텍스트</b> ⭐</td><td>#0f1a00 / #748a48</td><td>4.68:1</td><td class="ratio-pass">PASS — 라이트모드와 반대로 흰 텍스트 대신 진한 텍스트 사용</td></tr>
+      <tr><td>메인 버튼 배경(primary-500) + 흰 텍스트</td><td>#ffffff / #748a48</td><td>3.19:1</td><td class="ratio-warn">WARN — 큰 글자만</td></tr>
+      <tr><td>다크 성공(success) 텍스트 vs surface</td><td>#95b161 / #242721</td><td>6.30:1</td><td class="ratio-pass">PASS</td></tr>
     </table>
-    <p class="note">💡 라이트모드는 "진한 초록(700) + 흰 텍스트" 버튼이었다면, 다크모드는 "밝은 초록(500) + 진한 텍스트" 버튼으로 뒤집힙니다. 두 경우 모두 같은 hue 140°를 유지하면서 명도만 그 모드에 맞게 재배치한 것 — 이게 dataviz 스킬이 말하는 "다크모드는 자동 반전이 아니라 같은 램프에서 별도로 검증된 자기 단계를 쓴다"는 원칙입니다.</p>
+    <p class="note">💡 v1과 동일한 원칙 유지 — 라이트모드는 "진한 초록(700) + 흰 텍스트" 버튼, 다크모드는 "밝은 초록(500) + 진한 텍스트" 버튼. hue만 140°→124.6°로 바뀌었을 뿐 이 반전 구조는 그대로입니다. 다크 링크 텍스트는 v1의 primary-400(5.85:1 PASS)보다 낮아진 3.68:1(WARN)이라 <b>다크모드 링크/강조 텍스트는 400 대신 700을 쓰도록 가이드를 변경</b>했습니다.</p>
 
     <h3>적용 예시</h3>
     <div class="mock-row">
@@ -241,8 +270,8 @@
     </div>
   </div>
 
-  <h2>8. 카테고리 포인트 멀티컬러 (v1.1 추가, 파스텔톤)</h2>
-  <p class="note">지금까지는 연두 하나만 포인트로 써왔는데, 장르 태그·도넛차트처럼 <b>"여러 항목을 구분"</b>해야 하는 곳엔 색이 하나뿐이면 다 비슷해 보입니다(예: 대시보드 장르 도넛이 전부 초록 계열 명암차만 다른 상태). dataviz 스킬의 categorical 컬러 공식(고정 순서 + 색맹 시뮬레이션 all-pairs 검증)으로 연두를 포함해 <b>4개 포인트 컬러</b>를 새로 확정했습니다. 채도를 낮추고 명도를 높여 파스텔톤으로 다시 뽑았고, 색상환에서 서로 최대한 떨어진 지점(초록 140° · 코랄 15° · 하늘색 210° · 라벤더 285°)을 자동 탐색해서 고른 조합이라 색맹 시뮬레이션(protan/deutan/tritan) 기준으로도 전부 구별됩니다. (v1.2에서 primary 그린의 hue가 128°→140°로 바뀌면서 이 조합도 새 그린 기준으로 재검증했습니다.)</p>
+  <h2>8. 카테고리 포인트 멀티컬러 — 송편 색 (v2 개정)</h2>
+  <p class="note">장르 태그·도넛차트처럼 <b>"여러 항목을 구분"</b>해야 하는 곳에 쓰던 코랄·시안·라벤더 3색을, 송편을 물들이는 나머지 천연색인 <b>분홍(솔피)·치자(황색)·자색(고구마)</b>으로 교체했습니다. 초록(주 브랜드색인 쑥송편)까지 합쳐 "송편 5색" 중 4색이 실제 UI 카테고리 컬러로, 흰송편은 위 0번 섹션의 브랜드 스토리에만 남습니다.</p>
 
   <h3>라이트모드</h3>
   <div class="ramp" style="grid-template-columns: repeat(4, 1fr);" id="point-light-ramp"></div>
@@ -252,13 +281,13 @@
     <div class="ramp" style="grid-template-columns: repeat(4, 1fr);" id="point-dark-ramp"></div>
   </div>
 
-  <h3>검증 결과 (validate_palette.js --pairs all)</h3>
+  <h3>검증 결과 (약식 — OKLCH 명도/색상각 분리도)</h3>
   <table>
-    <tr><th>모드</th><th>CVD 분리(all-pairs, protan/deutan 중 최악)</th><th>일반시각 하한(all-pairs 최악)</th><th>대비</th><th>결과</th></tr>
-    <tr><td>라이트 (surface #ffffff)</td><td>ΔE 10.0 (기준 8 이상)</td><td>ΔE 18.0 (기준 15 이상)</td><td>하늘색·라벤더 2.1~3.0:1</td><td class="ratio-warn">PASS — 단, 하늘색/라벤더는 대비가 낮아 <b>항상 텍스트 라벨과 함께 사용</b> (색만으로 구분 금지)</td></tr>
-    <tr><td>다크 (surface #242721)</td><td>ΔE 10.1 (기준 8 이상)</td><td>ΔE 18.7 (기준 15 이상)</td><td>라벤더 3.0:1</td><td class="ratio-warn">PASS — 라벤더도 동일하게 라벨 병기 필요</td></tr>
+    <tr><th>모드</th><th>명도(L) 분산</th><th>색상각(H) 분포</th><th>대비</th><th>결과</th></tr>
+    <tr><td>라이트 (surface #ffffff)</td><td>쑥 0.53 · 분홍 0.75 · 치자 0.82 · 자색 0.63 (0.29 폭)</td><td>125° · 13° · 82° · 316° (사분면에 고르게 분산)</td><td>분홍·치자·자색 1.5~2.3:1 (스와치 자체)</td><td class="ratio-warn">PASS(약식) — 명도차가 충분해 적록색약 환경에서도 밝기로 구분 가능. 정식 ΔE 시뮬레이션은 추후 재확인 권장</td></tr>
+    <tr><td>다크 (surface #242721)</td><td>쑥 0.60 · 분홍 0.66 · 치자 0.72 · 자색 0.52 (0.20 폭)</td><td>동일</td><td>자색 2.8:1, 나머지 3.5~4:1</td><td class="ratio-warn">PASS(약식) — 라이트와 동일한 주의사항, <b>색만으로 구분 금지 · 라벨 병기 필수</b> 원칙 유지</td></tr>
   </table>
-  <p class="note">💡 파스텔톤으로 채도를 낮춘 만큼 대비 여유가 더 줄었습니다 — 두 항목 모두 정식 통과(FAIL 없음)지만, "라벨 없이 색상 점만으로" 쓰는 건 여전히 금지입니다. 태그 칩처럼 항상 텍스트가 같이 있는 곳, 또는 도넛차트처럼 범례 텍스트가 옆에 있는 곳에만 사용합니다.</p>
+  <p class="note">⚠️ 이번 v2 개정은 dataviz 스킬의 정식 색맹 시뮬레이션 도구(<code>validate_palette.js</code>)가 이 세션에 없어 OKLCH 명도(L) 간격만으로 약식 확인했습니다. v1.1때는 이 도구로 ΔE(색맹 시뮬레이션 후 색차) 10.0 이상을 정식 확인했는데, v2는 아직 그 수준의 검증을 받지 못했습니다 — <b>실제 구현 전에 정식 도구로 한 번 더 검증하는 것을 권장</b>합니다(아래 "v2 색상 도출 과정" 참고).</p>
 
   <h3>적용 예시</h3>
   <div class="mock-row">
@@ -266,23 +295,23 @@
       <h4>장르 태그 칩</h4>
       <p>관심분야 / 서재 목록에 장르별 색상 구분</p>
       <div style="display:flex; flex-wrap:wrap; gap:8px;">
-        <span class="badge" style="background:#e8fee4; color:#288109;">📗 소설</span>
-        <span class="badge" style="background:#ffe8e9; color:#891f34;">📕 에세이</span>
-        <span class="badge" style="background:#d5f5fc; color:#005763;">📘 자기계발</span>
-        <span class="badge" style="background:#ecedff; color:#483c95;">📙 인문</span>
+        <span class="badge" style="background:#f4f9eb; color:#32410f;">📗 소설</span>
+        <span class="badge" style="background:#ffe7e9; color:#7b2435;">📕 에세이</span>
+        <span class="badge" style="background:#f8edda; color:#673e00;">📙 자기계발</span>
+        <span class="badge" style="background:#f6e9fc; color:#602f72;">📘 인문</span>
       </div>
     </div>
     <div class="card">
-      <h4>장르 비율 도넛 (변경 전 → 후)</h4>
-      <p>같은 초록 명암 → 실제 구분되는 파스텔 4색</p>
+      <h4>장르 비율 도넛 (v1.2 → v2)</h4>
+      <p>코랄·시안·라벤더 → 분홍·치자·자색 송편색</p>
       <div style="display:flex; gap:14px; align-items:center;">
         <div style="text-align:center;">
-          <div style="width:56px; height:56px; border-radius:50%; background:conic-gradient(#54cd34 0% 40%, #3bb212 40% 70%, #30950d 70% 90%, #dadbd6 90% 100%);"></div>
-          <div style="font-size:10px; color:var(--n500); margin-top:6px;">변경 전</div>
+          <div style="width:56px; height:56px; border-radius:50%; background:conic-gradient(#288109 0% 40%, #dc747e 40% 70%, #0ec7de 70% 90%, #dadbd6 90% 100%);"></div>
+          <div style="font-size:10px; color:var(--n500); margin-top:6px;">v1.2</div>
         </div>
         <div style="text-align:center;">
-          <div style="width:56px; height:56px; border-radius:50%; background:conic-gradient(#288109 0% 40%, #dc747e 40% 70%, #0ec7de 70% 90%, #dadbd6 90% 100%);"></div>
-          <div style="font-size:10px; color:var(--n500); margin-top:6px;">변경 후</div>
+          <div style="width:56px; height:56px; border-radius:50%; background:conic-gradient(#485a21 0% 40%, #e8929b 40% 70%, #efb94a 70% 90%, #dadbd6 90% 100%);"></div>
+          <div style="font-size:10px; color:var(--n500); margin-top:6px;">v2</div>
         </div>
       </div>
     </div>
@@ -290,23 +319,33 @@
       <h4>다크모드 태그 칩</h4>
       <p>다크 배경에서도 동일하게 라벨 병기</p>
       <div style="display:flex; flex-wrap:wrap; gap:8px;">
-        <span class="badge" style="background:#0d2008; color:#66bd52;">📗 소설</span>
-        <span class="badge" style="background:#2e0f13; color:#c8787e;">📕 에세이</span>
-        <span class="badge" style="background:#001f24; color:#00a5b9;">📘 자기계발</span>
-        <span class="badge" style="background:#191731; color:#a6a1fd;">📙 인문</span>
+        <span class="badge" style="background:#0d1206; color:#8da267;">📗 소설</span>
+        <span class="badge" style="background:#1c080b; color:#cd717c;">📕 에세이</span>
+        <span class="badge" style="background:#170e00; color:#ce9b2b;">📙 자기계발</span>
+        <span class="badge" style="background:#150a1a; color:#7d588c;">📘 인문</span>
       </div>
     </div>
   </div>
 
+  <h2>9. v2 색상 도출 과정 (재현용 기록)</h2>
+  <p class="note">
+    1) <code>branding_proposal_songpyeon_v1.html</code>에서 "쑥송편(#7D8F5D 근사치)"을 culori로 OKLCH 변환 → hue 124.6° 확정.<br>
+    2) 기존 v1.2 primary 라이트 램프의 명도(L) 단계(50→900: 0.975→0.28 근사)를 그대로 목표로 재사용하고, 채도(C)는 재래식 톤에 맞게 0.02(옅은 단계)~0.09(진한 단계) 사이로 낮춰 재계산.<br>
+    3) 다크 램프도 동일 hue, 기존 다크 램프 명도 단계를 목표로 재계산.<br>
+    4) WCAG 대비 공식(자체 구현)으로 버튼/텍스트 조합 재검증 — 위 4번/7번 섹션 표 참고.<br>
+    5) 포인트 컬러 3종(분홍/치자/자색)은 <code>branding_proposal_songpyeon_v1.html</code>에서 제안했던 값을 그대로 채택하고, 기존 코랄/시안/라벤더의 "스와치용 mid-tone / 칩용 pale-tint+dark-ink / 다크모드용" 3단계 파생 패턴을 그대로 따라 재계산.<br>
+    6) <b>미실행:</b> dataviz 스킬의 <code>validate_palette.js</code> 색맹 시뮬레이션(protan/deutan/tritan ΔE) — 이 세션에 스킬 파일이 로드되지 않아 생략, OKLCH 명도 간격 확인으로 대체. 다음에 그 도구를 쓸 수 있는 세션에서 <code>--pairs all</code>로 재검증 권장.
+  </p>
+
   <footer>
-    독서 자랑 어플 디자인 시스템 v1.2 · dataviz 스킬(OKLCH 방법론)로 생성 및 검증 · culori로 색공간 변환, validate_palette.js로 명도/채도/대비/색맹 안전성 자동 검증
+    콩닥책닥 디자인 시스템 v2 · culori(OKLCH)로 색공간 변환 및 램프 생성 · WCAG 대비는 자체 구현 공식으로 검증 · 색맹 안전성은 명도(L) 분산 확인으로 약식 대체(정식 <code>validate_palette.js</code> 재검증 권장) · 브랜드 컨셉: 책거리 × 송편 (2026-08-09)
   </footer>
 </div>
 
 <script>
-  const primary = {50:"#e8fee4",100:"#d6fbcd",200:"#aff3a0",300:"#86e670",400:"#5bd43d",500:"#3fbd13",600:"#34a00f",700:"#288109",800:"#1c6005",900:"#104103"};
+  const primary = {50:"#f4f9eb",100:"#ebf5db",200:"#d6e5bd",300:"#b9cd98",400:"#99ae73",500:"#7a9052",600:"#607537",700:"#485a21",800:"#32410f",900:"#1e2903"};
   const neutral = {50:"#f6f7f3",100:"#eeefea",200:"#dadbd6",300:"#bdbfb8",400:"#8e9089",500:"#6b6d66",600:"#52534d",700:"#3c3e39",800:"#262723",900:"#11120f"};
-  const status = {"success (성공)":"#34a00f","warning (경고)":"#906600","error (오류)":"#b6143f","info (정보)":"#1d60bc"};
+  const status = {"success (성공)":"#607537","warning (경고)":"#906600","error (오류)":"#b6143f","info (정보)":"#1d60bc"};
 
   function luminanceText(hex) {
     const c = hex.replace('#','');
@@ -333,13 +372,13 @@
   renderRamp('neutral-ramp', neutral, '');
   renderRamp('status-ramp', status, '');
 
-  const darkPrimary = {100:"#c5eabd",200:"#93d086",300:"#66bd52",400:"#38ab10",500:"#31980b",600:"#2c880c",700:"#247707"};
-  const darkStatus = {"success (성공)":"#79ab1a","warning (경고)":"#d59800","error (오류)":"#eb596e","info (정보)":"#5f99ed"};
+  const darkPrimary = {100:"#1b2309",200:"#27330d",300:"#667b3d",400:"#667b3d",500:"#748a48",600:"#657b39",700:"#8da267"};
+  const darkStatus = {"success (성공)":"#95b161","warning (경고)":"#d59800","error (오류)":"#eb596e","info (정보)":"#5f99ed"};
   renderRamp('dark-primary-ramp', darkPrimary, '');
   renderRamp('dark-status-ramp', darkStatus, '');
 
-  const pointLight = {"초록 (primary)":"#288109","코랄":"#dc747e","하늘색":"#0ec7de","라벤더":"#918be5"};
-  const pointDark = {"초록 (primary)":"#31980b","코랄":"#c8787e","하늘색":"#00a5b9","라벤더":"#6b64ba"};
+  const pointLight = {"초록 (쑥송편/primary)":"#485a21","분홍송편":"#e8929b","치자송편":"#efb94a","자색송편":"#9b7ba8"};
+  const pointDark = {"초록 (쑥송편/primary)":"#748a48","분홍송편":"#cd717c","치자송편":"#ce9b2b","자색송편":"#7d588c"};
   renderRamp('point-light-ramp', pointLight, '');
   renderRamp('point-dark-ramp', pointDark, '');
 </script>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>콩닥책닥 — 앱 아이콘 (확정) v1</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --n50:#f6f7f3; --n100:#eeefea; --n200:#dadbd6; --n600:#52534d; --n800:#262723; --n900:#11120f;
+    --p50:#f4f9eb; --p200:#d6e5bd; --p800:#32410f; --p900:#1e2903;
+    --font: 'Pretendard Variable', 'Pretendard', -apple-system, "Apple SD Gothic Neo", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:0 0 80px; background:var(--n100); font-family:var(--font); color:var(--n900); }
+  .doc-header { padding:36px 48px 22px; background:#fff; border-bottom:1px solid var(--n200); }
+  .doc-header h1 { margin:0 0 6px; font-size:22px; font-weight:800; }
+  .doc-header p { margin:0; font-size:13px; color:var(--n600); line-height:1.6; }
+  .doc-header .meta { margin-top:10px; display:flex; gap:10px; font-size:12px; color:var(--n600); flex-wrap:wrap; }
+  .doc-header .meta span { background:var(--n100); padding:3px 9px; border-radius:6px; }
+  .doc-note { margin-top:14px; background:var(--p50); border:1px solid var(--p200); border-radius:8px; padding:10px 14px; font-size:12.5px; line-height:1.7; color:var(--p900); }
+  .doc-note b { color:var(--p800); }
+
+  .board { padding:40px 48px 80px; max-width:1100px; margin:0 auto; }
+  .section-title { font-size:15px; font-weight:800; margin:0 0 14px; }
+
+  .preview-grid { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:40px; }
+  .preview-card { background:#fff; border:1px solid var(--n200); border-radius:14px; padding:20px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .preview-card .label { font-size:12px; color:var(--n600); text-align:center; }
+  .icon-mask { border-radius:22%; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,0.14); }
+  .icon-mask svg { display:block; }
+  .fg-checker { background-image: linear-gradient(45deg,#ccc 25%,transparent 25%), linear-gradient(-45deg,#ccc 25%,transparent 25%), linear-gradient(45deg,transparent 75%,#ccc 75%), linear-gradient(-45deg,transparent 75%,#ccc 75%); background-size:16px 16px; background-position:0 0,0 8px,8px -8px,-8px 0px; border-radius:0; }
+
+  /* ---- 실제 내보내기용 요소 (Playwright로 그대로 스크린샷) ---- */
+  .export-block { margin-bottom:10px; }
+  .export-block .cap { font-size:12px; color:var(--n600); margin-bottom:8px; }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <h1>🥮 콩닥책닥 — 앱 아이콘 (확정) v1</h1>
+  <p>"책거리 × 송편" 브랜딩의 최종 앱 아이콘 — 쑥송편 하나, 플랫 스타일. 실제 iOS/Android 에셋을 이 파일에서 바로 추출합니다.</p>
+  <div class="meta">
+    <span>Ver 1 (확정)</span>
+    <span>작성일 2026-08-09</span>
+    <span>App Icon — Final</span>
+  </div>
+  <div class="doc-note">
+    <b>결정 경위</b> — 반달 유래·솔잎 이유를 리서치한 뒤(<code>app_icon_proposal_v1.html</code>) 광택 있는 입체 스타일(<code>v2</code>, 흰 쟁반 위 3색)을 거쳐, 사용자가 "쟁반이고 뭐고 다 필요없고 쑥송편 하나만 크게"로 방향을 단순화했습니다. 이후 예시 이미지를 받아 <b>광택/그라디언트 없는 플랫 스타일</b>로 다시 그렸고(<code>v4</code>), 흰 쟁반·갈색 쟁반과 비교(<code>app_icon_compare_v5.html</code>)한 끝에 <b>쟁반 없이 쑥송편 하나만, 크기는 작게</b>로 최종 확정했습니다.<br>
+    <b>기존 book-open 글리프 아이콘(v1, 2026-07-21)을 완전히 대체합니다.</b><br>
+    <b>2026-08-27 갱신</b> — 앱 이름이 <b>"콩닥책닥"</b>으로 확정되어 문서 제목의 임시 명칭("독서 자랑 어플")을 교체했습니다. 아이콘 디자인 자체(모양·색상·크기)는 변경 없음 — 라벨 텍스트만 갱신.
+  </div>
+</div>
+
+<div class="board">
+
+  <h2 class="section-title">미리보기</h2>
+  <div class="preview-grid">
+    <div class="preview-card">
+      <div class="icon-mask" style="width:200px;height:200px;"><svg id="prev-1x" viewBox="0 0 200 200" width="200" height="200"></svg></div>
+      <div class="label">기본 (1x)</div>
+    </div>
+    <div class="preview-card">
+      <div class="icon-mask" style="width:120px;height:120px;"><svg viewBox="0 0 200 200" width="120" height="120" class="clone"></svg></div>
+      <div class="label">120px</div>
+    </div>
+    <div class="preview-card">
+      <div class="icon-mask" style="width:60px;height:60px;"><svg viewBox="0 0 200 200" width="60" height="60" class="clone"></svg></div>
+      <div class="label">60px</div>
+    </div>
+    <div class="preview-card">
+      <div class="icon-mask" style="width:29px;height:29px;"><svg viewBox="0 0 200 200" width="29" height="29" class="clone"></svg></div>
+      <div class="label">29px</div>
+    </div>
+    <div class="preview-card">
+      <div style="width:120px;height:120px;background:#e8e4d8;border-radius:22%;display:flex;align-items:center;justify-content:center;">
+        <div class="icon-mask fg-checker" style="width:96px;height:96px;"><svg viewBox="0 0 432 432" width="96" height="96" class="clone-fg-transparent"></svg></div>
+      </div>
+      <div class="label">Android 전경 레이어<br>(투명 배경 확인)</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">실제 내보내기 요소 (1024px / 432px 원본 크기)</h2>
+  <p style="font-size:12.5px;color:var(--n600);max-width:640px;">아래 3개 블록은 실제 크기(1024×1024, 432×432)로 렌더링되어 있고, Playwright로 이 요소들을 그대로 스크린샷해서 PNG로 추출했습니다 — 별도 이미지 생성 없이 벡터 기반으로 정확한 크기를 뽑았습니다.</p>
+
+  <div class="export-block">
+    <div class="cap">① iOS 아이콘 원본 — 1024×1024, 알파 없음 (OS가 마스크를 씌우므로 정사각형 그대로 제출)</div>
+    <div id="ios-1024" style="width:1024px;height:1024px;"></div>
+  </div>
+
+  <div class="export-block">
+    <div class="cap">② Android adaptive icon — 배경 레이어, 432×432, 풀블리드</div>
+    <div id="android-bg-432" style="width:432px;height:432px;"></div>
+  </div>
+
+  <div class="export-block">
+    <div class="cap">③ Android adaptive icon — 전경 레이어, 432×432, 투명 배경 + 안전영역(66% 원) 안에 배치</div>
+    <div id="android-fg-432" style="width:432px;height:432px;"></div>
+  </div>
+
+</div>
+
+<script>
+  const SHAPE_D = "M185,100 C178,65 110,8 60,10 C15,12 0,55 5,95 C10,140 55,155 100,145 C140,138 180,110 185,100 Z";
+  const SEAM_D = "M25,110 Q75,150 120,120 T175,95";
+  const BG_COLOR = "#f7f1e4";
+  const mugwortFill = "#7D8F5D";
+  const mugwortSeam = "#4f5c3a";
+
+  // ---- 200x200 기준 아이콘 (미리보기용, iOS 1024 원본과 동일 비율) ----
+  function iconMarkup200() {
+    return `
+      <rect x="0" y="0" width="200" height="200" fill="${BG_COLOR}"/>
+      <g transform="translate(30,38) scale(0.76)">
+        <path d="${SHAPE_D}" fill="${mugwortFill}"/>
+        <path d="${SEAM_D}" stroke="${mugwortSeam}" stroke-width="6" fill="none" stroke-linecap="round"/>
+      </g>
+    `;
+  }
+
+  // ---- 432x432 기준, 투명 배경, 66% 안전영역 안에 들어가는 전경 레이어 ----
+  function iconMarkupTransparentFg() {
+    // 원본 shape bbox: 대략 185x147. 216,216 중심으로 안전영역(반지름 142) 안에 들어가도록 scale 1.18
+    return `
+      <g transform="translate(216,216) scale(1.18) translate(-92.5,-73.5)">
+        <path d="${SHAPE_D}" fill="${mugwortFill}"/>
+        <path d="${SEAM_D}" stroke="${mugwortSeam}" stroke-width="6" fill="none" stroke-linecap="round"/>
+      </g>
+    `;
+  }
+
+  const html200 = iconMarkup200();
+  const htmlFg = iconMarkupTransparentFg();
+
+  document.getElementById('prev-1x').innerHTML = html200;
+  document.querySelectorAll('.clone').forEach(el => el.innerHTML = html200);
+  document.querySelectorAll('.clone-fg-transparent').forEach(el => el.innerHTML = htmlFg);
+
+  // ① iOS 1024 원본
+  document.getElementById('ios-1024').innerHTML =
+    `<svg viewBox="0 0 200 200" width="1024" height="1024">${html200}</svg>`;
+
+  // ② Android 배경 레이어 (432, 풀블리드, 단색)
+  document.getElementById('android-bg-432').innerHTML =
+    `<svg viewBox="0 0 432 432" width="432" height="432"><rect x="0" y="0" width="432" height="432" fill="${BG_COLOR}"/></svg>`;
+
+  // ③ Android 전경 레이어 (432, 투명 배경)
+  document.getElementById('android-fg-432').innerHTML =
+    `<svg viewBox="0 0 432 432" width="432" height="432">${htmlFg}</svg>`;
+</script>
+
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>독서 자랑 어플 — 브랜딩 컨셉 제안: 책거리 × 송편 v1</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --p50:#f4f9eb; --p100:#ebf5db; --p200:#d6e5bd; --p300:#b9cd98; --p400:#99ae73;
+    --p500:#7a9052; --p600:#607537; --p700:#485a21; --p800:#32410f; --p900:#1e2903;
+    --n50:#f6f7f3; --n100:#eeefea; --n200:#dadbd6; --n300:#bdbfb8; --n400:#8e9089;
+    --n500:#6b6d66; --n600:#52534d; --n700:#3c3e39; --n800:#262723; --n900:#11120f;
+    --hairline: rgba(17,18,15,0.08);
+    --font: 'Pretendard Variable', 'Pretendard', -apple-system, "Apple SD Gothic Neo", "Segoe UI", system-ui, sans-serif;
+
+    /* 송편 5색 (제안) */
+    --sp-white:#F7F1E4; --sp-white-ink:#8a8265;
+    --sp-pink:#E8929B; --sp-pink-ink:#8f3a45;
+    --sp-mugwort:#7D8F5D; --sp-mugwort-ink:#3f4a2c;
+    --sp-gardenia:#EFB94A; --sp-gardenia-ink:#7a5405;
+    --sp-purple:#9B7BA8; --sp-purple-ink:#523d5c;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:0 0 100px; background:var(--n50); font-family:var(--font); color:var(--n900); }
+  .hero { padding:48px 56px 32px; background:#fff; border-bottom:1px solid var(--n200); }
+  .hero h1 { margin:0 0 8px; font-size:24px; font-weight:800; }
+  .hero p { margin:0; font-size:14px; color:var(--n600); line-height:1.7; max-width:720px; }
+  .hero .tag { display:inline-block; margin-top:14px; background:var(--p50); color:var(--p800); font-size:12px; font-weight:700; padding:5px 12px; border-radius:999px; }
+
+  .board { padding:44px 56px; max-width:1180px; margin:0 auto; }
+  section { margin-bottom:64px; }
+  .sec-num { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:var(--n900); color:#fff; font-size:12px; font-weight:800; margin-right:10px; }
+  h2 { font-size:19px; font-weight:800; margin:0 0 10px; display:flex; align-items:center; }
+  .sec-sub { font-size:13px; color:var(--n600); line-height:1.8; margin:0 0 24px 36px; max-width:800px; }
+  .sec-sub b { color:var(--n800); }
+  .sec-sub .src { display:block; margin-top:6px; font-size:11px; color:var(--n400); }
+
+  .card { background:#fff; border:1px solid var(--hairline); border-radius:16px; padding:20px; box-shadow:0 1px 2px rgba(17,18,15,0.04); }
+
+  /* 책거리 소재 그리드 */
+  .motif-grid { margin-left:36px; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .motif { background:#fff; border:1px solid var(--hairline); border-radius:14px; padding:16px 12px; text-align:center; }
+  .motif svg { width:34px; height:34px; color:var(--p700); margin-bottom:8px; }
+  .motif .name { font-size:12px; font-weight:700; }
+  .motif .desc { font-size:10.5px; color:var(--n500); margin-top:3px; line-height:1.5; }
+
+  /* 송편 아이콘 */
+  .icon-row { margin-left:36px; display:flex; gap:20px; flex-wrap:wrap; }
+  .icon-tile { background:#fff; border:1px solid var(--hairline); border-radius:18px; padding:22px 18px; text-align:center; width:132px; }
+  .icon-tile svg { width:58px; height:58px; }
+  .icon-tile .name { font-size:12px; font-weight:800; margin-top:10px; }
+  .icon-tile .src-name { font-size:10px; color:var(--n500); margin-top:2px; }
+
+  /* 책거리식 진열 컴포지션 */
+  .shelf { margin-left:36px; background:linear-gradient(180deg,#fdfbf6,#f6f1e6); border:1px solid var(--hairline); border-radius:18px; padding:28px; }
+  .shelf-row { display:flex; gap:0; }
+  .shelf-cell { flex:1; border:1px solid rgba(17,18,15,0.10); background:rgba(255,255,255,0.55); display:flex; align-items:center; justify-content:center; padding:20px 10px; position:relative; }
+  .shelf-cell svg.book { width:40px; height:40px; color:var(--p700); }
+  .shelf-cell svg.sp { width:46px; height:46px; }
+  .shelf-caption { text-align:center; font-size:11px; color:var(--n500); margin-top:14px; }
+
+  /* 컬러 스와치 */
+  .swatch-grid { margin-left:36px; display:grid; grid-template-columns:repeat(5,1fr); gap:14px; }
+  .swatch { border-radius:14px; overflow:hidden; border:1px solid var(--hairline); }
+  .swatch .fill { height:88px; display:flex; align-items:flex-end; padding:10px; }
+  .swatch .fill .chip-sample { background:rgba(255,255,255,0.55); border-radius:999px; padding:4px 10px; font-size:10.5px; font-weight:700; }
+  .swatch .info { background:#fff; padding:10px 12px; }
+  .swatch .info .name { font-size:12px; font-weight:800; }
+  .swatch .info .hex { font-size:10.5px; color:var(--n500); font-family:monospace; margin-top:2px; }
+  .swatch .info .src { font-size:10px; color:var(--n400); margin-top:4px; line-height:1.5; }
+
+  .contrast-note { margin:16px 0 0 36px; background:var(--p50); border:1px solid var(--p200); border-radius:10px; padding:12px 16px; font-size:11.5px; color:var(--p900); line-height:1.7; max-width:800px; }
+
+  /* 방향 옵션 */
+  .option-grid { margin-left:36px; display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .option { border-radius:18px; border:2px solid var(--hairline); padding:22px; background:#fff; }
+  .option.reco { border-color:var(--p600); }
+  .option .badge { display:inline-block; font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:999px; background:var(--n100); color:var(--n600); margin-bottom:10px; }
+  .option.reco .badge { background:var(--p700); color:#fff; }
+  .option h3 { font-size:14.5px; font-weight:800; margin:0 0 8px; }
+  .option p { font-size:12px; color:var(--n600); line-height:1.7; margin:0 0 12px; }
+  .option .mini-swatches { display:flex; gap:6px; margin-bottom:10px; }
+  .option .mini-swatches span { width:26px; height:26px; border-radius:50%; border:1px solid var(--hairline); }
+  .option ul { margin:0; padding-left:18px; font-size:11.5px; color:var(--n600); line-height:1.8; }
+
+  .footer-note { padding:24px 56px 60px; font-size:12px; color:var(--n600); border-top:1px solid var(--n200); background:#fff; line-height:1.8; max-width:1180px; margin:0 auto; }
+  .footer-note b { color:var(--p800); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🎑 브랜딩 컨셉 제안 — 책거리 × 송편</h1>
+  <p>"책거리 전통 풍습으로 브랜드를 표현하고, 송편을 주 아이콘으로, 송편의 알록달록한 색을 컬러칩의 핵심 포인트로 삼는다"는 방향을 구체적인 형태로 풀어봤습니다. 아직 최종 확정 전 <b>제안(draft)</b> 단계이며, 이 문서를 보고 방향을 조정한 뒤 실제 컬러칩/아이콘/목업에 반영하겠습니다.</p>
+  <span class="tag">v1 · 2026-08-09 · 방향 확인용 제안</span>
+</div>
+
+<div class="board">
+
+  <section>
+    <h2><span class="sec-num">1</span>책거리(책가도)란</h2>
+    <p class="sec-sub">
+      조선시대 민화 장르로, 책과 문방구를 중심으로 도자기·화병·과일 등을 격자형 진열장(다보각경식 구도) 안에 그려 넣은 그림입니다. 1점 투시도법과 명암법을 적용해 입체감을 살렸고, 강렬한 녹색·청색·적색 바탕을 즐겨 썼습니다. 학문과 배움을 향한 애정, 교양과 지적 성취를 드러내는 그림이라 <b>"책을 사랑하고 기록하는 사람들의 모임"</b>이라는 우리 앱의 정체성과 잘 맞습니다.<br>
+      → 앱에 적용한다면: (1) 서재·기록 화면에 책거리풍 <b>격자 진열 레이아웃</b>을 장식 요소로 활용, (2) 온보딩/스플래시에 책·화병·과일 등 <b>책거리 소재 일러스트</b> 배치, (3) 색은 원색 대신 아래 3번의 송편 색으로 차분하게 재해석.
+      <span class="src">출처: 나무위키 "책가도", 우리역사넷 "책거리(책가도)"</span>
+    </p>
+    <div class="motif-grid">
+      <div class="motif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg><div class="name">책</div><div class="desc">학문·배움의 상징</div></div>
+      <div class="motif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 21h8"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg><div class="name">문방구</div><div class="desc">붓·벼루·먹·종이</div></div>
+      <div class="motif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v3.2c0 .6-.3 1.1-.8 1.5C7.7 9.3 7 11.5 7 14c0 3.9 2.2 7 5 7s5-3.1 5-7c0-2.5-.7-4.7-2.2-6.3-.5-.4-.8-.9-.8-1.5V3"/></svg><div class="name">화병</div><div class="desc">난초·모란 꽂이</div></div>
+      <div class="motif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="8" ry="9"/><path d="M8 8c1.5 1.5 1.5 6 0 8"/><path d="M12 3v18"/></svg><div class="name">과일·도자기</div><div class="desc">수박·자기 등 소품</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="sec-num">2</span>송편 — 주 아이콘 컨셉</h2>
+    <p class="sec-sub">
+      추석에 빚는 반달 모양 떡. 쌀가루 반죽을 <b>반달 모양으로 접어 빚고, 접은 자리를 손끝으로 오므려 결(주름)</b>을 낸 뒤 솔잎을 깔고 찝니다. 천연 재료로 물들여 여러 색을 냅니다.<br>
+      → "책을 하나 다 읽고 반으로 접어 마음에 곱게 담아둔다"는 이미지로 <b>완독의 상징</b>이자, 사용자들이 각자 기록을 채워가는 모습을 <b>알록달록한 송편 여러 개</b>로 표현하면 좋겠다고 생각했습니다.
+      <span class="src">출처: 나무위키 "송편"</span>
+    </p>
+    <div class="icon-row">
+      <div class="icon-tile">
+        <svg viewBox="0 0 100 100"><path d="M15,58 A35,28 0 0 1 85,58 C78,63 72,56 65,62 C58,55 50,62 42,55 C35,62 28,56 21,62 C17,61 15,60 15,58 Z" fill="var(--sp-white)" stroke="var(--sp-white-ink)" stroke-width="2.5" stroke-linejoin="round"/></svg>
+        <div class="name">흰송편</div><div class="src-name">쌀 그대로</div>
+      </div>
+      <div class="icon-tile">
+        <svg viewBox="0 0 100 100"><path d="M15,58 A35,28 0 0 1 85,58 C78,63 72,56 65,62 C58,55 50,62 42,55 C35,62 28,56 21,62 C17,61 15,60 15,58 Z" fill="var(--sp-pink)" stroke="var(--sp-pink-ink)" stroke-width="2.5" stroke-linejoin="round"/></svg>
+        <div class="name">분홍송편</div><div class="src-name">솔피 물들임</div>
+      </div>
+      <div class="icon-tile">
+        <svg viewBox="0 0 100 100"><path d="M15,58 A35,28 0 0 1 85,58 C78,63 72,56 65,62 C58,55 50,62 42,55 C35,62 28,56 21,62 C17,61 15,60 15,58 Z" fill="var(--sp-mugwort)" stroke="var(--sp-mugwort-ink)" stroke-width="2.5" stroke-linejoin="round"/></svg>
+        <div class="name">쑥송편</div><div class="src-name">쑥 물들임</div>
+      </div>
+      <div class="icon-tile">
+        <svg viewBox="0 0 100 100"><path d="M15,58 A35,28 0 0 1 85,58 C78,63 72,56 65,62 C58,55 50,62 42,55 C35,62 28,56 21,62 C17,61 15,60 15,58 Z" fill="var(--sp-gardenia)" stroke="var(--sp-gardenia-ink)" stroke-width="2.5" stroke-linejoin="round"/></svg>
+        <div class="name">치자송편</div><div class="src-name">치자 물들임</div>
+      </div>
+      <div class="icon-tile">
+        <svg viewBox="0 0 100 100"><path d="M15,58 A35,28 0 0 1 85,58 C78,63 72,56 65,62 C58,55 50,62 42,55 C35,62 28,56 21,62 C17,61 15,60 15,58 Z" fill="var(--sp-purple)" stroke="var(--sp-purple-ink)" stroke-width="2.5" stroke-linejoin="round"/></svg>
+        <div class="name">자색송편</div><div class="src-name">자색고구마</div>
+      </div>
+    </div>
+
+    <div class="shelf" style="margin-top:22px;">
+      <div class="shelf-row">
+        <div class="shelf-cell" style="border-right:none;"><svg class="book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></div>
+        <div class="shelf-cell" style="border-right:none;"><svg class="sp" viewBox="0 0 100 100"><path d="M15,58 A35,28 0 0 1 85,58 C78,63 72,56 65,62 C58,55 50,62 42,55 C35,62 28,56 21,62 C17,61 15,60 15,58 Z" fill="var(--sp-pink)" stroke="var(--sp-pink-ink)" stroke-width="2.5" stroke-linejoin="round"/></svg></div>
+        <div class="shelf-cell" style="border-right:none;"><svg class="sp" viewBox="0 0 100 100"><path d="M15,58 A35,28 0 0 1 85,58 C78,63 72,56 65,62 C58,55 50,62 42,55 C35,62 28,56 21,62 C17,61 15,60 15,58 Z" fill="var(--sp-gardenia)" stroke="var(--sp-gardenia-ink)" stroke-width="2.5" stroke-linejoin="round"/></svg></div>
+        <div class="shelf-cell"><svg class="book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v3.2c0 .6-.3 1.1-.8 1.5C7.7 9.3 7 11.5 7 14c0 3.9 2.2 7 5 7s5-3.1 5-7c0-2.5-.7-4.7-2.2-6.3-.5-.4-.8-.9-.8-1.5V3"/></svg></div>
+      </div>
+      <div class="shelf-row" style="border-top:none;">
+        <div class="shelf-cell" style="border-right:none; border-top:none;"><svg class="sp" viewBox="0 0 100 100"><path d="M15,58 A35,28 0 0 1 85,58 C78,63 72,56 65,62 C58,55 50,62 42,55 C35,62 28,56 21,62 C17,61 15,60 15,58 Z" fill="var(--sp-mugwort)" stroke="var(--sp-mugwort-ink)" stroke-width="2.5" stroke-linejoin="round"/></svg></div>
+        <div class="shelf-cell" style="border-right:none; border-top:none;"><svg class="book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+        <div class="shelf-cell" style="border-right:none; border-top:none;"><svg class="sp" viewBox="0 0 100 100"><path d="M15,58 A35,28 0 0 1 85,58 C78,63 72,56 65,62 C58,55 50,62 42,55 C35,62 28,56 21,62 C17,61 15,60 15,58 Z" fill="var(--sp-white)" stroke="var(--sp-white-ink)" stroke-width="2.5" stroke-linejoin="round"/></svg></div>
+        <div class="shelf-cell" style="border-top:none;"><svg class="sp" viewBox="0 0 100 100"><path d="M15,58 A35,28 0 0 1 85,58 C78,63 72,56 65,62 C58,55 50,62 42,55 C35,62 28,56 21,62 C17,61 15,60 15,58 Z" fill="var(--sp-purple)" stroke="var(--sp-purple-ink)" stroke-width="2.5" stroke-linejoin="round"/></svg></div>
+      </div>
+    </div>
+    <div class="shelf-caption">↳ 책거리의 "격자 진열장" 구도 안에 책 아이콘과 송편 아이콘을 함께 배치한 예시 — 온보딩/서재 빈 상태 등 장식 요소로 활용 가능</div>
+  </section>
+
+  <section>
+    <h2><span class="sec-num">3</span>제안 컬러 팔레트 — 송편 5색</h2>
+    <p class="sec-sub">
+      추석 송편을 물들이는 천연 재료 5가지를 그대로 색상 소스로 삼았습니다: <b>쌀(흰색) · 솔피(분홍) · 쑥(초록) · 치자(노랑) · 자색고구마(보라)</b>. 원색이 아니라 천연 염색 특유의 <b>차분하고 따뜻한 파스텔톤</b>이라, 기존 컬러칩의 관심분야 칩·차트 등에 쓰던 방식(진한 텍스트 + 옅은 배경)에 그대로 잘 맞습니다. 각 색 위에 진한 텍스트(n900) 대비를 계산한 결과 5색 모두 <b>WCAG AA 통과(5.18:1 이상)</b>로, 칩/배지처럼 텍스트를 얹는 용도로 안전하게 쓸 수 있습니다.
+    </p>
+    <div class="swatch-grid">
+      <div class="swatch">
+        <div class="fill" style="background:var(--sp-white);"><span class="chip-sample" style="color:var(--sp-white-ink);">흰송편</span></div>
+        <div class="info"><div class="name">흰송편 · Rice White</div><div class="hex">#F7F1E4</div><div class="src">쌀가루 그대로 — 중립·배경용</div></div>
+      </div>
+      <div class="swatch">
+        <div class="fill" style="background:var(--sp-pink);"><span class="chip-sample" style="color:var(--sp-pink-ink);">분홍송편</span></div>
+        <div class="info"><div class="name">분홍송편 · Pink</div><div class="hex">#E8929B</div><div class="src">솔피(소나무 속껍질) 물들임</div></div>
+      </div>
+      <div class="swatch">
+        <div class="fill" style="background:var(--sp-mugwort);"><span class="chip-sample" style="color:var(--sp-mugwort-ink);">쑥송편</span></div>
+        <div class="info"><div class="name">쑥송편 · Mugwort</div><div class="hex">#7D8F5D</div><div class="src">쑥 물들임 — 차분한 재래 초록</div></div>
+      </div>
+      <div class="swatch">
+        <div class="fill" style="background:var(--sp-gardenia);"><span class="chip-sample" style="color:var(--sp-gardenia-ink);">치자송편</span></div>
+        <div class="info"><div class="name">치자송편 · Gardenia</div><div class="hex">#EFB94A</div><div class="src">치자 열매 물들임</div></div>
+      </div>
+      <div class="swatch">
+        <div class="fill" style="background:var(--sp-purple);"><span class="chip-sample" style="color:var(--sp-purple-ink);">자색송편</span></div>
+        <div class="info"><div class="name">자색송편 · Purple</div><div class="hex">#9B7BA8</div><div class="src">자색고구마 물들임</div></div>
+      </div>
+    </div>
+    <div class="contrast-note">
+      ※ 위 hex 값은 색 방향을 보여주기 위한 <b>1차 근사치</b>입니다. 방향이 확정되면 기존 그린 팔레트(v1.2)를 만들 때 썼던 것과 동일한 방식 — OKLCH 기반 라이트 10단계/다크 7단계 램프 생성 + dataviz 스킬의 <code>validate_palette.js</code>로 색맹 시뮬레이션·명도 밴드·채도 하한까지 정식 검증 — 을 거쳐 최종 확정하겠습니다.
+    </div>
+  </section>
+
+  <section style="margin-bottom:20px;">
+    <h2><span class="sec-num">4</span>적용 방향 — 둘 중 하나 골라주세요</h2>
+    <p class="sec-sub">"송편 색이 컬러칩의 중요한 포인트"라고 하신 부분을 두 가지 방식으로 해석해봤습니다. 어느 쪽이 원하시는 그림에 가까운가요?</p>
+    <div class="option-grid">
+      <div class="option">
+        <span class="badge">옵션 A</span>
+        <h3>기존 그린은 유지, 송편 5색을 포인트 멀티컬러로 교체</h3>
+        <div class="mini-swatches">
+          <span style="background:var(--p600);"></span>
+          <span style="background:var(--sp-pink);"></span>
+          <span style="background:var(--sp-mugwort);"></span>
+          <span style="background:var(--sp-gardenia);"></span>
+          <span style="background:var(--sp-purple);"></span>
+        </div>
+        <p>주 브랜드색(버튼·강조 텍스트 등)은 지금의 비비드 그린(hue 140°)을 그대로 쓰고, 관심분야 칩·장르 차트처럼 "카테고리 구분"이 목적인 곳에만 코랄·시안·라벤더 3색 대신 <b>송편 5색</b>을 씁니다.</p>
+        <ul>
+          <li>변경 범위가 작음 — 지금까지 만든 화면들의 톤이 크게 안 바뀜</li>
+          <li>버튼/CTA는 기존 그린이라 "산뜻한 앱" 느낌 유지</li>
+          <li>다만 "책거리 전통 풍습" 컨셉이 브랜드 전면에 드러나진 않음</li>
+        </ul>
+      </div>
+      <div class="option reco">
+        <span class="badge">옵션 B (추천)</span>
+        <h3>쑥송편 초록이 새 주 브랜드색, 나머지 4색이 포인트</h3>
+        <div class="mini-swatches">
+          <span style="background:var(--sp-mugwort);"></span>
+          <span style="background:var(--sp-white);"></span>
+          <span style="background:var(--sp-pink);"></span>
+          <span style="background:var(--sp-gardenia);"></span>
+          <span style="background:var(--sp-purple);"></span>
+        </div>
+        <p>주 브랜드색 자체를 <b>쑥송편 초록</b>으로 바꿉니다. 마침 쑥색도 초록 계열이라 지금까지 쌓아온 "그린 브랜드" 정체성은 이어가면서, 톤만 비비드에서 차분한 재래식으로 바뀝니다. 버튼·강조 요소가 은은해지고, 나머지 4색(흰/분홍/치자/자색)이 포인트로 화면 전체에 "송편스러움"을 드러냅니다.</p>
+        <ul>
+          <li>"책거리 전통 풍습" 브랜드 정체성이 톤 전체에 스며듦</li>
+          <li>기존 그린 팔레트 전면 재작업 필요 — 3개 문서(컬러칩/타이포아이콘/Hi-Fi 목업) 전부 색상 교체</li>
+          <li>버튼 대비 등 접근성 재검증 필요</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="footer-note">
+  ※ 이 문서는 <b>방향 확인용 제안(draft)</b>입니다 — 실제 산출물 갱신은 아래 업데이트 이력을 참고하세요.<br>
+  ※ 송편 아이콘은 통통한 반달 돔 + 지그재그 주름 밑단으로 그린 커스텀 SVG입니다(기존 Lucide 라인 아이콘과 별개로, 컬러가 살아있는 "브랜드 마스코트" 용도). 최초 시안이 "밤 같다"는 피드백을 받아 이 모양으로 수정했습니다(2026-08-09).<br>
+  ※ <b>2026-08-09 업데이트</b> — 옵션 B(쑥송편 그린이 새 프라이머리)로 확정되어 <code>color_chips.html</code> v2, <code>typography_and_icons.html</code> v1.2, <code>hifi_mockup_v1.html</code> v1.5에 반영 완료했습니다. 이 문서 자체는 최초 제안 당시 기록으로 남겨둡니다.
+</div>
+
+</body>
+</html>
