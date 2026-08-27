@@ -1,11 +1,12 @@
 /**
- * 디자인 시스템 v1.2 컬러 팔레트 (design/color_chips.html, design/hifi_mockup_v1.html과 동일한 값).
- * OKLCH hue 140°(연두) 기반 primary 램프 + neutral 램프 + 상태색 + 카테고리 포인트 멀티컬러.
- * 라이트/다크 모두 같은 hue를 유지하고 명도만 재조정한 것 — 자세한 도출 근거는 design/README.md 참고.
+ * 디자인 시스템 v2 컬러 팔레트 — "책거리×송편" 리브랜딩 (design/color_chips.html, design/hifi_mockup_v1.html v1.5와 동일한 값).
+ * OKLCH hue 124.6°(쑥송편) 기반 primary 램프 + neutral 램프 + 상태색 + 카테고리 포인트 멀티컬러(송편 5색 중 4색).
+ * 2026-08-09 확정, 2026-08-27 프론트 반영. 이전 v1.2(hue 140° 연두 + 코랄/시안/라벤더)에서 전면 교체됨 —
+ * 자세한 도출 근거는 claude/독서기록앱_디자인시스템_컬러팔레트_v1.md 참고.
  */
 
 export interface ThemeColors {
-  /** Primary(연두) 램프 50~900 */
+  /** Primary(쑥송편 그린) 램프 50~900 */
   p50: string;
   p100: string;
   p200: string;
@@ -47,16 +48,16 @@ export interface ThemeColors {
 }
 
 export const lightColors: ThemeColors = {
-  p50: '#e8fee4',
-  p100: '#d6fbcd',
-  p200: '#aff3a0',
-  p300: '#86e670',
-  p400: '#5bd43d',
-  p500: '#3fbd13',
-  p600: '#34a00f',
-  p700: '#288109',
-  p800: '#1c6005',
-  p900: '#104103',
+  p50: '#f4f9eb',
+  p100: '#ebf5db',
+  p200: '#d6e5bd',
+  p300: '#b9cd98',
+  p400: '#99ae73',
+  p500: '#7a9052',
+  p600: '#607537',
+  p700: '#485a21',
+  p800: '#32410f',
+  p900: '#1e2903',
   n50: '#f6f7f3',
   n100: '#eeefea',
   n200: '#dadbd6',
@@ -67,16 +68,18 @@ export const lightColors: ThemeColors = {
   n700: '#3c3e39',
   n800: '#262723',
   n900: '#11120f',
-  success: '#34a00f',
+  success: '#607537',
   warning: '#906600',
   error: '#b6143f',
   info: '#1d60bc',
-  chart1: '#288109',
-  chart2: '#dc747e',
-  chart3: '#0ec7de',
-  chart4: '#918be5',
+  /** chart1 = p700 (브랜드 메인 강조색과 항상 동일하게 유지) */
+  chart1: '#485a21',
+  chart2: '#e8929b',
+  chart3: '#efb94a',
+  chart4: '#9b7ba8',
   surface: '#ffffff',
-  accentSolidBg: '#288109',
+  /** accentSolidBg = p700 */
+  accentSolidBg: '#485a21',
   onAccentSolid: '#ffffff',
   warnBg: '#fbf3e2',
   warnText: '#5c4300',
@@ -84,16 +87,16 @@ export const lightColors: ThemeColors = {
 };
 
 export const darkColors: ThemeColors = {
-  p50: '#1a2d15',
-  p100: '#274520',
-  p200: '#305528',
-  p300: '#66bd52',
-  p400: '#66bd52',
-  p500: '#31980b',
-  p600: '#2c880c',
-  p700: '#66bd52',
-  p800: '#85d873',
-  p900: '#b2eca6',
+  p50: '#121906',
+  p100: '#1b2309',
+  p200: '#27330d',
+  p300: '#667b3d',
+  p400: '#667b3d',
+  p500: '#748a48',
+  p600: '#657b39',
+  p700: '#8da267',
+  p800: '#adc08b',
+  p900: '#cfdeb7',
   n50: '#1e211b',
   n100: '#1a1d17',
   n200: '#373934',
@@ -104,16 +107,18 @@ export const darkColors: ThemeColors = {
   n700: '#d3d5ce',
   n800: '#eef0e9',
   n900: '#f5f6f1',
-  success: '#79ab1a',
+  success: '#748a48',
   warning: '#d59800',
   error: '#eb596e',
   info: '#5f99ed',
-  chart1: '#31980b',
-  chart2: '#c8787e',
-  chart3: '#00a5b9',
-  chart4: '#6b64ba',
+  /** 다크모드는 chart1 = accentSolidBg(p500) — 라이트와 동일하게 "브랜드 메인 강조색"을 따라감 */
+  chart1: '#748a48',
+  chart2: '#cd717c',
+  chart3: '#ce9b2b',
+  chart4: '#7d588c',
   surface: '#242721',
-  accentSolidBg: '#31980b',
+  /** 다크모드 accentSolidBg는 p700이 아니라 p500 — v1.2 때부터 이어진 규칙, 값만 교체 */
+  accentSolidBg: '#748a48',
   onAccentSolid: '#0f1a00',
   warnBg: '#332911',
   warnText: '#e3ae4c',
