@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>콩닥책닥 — 스플래시 화면 컨셉 비교 v1</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --n50:#f6f7f3; --n100:#eeefea; --n200:#dadbd6; --n600:#52534d; --n800:#262723; --n900:#11120f;
+    --p50:#f4f9eb; --p200:#d6e5bd; --p800:#32410f; --p900:#1e2903;
+    --font: 'Pretendard Variable', 'Pretendard', -apple-system, "Apple SD Gothic Neo", "Segoe UI", system-ui, sans-serif;
+    --mugwort:#7D8F5D;
+    --cream:#f7f1e4;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:0 0 80px; background:var(--n100); font-family:var(--font); color:var(--n900); }
+  .doc-header { padding:36px 48px 22px; background:#fff; border-bottom:1px solid var(--n200); }
+  .doc-header h1 { margin:0 0 6px; font-size:22px; font-weight:800; }
+  .doc-header p { margin:0; font-size:13px; color:var(--n600); line-height:1.6; }
+  .doc-header .meta { margin-top:10px; display:flex; gap:10px; font-size:12px; color:var(--n600); flex-wrap:wrap; }
+  .doc-header .meta span { background:var(--n100); padding:3px 9px; border-radius:6px; }
+  .doc-note { margin-top:14px; background:var(--p50); border:1px solid var(--p200); border-radius:8px; padding:10px 14px; font-size:12.5px; line-height:1.7; color:var(--p900); }
+  .doc-note b { color:var(--p800); }
+
+  .board { padding:40px 48px 80px; max-width:1100px; margin:0 auto; }
+  .section-title { font-size:15px; font-weight:800; margin:0 0 14px; }
+
+  .compare-grid { display:flex; gap:40px; flex-wrap:wrap; }
+  .compare-card { display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .compare-card .cap { font-size:12.5px; font-weight:700; color:var(--n800); text-align:center; }
+  .compare-card .cap-sub { font-size:11px; color:var(--n600); text-align:center; max-width:280px; line-height:1.6; margin-top:-4px; }
+
+  /* 폰 프레임 (hifi_mockup_v1.html과 동일 스펙 재사용) */
+  .phone-frame { width:300px; height:648px; background:#fff; border:1px solid var(--n200); border-radius:46px; position:relative; flex-shrink:0; overflow:hidden; box-shadow:0 8px 24px rgba(17,18,15,0.1); }
+  .statusbar { height:34px; display:flex; align-items:center; justify-content:space-between; padding:0 22px; font-size:12px; font-weight:600; font-variant-numeric:tabular-nums; position:relative; z-index:6; }
+  .dynamic-island { position:absolute; top:7px; left:50%; transform:translateX(-50%); width:74px; height:20px; background:#000; border-radius:20px; z-index:5; }
+  .status-icons { display:flex; align-items:center; gap:5px; }
+  .status-icons svg { display:block; }
+  .splash-screen { height:calc(100% - 34px); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+
+  .icon-mask { border-radius:22%; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,0.14); }
+  .icon-mask svg { display:block; }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <h1>🌱 콩닥책닥 — 스플래시 화면 컨셉 비교 v1</h1>
+  <p>아직 한 번도 만든 적 없던 스플래시 화면(앱 실행 직후 잠깐 보이는 시작 화면)의 방향을 정하기 위한 비교 시안입니다. 새 앱 아이콘(v3, 텍스트 워드마크형)의 배경·전경 색을 그대로 재사용해 두 가지 스타일로 그려봤습니다. 아직 확정 아님 — 방향만 골라주시면 그 스타일로 실제 산출물(에셋 포함)을 만들겠습니다.</p>
+  <div class="meta">
+    <span>Ver 1 (컨셉 비교, 미확정)</span>
+    <span>작성일 2026-08-27</span>
+    <span>Splash Screen — Concept</span>
+  </div>
+  <div class="doc-note">
+    <b>왜 다크모드 짝이 없나요</b> — 스플래시 화면은 앱이 완전히 로딩되기 전, OS가 가장 먼저 띄우는 화면이라 실제로는 시스템 다크모드 설정과 무관하게 <b>보통 단일 버전</b>으로 만듭니다(iOS/Android 런치스크린 관례). 그래서 이번 비교는 라이트 한 가지 버전으로만 그렸습니다.<br>
+    <b>색상 출처</b> — 두 시안 모두 앱 아이콘 v3와 동일한 색(배경 <code>#7D8F5D</code> 쑥송편 그린 / 텍스트·전경 <code>#f7f1e4</code> 크림)을 그대로 재사용해서, 아이콘 → 스플래시 → 앱 진입까지 색이 끊기지 않고 이어지도록 했습니다.
+  </div>
+</div>
+
+<div class="board">
+  <h2 class="section-title">두 가지 방향</h2>
+  <div class="compare-grid">
+
+    <div class="compare-card">
+      <div class="phone-frame" style="background:var(--cream);">
+        <div class="statusbar" style="color:var(--n800);"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
+        <div class="splash-screen">
+          <div class="icon-mask" id="icon-mask-1" style="width:100px; height:100px;"><svg viewBox="0 0 200 200" width="100" height="100"></svg></div>
+        </div>
+      </div>
+      <div class="cap">① 심플 아이콘 중앙형</div>
+      <div class="cap-sub">크림 배경 위에 지금 앱 아이콘(그린 사각형 + 워드마크)만 작게 중앙에. iOS 기본 런치스크린처럼 가장 짧고 담백하게 지나가는 느낌.</div>
+    </div>
+
+    <div class="compare-card">
+      <div class="phone-frame" style="background:var(--mugwort);">
+        <div class="statusbar" style="color:var(--cream);"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
+        <div class="splash-screen">
+          <svg viewBox="0 0 300 300" width="220" height="220">
+            <text x="150" y="150" text-anchor="middle" font-family="'Pretendard Variable','Pretendard',sans-serif" font-weight="800" font-size="58" fill="#f7f1e4" letter-spacing="-1">콩닥</text>
+            <text x="150" y="216" text-anchor="middle" font-family="'Pretendard Variable','Pretendard',sans-serif" font-weight="800" font-size="58" fill="#f7f1e4" letter-spacing="-1">책닥</text>
+          </svg>
+        </div>
+      </div>
+      <div class="cap">② 풀블리드 워드마크형 (추천)</div>
+      <div class="cap-sub">쑥송편 그린을 화면 전체에 채우고, 그 위에 "콩닥/책닥" 워드마크만 크림색으로 크게. 브랜드 컬러가 화면 전체를 채워서 더 인상적이고, 피처 그래픽·앱 아이콘과 톤이 자연스럽게 이어짐.</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const BG_COLOR = "#7D8F5D";
+  const TEXT_COLOR = "#f7f1e4";
+  const FONT_FAMILY = "'Pretendard Variable','Pretendard',sans-serif";
+
+  function textGroup(fill) {
+    return `
+      <text x="100" y="88" text-anchor="middle" font-family="${FONT_FAMILY}" font-weight="800" font-size="46" fill="${fill}" letter-spacing="-1">콩닥</text>
+      <text x="100" y="136" text-anchor="middle" font-family="${FONT_FAMILY}" font-weight="800" font-size="46" fill="${fill}" letter-spacing="-1">책닥</text>
+    `;
+  }
+
+  document.querySelector('#icon-mask-1 svg').innerHTML = `
+    <rect x="0" y="0" width="200" height="200" fill="${BG_COLOR}"/>
+    ${textGroup(TEXT_COLOR)}
+  `;
+</script>
+
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>콩닥책닥 — 텍스트 아이콘 컨셉 v1 (탐색용)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --n50:#f6f7f3; --n100:#eeefea; --n200:#dadbd6; --n600:#52534d; --n800:#262723; --n900:#11120f;
+    --p50:#f4f9eb; --p200:#d6e5bd; --p800:#32410f; --p900:#1e2903;
+    --font: 'Pretendard Variable', 'Pretendard', -apple-system, "Apple SD Gothic Neo", "Segoe UI", system-ui, sans-serif;
+    --cream:#f7f1e4;
+    --mugwort:#7D8F5D;
+    --mugwort-dark:#485a21;
+    --sp-pink:#e8929b;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:0 0 80px; background:var(--n100); font-family:var(--font); color:var(--n900); }
+  .doc-header { padding:36px 48px 22px; background:#fff; border-bottom:1px solid var(--n200); }
+  .doc-header h1 { margin:0 0 6px; font-size:22px; font-weight:800; }
+  .doc-header p { margin:0; font-size:13px; color:var(--n600); line-height:1.6; }
+  .doc-note { margin-top:14px; background:var(--p50); border:1px solid var(--p200); border-radius:8px; padding:10px 14px; font-size:12.5px; line-height:1.7; color:var(--p900); }
+  .doc-note b { color:var(--p800); }
+
+  .board { padding:40px 48px 80px; max-width:1200px; margin:0 auto; }
+  .row { display:flex; gap:32px; flex-wrap:wrap; margin-bottom:48px; }
+  .option-card { background:#fff; border:1px solid var(--n200); border-radius:16px; padding:24px; }
+  .option-card h3 { margin:0 0 4px; font-size:15px; }
+  .option-card .desc { font-size:12px; color:var(--n600); margin:0 0 16px; max-width:280px; }
+  .icon-mask { border-radius:22%; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,0.14); }
+  .icon-mask svg { display:block; }
+  .size-row { display:flex; gap:16px; align-items:flex-end; margin-top:14px; }
+  .size-row .cell { text-align:center; }
+  .size-row .cell .lbl { font-size:10px; color:var(--n600); margin-top:6px; }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <h1>🔤 콩닥책닥 — 텍스트 아이콘 컨셉 v1 (탐색용)</h1>
+  <p>앱 이름 "콩닥책닥"을 아이콘 안에 두 줄(콩닥 / 책닥)로 배치하는 컨셉입니다. 기존 확정된 쑥송편 아이콘(<code>app_icon.html</code>)을 아직 대체한 것은 아니고, 비교해볼 수 있게 시안만 먼저 그려봤습니다.</p>
+  <div class="meta"></div>
+  <div class="doc-note">
+    <b>탐색 배경</b> — 앱 이름이 "콩닥책닥"으로 확정된 뒤, 사용자가 아이콘을 "콩닥 / 책닥" 두 줄 텍스트로 만들어보고 싶다고 요청. 국내 앱(무신사·오늘의집 등)에서 자주 쓰는 4음절 워드마크형 아이콘 스타일입니다. 작은 사이즈(29px)에서도 읽히는지가 핵심 검증 포인트라 여러 색상 조합 + 실제 크기 축소본을 함께 준비했습니다.
+  </div>
+</div>
+
+<div class="board">
+  <h2 style="font-size:15px; font-weight:800;">색상 조합 A안 — 크림 배경 + 쑥송편 그린 텍스트</h2>
+  <p style="font-size:12.5px; color:var(--n600); max-width:600px;">기존 아이콘과 동일한 배경색(<code>--cream</code>)을 써서, 두 아이콘을 나란히 둬도 톤이 어색하지 않습니다.</p>
+  <div class="row">
+    <div class="option-card">
+      <h3>기본 (200px)</h3>
+      <div class="icon-mask" style="width:200px;height:200px;"><svg id="a-200" viewBox="0 0 200 200" width="200" height="200"></svg></div>
+    </div>
+    <div class="option-card">
+      <h3>실제 크기 축소 확인</h3>
+      <div class="desc">홈 화면에서 실제로 보이는 크기대로 나열</div>
+      <div class="size-row">
+        <div class="cell"><svg viewBox="0 0 200 200" width="80" height="80" class="clone-a"></svg><div class="lbl">80px</div></div>
+        <div class="cell"><svg viewBox="0 0 200 200" width="60" height="60" class="clone-a"></svg><div class="lbl">60px</div></div>
+        <div class="cell"><svg viewBox="0 0 200 200" width="40" height="40" class="clone-a"></svg><div class="lbl">40px</div></div>
+        <div class="cell"><svg viewBox="0 0 200 200" width="29" height="29" class="clone-a"></svg><div class="lbl">29px</div></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="font-size:15px; font-weight:800;">색상 조합 B안 — 쑥송편 그린 배경 + 크림 텍스트 (반전)</h2>
+  <p style="font-size:12.5px; color:var(--n600); max-width:600px;">배경과 텍스트를 반전시킨 버전. 홈 화면에서 더 눈에 띄지만, 다른 초록 계열 아이콘들과 섞이면 구분이 덜 될 수 있습니다.</p>
+  <div class="row">
+    <div class="option-card">
+      <h3>기본 (200px)</h3>
+      <div class="icon-mask" style="width:200px;height:200px;"><svg id="b-200" viewBox="0 0 200 200" width="200" height="200"></svg></div>
+    </div>
+    <div class="option-card">
+      <h3>실제 크기 축소 확인</h3>
+      <div class="size-row">
+        <div class="cell"><svg viewBox="0 0 200 200" width="80" height="80" class="clone-b"></svg><div class="lbl">80px</div></div>
+        <div class="cell"><svg viewBox="0 0 200 200" width="60" height="60" class="clone-b"></svg><div class="lbl">60px</div></div>
+        <div class="cell"><svg viewBox="0 0 200 200" width="40" height="40" class="clone-b"></svg><div class="lbl">40px</div></div>
+        <div class="cell"><svg viewBox="0 0 200 200" width="29" height="29" class="clone-b"></svg><div class="lbl">29px</div></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="font-size:15px; font-weight:800;">색상 조합 C안 — 진한 그린 배경 + 크림 텍스트 (고대비)</h2>
+  <p style="font-size:12.5px; color:var(--n600); max-width:600px;">primary-800(<code>#32410f</code>)처럼 훨씬 진한 초록을 배경으로 써서 대비를 최대로 끌어올린 버전 — 작은 사이즈에서 가장 또렷하게 보입니다.</p>
+  <div class="row">
+    <div class="option-card">
+      <h3>기본 (200px)</h3>
+      <div class="icon-mask" style="width:200px;height:200px;"><svg id="c-200" viewBox="0 0 200 200" width="200" height="200"></svg></div>
+    </div>
+    <div class="option-card">
+      <h3>실제 크기 축소 확인</h3>
+      <div class="size-row">
+        <div class="cell"><svg viewBox="0 0 200 200" width="80" height="80" class="clone-c"></svg><div class="lbl">80px</div></div>
+        <div class="cell"><svg viewBox="0 0 200 200" width="60" height="60" class="clone-c"></svg><div class="lbl">60px</div></div>
+        <div class="cell"><svg viewBox="0 0 200 200" width="40" height="40" class="clone-c"></svg><div class="lbl">40px</div></div>
+        <div class="cell"><svg viewBox="0 0 200 200" width="29" height="29" class="clone-c"></svg><div class="lbl">29px</div></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="font-size:15px; font-weight:800;">비교: 기존 확정 쑥송편 아이콘</h2>
+  <p style="font-size:12.5px; color:var(--n600); max-width:600px;">참고용으로 옆에 나란히 뒀습니다 — 실제 결정은 아래에서 어느 방향으로 갈지 알려주시면 됩니다.</p>
+  <div class="row">
+    <div class="option-card">
+      <h3>app_icon.html (확정본)</h3>
+      <div class="icon-mask" style="width:200px;height:200px;"><svg id="sp-200" viewBox="0 0 200 200" width="200" height="200"></svg></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const FONT_WEIGHT = 800;
+
+  function textIconMarkup(bg, textColor) {
+    return `
+      <rect x="0" y="0" width="200" height="200" fill="${bg}"/>
+      <text x="100" y="88" text-anchor="middle" font-family="'Pretendard Variable','Pretendard',sans-serif" font-weight="${FONT_WEIGHT}" font-size="46" fill="${textColor}" letter-spacing="-1">콩닥</text>
+      <text x="100" y="136" text-anchor="middle" font-family="'Pretendard Variable','Pretendard',sans-serif" font-weight="${FONT_WEIGHT}" font-size="46" fill="${textColor}" letter-spacing="-1">책닥</text>
+    `;
+  }
+
+  const markupA = textIconMarkup('#f7f1e4', '#485a21');   // 크림 배경 + 진한 그린 텍스트
+  const markupB = textIconMarkup('#7D8F5D', '#f7f1e4');   // 그린 배경 + 크림 텍스트
+  const markupC = textIconMarkup('#32410f', '#f7f1e4');   // 진한 그린 배경 + 크림 텍스트 (고대비)
+
+  document.getElementById('a-200').innerHTML = markupA;
+  document.getElementById('b-200').innerHTML = markupB;
+  document.getElementById('c-200').innerHTML = markupC;
+  document.querySelectorAll('.clone-a').forEach(el => el.innerHTML = markupA);
+  document.querySelectorAll('.clone-b').forEach(el => el.innerHTML = markupB);
+  document.querySelectorAll('.clone-c').forEach(el => el.innerHTML = markupC);
+
+  // 기존 확정 아이콘(쑥송편) 재사용 — app_icon.html과 동일한 SHAPE_D
+  const SHAPE_D = "M185,100 C178,65 110,8 60,10 C15,12 0,55 5,95 C10,140 55,155 100,145 C140,138 180,110 185,100 Z";
+  const SEAM_D = "M25,110 Q75,150 120,120 T175,95";
+  const spMarkup = `
+    <rect x="0" y="0" width="200" height="200" fill="#f7f1e4"/>
+    <g transform="translate(30,38) scale(0.76)">
+      <path d="${SHAPE_D}" fill="#7D8F5D"/>
+      <path d="${SEAM_D}" stroke="#4f5c3a" stroke-width="6" fill="none" stroke-linecap="round"/>
+    </g>
+  `;
+  document.getElementById('sp-200').innerHTML = spMarkup;
+</script>
+
+</body>
+</html>

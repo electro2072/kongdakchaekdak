@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>콩닥책닥 — 스플래시 화면 (확정) v1</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --n50:#f6f7f3; --n100:#eeefea; --n200:#dadbd6; --n600:#52534d; --n800:#262723; --n900:#11120f;
+    --p50:#f4f9eb; --p200:#d6e5bd; --p800:#32410f; --p900:#1e2903;
+    --font: 'Pretendard Variable', 'Pretendard', -apple-system, "Apple SD Gothic Neo", "Segoe UI", system-ui, sans-serif;
+    --mugwort:#7D8F5D;
+    --cream:#f7f1e4;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:0 0 80px; background:var(--n100); font-family:var(--font); color:var(--n900); }
+  .doc-header { padding:36px 48px 22px; background:#fff; border-bottom:1px solid var(--n200); }
+  .doc-header h1 { margin:0 0 6px; font-size:22px; font-weight:800; }
+  .doc-header p { margin:0; font-size:13px; color:var(--n600); line-height:1.6; }
+  .doc-header .meta { margin-top:10px; display:flex; gap:10px; font-size:12px; color:var(--n600); flex-wrap:wrap; }
+  .doc-header .meta span { background:var(--n100); padding:3px 9px; border-radius:6px; }
+  .doc-note { margin-top:14px; background:var(--p50); border:1px solid var(--p200); border-radius:8px; padding:10px 14px; font-size:12.5px; line-height:1.7; color:var(--p900); }
+  .doc-note b { color:var(--p800); }
+
+  .board { padding:40px 48px 80px; max-width:1100px; margin:0 auto; }
+  .section-title { font-size:15px; font-weight:800; margin:0 0 14px; }
+  .section-desc { font-size:12.5px; color:var(--n600); margin:0 0 16px; max-width:640px; }
+
+  .preview-row { display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap; margin-bottom:48px; }
+  .preview-card { display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .preview-card .cap { font-size:12px; color:var(--n600); text-align:center; }
+
+  /* 폰 프레임 (hifi_mockup_v1.html과 동일 스펙 재사용) */
+  .phone-frame { width:300px; height:648px; background:var(--mugwort); border:1px solid var(--n200); border-radius:46px; position:relative; flex-shrink:0; overflow:hidden; box-shadow:0 8px 24px rgba(17,18,15,0.1); }
+  .statusbar { height:34px; display:flex; align-items:center; justify-content:space-between; padding:0 22px; font-size:12px; font-weight:600; color:var(--cream); font-variant-numeric:tabular-nums; position:relative; z-index:6; }
+  .dynamic-island { position:absolute; top:7px; left:50%; transform:translateX(-50%); width:74px; height:20px; background:#000; border-radius:20px; z-index:5; }
+  .status-icons { display:flex; align-items:center; gap:5px; color:var(--cream); }
+  .status-icons svg { display:block; }
+  .splash-screen { height:calc(100% - 34px); display:flex; align-items:center; justify-content:center; }
+
+  .swatch { width:64px; height:64px; border-radius:12px; border:1px solid var(--n200); }
+  .spec-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; font-size:12.5px; }
+  .spec-row code { background:var(--n100); padding:3px 8px; border-radius:6px; font-size:12px; }
+
+  .export-block { margin-bottom:10px; }
+  .export-block .cap { font-size:12px; color:var(--n600); margin-bottom:8px; }
+  .checker { background-image: linear-gradient(45deg,#ccc 25%,transparent 25%), linear-gradient(-45deg,#ccc 25%,transparent 25%), linear-gradient(45deg,transparent 75%,#ccc 75%), linear-gradient(-45deg,transparent 75%,#ccc 75%); background-size:16px 16px; background-position:0 0,0 8px,8px -8px,-8px 0px; }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <h1>🌱 콩닥책닥 — 스플래시 화면 (확정) v1</h1>
+  <p>앱 실행 직후 잠깐 보이는 시작 화면. 쑥송편 그린 배경을 화면 전체에 채우고 "콩닥/책닥" 워드마크만 크림색으로 크게 배치하는 풀블리드 워드마크형으로 확정했습니다.</p>
+  <div class="meta">
+    <span>Ver 1 (확정)</span>
+    <span>작성일 2026-08-27</span>
+    <span>Splash Screen — Final</span>
+  </div>
+  <div class="doc-note">
+    <b>결정 경위</b> — 스플래시 화면은 이전까지 계속 보류 상태였는데(앱 아이콘이 정해지지 않아서), 앱 아이콘이 v3 텍스트 워드마크형으로 확정된 뒤 진행했습니다. "① 심플 아이콘 중앙형"(크림 배경 + 작은 아이콘)과 "② 풀블리드 워드마크형"(그린 배경 전체 + 큰 워드마크) 두 방향을 시안으로 비교했고(<code>splash_screen_concept_v1.html</code>), 사용자가 <b>②번</b>을 선택해 확정했습니다.<br>
+    <b>왜 다크모드 짝이 없나요</b> — 스플래시는 OS가 앱 로딩 전에 가장 먼저 띄우는 화면이라 실제 iOS/Android 런치스크린 관례상 시스템 다크모드와 무관하게 보통 단일 버전으로 만듭니다. 이 문서도 라이트/다크 구분 없이 하나로 확정했습니다.<br>
+    <b>색상 재사용</b> — 배경·텍스트 색 모두 앱 아이콘 v3와 동일한 값을 그대로 사용해, 아이콘 → 스플래시 → 앱 진입 화면까지 색이 끊기지 않고 이어지도록 했습니다.
+  </div>
+</div>
+
+<div class="board">
+
+  <h2 class="section-title">미리보기</h2>
+  <div class="preview-row">
+    <div class="preview-card">
+      <div class="phone-frame">
+        <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
+        <div class="splash-screen"><svg id="prev-logo" viewBox="0 0 300 300" width="200" height="200"></svg></div>
+      </div>
+      <div class="cap">실제 화면 미리보기</div>
+    </div>
+
+    <div class="preview-card">
+      <div class="swatch" style="background:#7D8F5D;"></div>
+      <div class="cap">배경색<br><code>#7D8F5D</code></div>
+    </div>
+    <div class="preview-card">
+      <div class="swatch checker" style="display:flex; align-items:center; justify-content:center;"><svg width="40" height="40" viewBox="0 0 100 100"><rect fill="#7D8F5D" width="100" height="100"/><text x="50" y="40" text-anchor="middle" font-family="'Pretendard Variable'" font-weight="800" font-size="16" fill="#f7f1e4">콩</text></svg></div>
+      <div class="cap">텍스트색<br><code>#f7f1e4</code></div>
+    </div>
+  </div>
+
+  <h2 class="section-title">스펙</h2>
+  <div style="margin-bottom:40px; font-size:12.5px; color:var(--n700); line-height:2;">
+    <div class="spec-row">배경 <code>#7D8F5D</code> 풀블리드 단색 (그라디언트·이미지 없음)</div>
+    <div class="spec-row">워드마크 <code>Pretendard Variable, weight 800</code> · 색 <code>#f7f1e4</code> · "콩닥" / "책닥" 두 줄, 화면 중앙</div>
+    <div class="spec-row">로딩 인디케이터 없음 — 네이티브 런치스크린 관례에 따라 정적 화면 하나로만 구성</div>
+    <div class="spec-row">다크모드 대응 없음 — 스플래시는 시스템 테마와 무관하게 단일 버전 사용</div>
+  </div>
+
+  <h2 class="section-title">실제 내보내기 요소 — 워드마크 로고 (투명 배경)</h2>
+  <p class="section-desc">배경색은 이미지가 아니라 앱 실행 설정(네이티브 스플래시 배경색)으로 직접 지정하고, 이 로고 하나만 투명 배경 PNG로 그 위에 얹는 구성입니다. 벡터 텍스트를 넉넉한 해상도(960×960)로 내보내 실제 적용 시 필요한 크기로 축소해서 쓸 수 있습니다.</p>
+  <div class="export-block">
+    <div class="cap">워드마크 로고, 960×960, 투명 배경</div>
+    <div id="logo-export" class="checker" style="width:960px; height:960px;"></div>
+  </div>
+
+</div>
+
+<script>
+  const TEXT_COLOR = "#f7f1e4";
+  const FONT_FAMILY = "'Pretendard Variable','Pretendard',sans-serif";
+
+  function wordmark(fill) {
+    return `
+      <text x="150" y="150" text-anchor="middle" font-family="${FONT_FAMILY}" font-weight="800" font-size="58" fill="${fill}" letter-spacing="-1">콩닥</text>
+      <text x="150" y="216" text-anchor="middle" font-family="${FONT_FAMILY}" font-weight="800" font-size="58" fill="${fill}" letter-spacing="-1">책닥</text>
+    `;
+  }
+
+  document.getElementById('prev-logo').innerHTML = wordmark(TEXT_COLOR);
+  document.getElementById('logo-export').innerHTML =
+    `<svg viewBox="0 0 300 300" width="960" height="960">${wordmark(TEXT_COLOR)}</svg>`;
+</script>
+
+</body>
+</html>
