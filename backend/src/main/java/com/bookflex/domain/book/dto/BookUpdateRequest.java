@@ -1,11 +1,13 @@
 package com.bookflex.domain.book.dto;
 
+import com.bookflex.domain.common.Genre;
+
 public record BookUpdateRequest(
         String title,
         String author,
         String coverImage,
         String isbn,
-        String genre,
+        Genre genre,
         Integer totalPages
 ) {
 }

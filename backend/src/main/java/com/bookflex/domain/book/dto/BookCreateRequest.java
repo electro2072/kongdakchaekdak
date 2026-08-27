@@ -1,5 +1,6 @@
 package com.bookflex.domain.book.dto;
 
+import com.bookflex.domain.common.Genre;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -11,7 +12,7 @@ public record BookCreateRequest(
         @NotBlank String author,
         String coverImage,
         String isbn,
-        String genre,
+        Genre genre,
         Integer totalPages,
         LocalDate startDate
 ) {

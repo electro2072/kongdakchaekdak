@@ -1,10 +1,12 @@
 package com.bookflex.domain.user.dto;
 
+import com.bookflex.domain.common.Genre;
 import com.bookflex.domain.user.Gender;
 import com.bookflex.domain.user.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Schema(description = "회원 조회 응답")
 public record UserResponse(
@@ -14,6 +16,7 @@ public record UserResponse(
         String bio,
         Gender gender,
         String socialProvider,
+        Set<Genre> interests,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
@@ -25,6 +28,7 @@ public record UserResponse(
                 user.getBio(),
                 user.getGender(),
                 user.getSocialProvider(),
+                user.getInterests(),
                 user.getCreatedAt(),
                 user.getUpdatedAt()
         );

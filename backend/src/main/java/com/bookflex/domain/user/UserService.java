@@ -35,6 +35,7 @@ public class UserService {
                 request.socialProvider(),
                 request.socialId()
         );
+        user.updateInterests(request.interests());
 
         User saved = userRepository.save(user);
         auditLogger.event("USER_CREATED", saved.getId(), null);
@@ -56,6 +57,7 @@ public class UserService {
         requireOwner(id, currentUserId);
         User user = findUserOrThrow(id);
         user.updateProfile(request.nickname(), request.profileImage(), request.bio(), request.gender());
+        user.updateInterests(request.interests());
         return UserResponse.from(user);
     }
 

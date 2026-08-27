@@ -17,12 +17,11 @@ import java.util.Optional;
  * {@link #getLabel()}) — 프론트가 화면에 쓰는 문자열과 API 값이 1:1로 같아서 별도 매핑이
  * 필요 없다.</p>
  *
- * <p>{@code User.interests}에 다중선택으로 이번에 실제 적용했다. {@code Book.genre}에도
- * 단일값으로 재사용할 예정이지만, 이번 라운드는 엔티티 계층만 먼저 구현하기로 해서
- * {@code Book.genre}는 아직 기존 자유 {@code String}을 그대로 유지한다 —
- * {@code domain/book/dto}가 이 세션 도구의 폴더 깊이 제한으로 못 읽는 상태라, 내용을 안 보고
- * 타입을 바꾸면 기존 요청/응답 DTO가 조용히 깨질 위험이 있어서다. 이 enum은 그때 그대로
- * 재사용하면 된다.</p>
+ * <p>{@code User.interests}(다중선택, {@code Set<Genre>})와 {@code Book.genre}(단일선택)
+ * 양쪽 모두 같은 날 후속 라운드에서 실제 적용을 마쳤다({@code domain/user/dto},
+ * {@code domain/book/dto}를 이 세션 도구가 처음엔 폴더 깊이 제한으로 못 읽어 한 라운드
+ * 미뤘던 것 — 이후 사용자가 더 깊은 폴더를 추가로 연결해줘서 해결됨, 개발현황.md 27~29번
+ * 항목 참고).</p>
  */
 public enum Genre {
     NOVEL("소설"),
@@ -50,7 +49,7 @@ public enum Genre {
                 .orElseThrow(() -> new IllegalArgumentException("알 수 없는 카테고리: " + label));
     }
 
-    /** 알 수 없거나 null/공백이면 빈 Optional — 자유 입력값(예: 기존 Book.genre)을 검증할 때 사용. */
+    /** 알 수 없거나 null/공백이면 빈 Optional — 자유 입력값(예: 마이그레이션 전 Book.genre)을 검증할 때 사용. */
     public static Optional<Genre> fromLabelOrNull(String label) {
         if (label == null || label.isBlank()) {
             return Optional.empty();

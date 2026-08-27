@@ -2,6 +2,7 @@ package com.bookflex.domain.book.dto;
 
 import com.bookflex.domain.book.Book;
 import com.bookflex.domain.book.BookStatus;
+import com.bookflex.domain.common.Genre;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,7 +14,7 @@ public record BookResponse(
         String author,
         String coverImage,
         String isbn,
-        String genre,
+        Genre genre,
         Integer totalPages,
         BookStatus status,
         LocalDate startDate,

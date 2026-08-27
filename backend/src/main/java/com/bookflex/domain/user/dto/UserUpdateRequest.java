@@ -1,8 +1,11 @@
 package com.bookflex.domain.user.dto;
 
+import com.bookflex.domain.common.Genre;
 import com.bookflex.domain.user.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
+
+import java.util.Set;
 
 @Schema(description = "회원 프로필 부분 수정 요청 (null 필드는 변경하지 않음)")
 public record UserUpdateRequest(
@@ -20,6 +23,9 @@ public record UserUpdateRequest(
         String bio,
 
         @Schema(description = "성별")
-        Gender gender
+        Gender gender,
+
+        @Schema(description = "관심분야 (Frame 05.2 다중선택 통째 교체 — null이면 변경 없음, 빈 Set이면 전체 해제)")
+        Set<Genre> interests
 ) {
 }

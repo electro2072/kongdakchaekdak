@@ -3,6 +3,7 @@ package com.bookflex.domain.dashboard;
 import com.bookflex.domain.book.Book;
 import com.bookflex.domain.book.BookRepository;
 import com.bookflex.domain.book.BookStatus;
+import com.bookflex.domain.common.Genre;
 import com.bookflex.domain.dashboard.dto.BookHighlightDto;
 import com.bookflex.domain.dashboard.dto.DashboardHighlights;
 import com.bookflex.domain.dashboard.dto.DashboardResponse;
@@ -143,10 +144,12 @@ public class DashboardService {
                 .toList();
     }
 
-    // 테이블정의서상 genre는 선택 입력이라 비어있는 책이 있을 수 있음 — "기타"로 묶는다.
+    // 2026-08-27: Book.genre가 자유 String에서 Genre enum으로 바뀌면서 null 체크만 남았다
+    // (enum 참조는 공백일 수 없으므로 isBlank() 체크는 더 이상 불필요). 테이블정의서상 genre는
+    // 선택 입력이라 미입력 책이 있을 수 있음 — "기타"로 묶는다.
     private String genreLabel(Book book) {
-        String genre = book.getGenre();
-        return (genre == null || genre.isBlank()) ? OTHER_GENRE_LABEL : genre;
+        Genre genre = book.getGenre();
+        return genre == null ? OTHER_GENRE_LABEL : genre.getLabel();
     }
 
     private double roundToOneDecimal(double value) {

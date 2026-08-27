@@ -50,10 +50,12 @@ import java.util.Set;
  * (Frame 05.2) 화면이 다중선택으로 입력받는 값을 저장한다. 디자이너 에이전트가
  * {@code hifi_mockup_v1.html} 실제 마크업을 확인해 회신한 고정 6개 카테고리
  * ({@link Genre})만 허용한다(자유 입력 아님) —
- * {@code claude/독서기록앱_백엔드요청_디자인_관심분야장르확인_v1.md} 참고. 이번 라운드는
- * 엔티티 계층만 먼저 구현한 것으로, 회원가입/프로필 수정 API가 실제로 이 필드를 채우도록
- * 하는 서비스·DTO 연동은 아직 없다({@code domain/user/dto}가 이 세션 도구의 폴더 깊이
- * 제한으로 못 읽는 상태라 다음 라운드로 미룸, 개발현황.md 27번 항목 참고).</p>
+ * {@code claude/독서기록앱_백엔드요청_디자인_관심분야장르확인_v1.md} 참고. 같은 날 후속
+ * 라운드에서 {@code UserCreateRequest}/{@code UserUpdateRequest}/{@code UserResponse} 및
+ * {@code UserService.create/update}까지 실제로 연동을 마쳐, 회원가입/프로필 수정 API가 이
+ * 필드를 채운다(개발현황.md 27·29번 항목 참고). {@code Book.genre}도 같은 라운드에서 동일한
+ * {@link Genre}/{@link GenreConverter} 패턴으로 String에서 전환했다(단, 단일선택이라
+ * ElementCollection이 아닌 단순 컬럼).</p>
  */
 @Entity
 @Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = {"social_provider", "social_id"}))

@@ -1,7 +1,10 @@
 package com.bookflex.domain.book;
 
+import com.bookflex.domain.common.Genre;
+import com.bookflex.domain.common.GenreConverter;
 import com.bookflex.domain.user.User;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -50,8 +53,12 @@ public class Book {
     @Column(length = 20)
     private String isbn;
 
-    @Column(length = 30)
-    private String genre;
+    // 2026-08-27: 자유 입력 String에서 고정 카테고리 Genre enum으로 전환(User.interests와 동일한
+    // GenreConverter 패턴 — DB에는 enum 이름이 아니라 한글 라벨 그대로 저장됨). 단일선택이라
+    // User.interests(ElementCollection)와 달리 그냥 컬럼 하나.
+    @Convert(converter = GenreConverter.class)
+    @Column(name = "genre", length = 20)
+    private Genre genre;
 
     @Column(name = "total_pages")
     private Integer totalPages;
@@ -74,7 +81,7 @@ public class Book {
     private LocalDateTime updatedAt;
 
     public Book(User user, String title, String author, String coverImage, String isbn,
-                String genre, Integer totalPages, LocalDate startDate) {
+                Genre genre, Integer totalPages, LocalDate startDate) {
         this.user = user;
         this.title = title;
         this.author = author;
@@ -87,7 +94,7 @@ public class Book {
     }
 
     public void update(String title, String author, String coverImage, String isbn,
-                        String genre, Integer totalPages) {
+                        Genre genre, Integer totalPages) {
         if (title != null) this.title = title;
         if (author != null) this.author = author;
         if (coverImage != null) this.coverImage = coverImage;
