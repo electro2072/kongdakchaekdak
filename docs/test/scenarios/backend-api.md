@@ -39,6 +39,10 @@
 
 ## 1. 인증 / 접근 제어 (`/api/auth`, SecurityConfig)
 
+> 소셜 로그인(카카오/구글/네이버) 자체의 상세 시나리오 — 에러 경로 + 유효 토큰 해피패스 +
+> find-or-create + 토큰 발급 절차 — 는 **[social-login.md](social-login.md)** 참고.
+> 아래는 접근 제어(공개/비공개 경로, JWT 검증) 위주.
+
 | # | 시나리오 | 기대 |
 |---|---|---|
 | BE-AUTH-01 | 토큰 없이 `GET /api/auth/me` | 401, 공통 에러 포맷 |
@@ -47,12 +51,12 @@
 | BE-AUTH-04 | 유효 토큰으로 `GET /api/auth/me` | 200 + 본인 UserResponse |
 | BE-AUTH-05 | 존재하지 않는 userId를 sub로 넣은 유효 토큰으로 `/api/auth/me` | 404 또는 401 (실제 동작 확인 대상) |
 | BE-AUTH-06 | `POST /api/auth/kakao` 빈 body / accessToken 누락 | 400 |
-| BE-AUTH-07 | `POST /api/auth/kakao` 가짜 accessToken | 401/502 등 — 실패를 공통 포맷으로 감싸는지 |
+| BE-AUTH-07 | `POST /api/auth/kakao` 가짜 accessToken | **401 `INVALID_CREDENTIALS`** (kapi.kakao.com 실제 왕복 후 실패 변환, 500 아님) — 2026-08-28 확인 |
 | BE-AUTH-08 | 공개 경로(`/health`, `/swagger-ui.html`, `/v3/api-docs`, `/public/**`) 토큰 없이 접근 | 200 |
 | BE-AUTH-09 | `GET /api/books` 토큰 없이 | 401 (공개 아님) |
 
-> 소셜 로그인 정상 흐름(BE-AUTH-07의 "성공" 버전)은 실제 카카오/구글/네이버 토큰이 필요해
-> 서버 단독으로는 검증 불가 → 프론트 SDK 연동 후 별도 세션에서.
+> 카카오 정상 흐름은 유효 access token으로 2026-08-28 검증 완료([social-login.md](social-login.md),
+> [reports/2026-08-28d.md](../reports/2026-08-28d.md)). 구글/네이버는 `.env` 키 미설정이라 에러 경로만.
 
 ## 2. User (`/api/users`)
 
