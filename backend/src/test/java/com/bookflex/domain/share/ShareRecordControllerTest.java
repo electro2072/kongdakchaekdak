@@ -34,6 +34,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * (2026-08-28) shareType/scope/platform/targetType 요청·응답 값을 전부 소문자로 바꿨다
+ * (FINDING-20260827-04 수정 — ShareType/ShareScope/SharePlatform/ShareTargetType에
+ * {@code @JsonValue}/{@code @JsonCreator} 추가). 이전엔 대문자만 받아들였는데 지금은 반대로
+ * 소문자만 받아들인다 — 마지막의 {@code shareType을_대문자로_보내면_400()}가 그 회귀를 막는다.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -93,9 +99,9 @@ class ShareRecordControllerTest {
     @Test
     void scope가_ALL이면_targets_없이_공유_생성과_목록조회가_동작한다() throws Exception {
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "DASHBOARD",
-                "scope", "ALL",
-                "platform", "APP"
+                "shareType", "dashboard",
+                "scope", "all",
+                "platform", "app"
         ));
 
         String response = mockMvc.perform(post("/api/share-records")
@@ -103,8 +109,8 @@ class ShareRecordControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.shareType").value("DASHBOARD"))
-                .andExpect(jsonPath("$.scope").value("ALL"))
+                .andExpect(jsonPath("$.shareType").value("dashboard"))
+                .andExpect(jsonPath("$.scope").value("all"))
                 .andExpect(jsonPath("$.publicToken").isNotEmpty())
                 .andExpect(jsonPath("$.targets").isEmpty())
                 .andReturn().getResponse().getContentAsString();
@@ -119,9 +125,9 @@ class ShareRecordControllerTest {
     @Test
     void shareType이_BOOK인데_bookId가_없으면_400() throws Exception {
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "BOOK",
-                "scope", "ALL",
-                "platform", "APP"
+                "shareType", "book",
+                "scope", "all",
+                "platform", "app"
         ));
 
         mockMvc.perform(post("/api/share-records")
@@ -139,10 +145,10 @@ class ShareRecordControllerTest {
         String otherToken = "Bearer " + jwtProvider.generateToken(otherUserId);
 
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "BOOK",
+                "shareType", "book",
                 "bookId", bookId,
-                "scope", "ALL",
-                "platform", "APP"
+                "scope", "all",
+                "platform", "app"
         ));
 
         mockMvc.perform(post("/api/share-records")
@@ -156,9 +162,9 @@ class ShareRecordControllerTest {
     @Test
     void scope가_CUSTOM인데_targets가_없으면_400() throws Exception {
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "DASHBOARD",
-                "scope", "CUSTOM",
-                "platform", "APP"
+                "shareType", "dashboard",
+                "scope", "custom",
+                "platform", "app"
         ));
 
         mockMvc.perform(post("/api/share-records")
@@ -172,10 +178,10 @@ class ShareRecordControllerTest {
     @Test
     void scope가_GROUP인데_targetType에_USER가_섞이면_400() throws Exception {
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "DASHBOARD",
-                "scope", "GROUP",
-                "platform", "APP",
-                "targets", List.of(Map.of("targetType", "USER", "targetId", sharerId))
+                "shareType", "dashboard",
+                "scope", "group",
+                "platform", "app",
+                "targets", List.of(Map.of("targetType", "user", "targetId", sharerId))
         ));
 
         mockMvc.perform(post("/api/share-records")
@@ -194,10 +200,10 @@ class ShareRecordControllerTest {
         groupMemberRepository.save(new GroupMember(othersGroup, otherOwner));
 
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "DASHBOARD",
-                "scope", "GROUP",
-                "platform", "APP",
-                "targets", List.of(Map.of("targetType", "GROUP", "targetId", othersGroup.getId()))
+                "shareType", "dashboard",
+                "scope", "group",
+                "platform", "app",
+                "targets", List.of(Map.of("targetType", "group", "targetId", othersGroup.getId()))
         ));
 
         mockMvc.perform(post("/api/share-records")
@@ -211,10 +217,10 @@ class ShareRecordControllerTest {
     @Test
     void 그룹_scope_공유가_정상_생성된다() throws Exception {
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "DASHBOARD",
-                "scope", "GROUP",
-                "platform", "APP",
-                "targets", List.of(Map.of("targetType", "GROUP", "targetId", myGroupId))
+                "shareType", "dashboard",
+                "scope", "group",
+                "platform", "app",
+                "targets", List.of(Map.of("targetType", "group", "targetId", myGroupId))
         ));
 
         mockMvc.perform(post("/api/share-records")
@@ -222,16 +228,16 @@ class ShareRecordControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.targets[0].targetType").value("GROUP"))
+                .andExpect(jsonPath("$.targets[0].targetType").value("group"))
                 .andExpect(jsonPath("$.targets[0].targetId").value(myGroupId));
     }
 
     @Test
     void 공유_기록_삭제는_본인만_가능하다() throws Exception {
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "DASHBOARD",
-                "scope", "ALL",
-                "platform", "APP"
+                "shareType", "dashboard",
+                "scope", "all",
+                "platform", "app"
         ));
         String response = mockMvc.perform(post("/api/share-records")
                         .header("Authorization", sharerToken)
@@ -263,10 +269,10 @@ class ShareRecordControllerTest {
     @Test
     void bookNoteId와_photoIds를_지정하면_응답에_소감과_사진이_순서대로_포함된다() throws Exception {
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "BOOK",
+                "shareType", "book",
                 "bookId", bookId,
-                "scope", "ALL",
-                "platform", "APP",
+                "scope", "all",
+                "platform", "app",
                 "bookNoteId", noteId,
                 "photoIds", List.of(photoId)
         ));
@@ -291,10 +297,10 @@ class ShareRecordControllerTest {
         Long otherNoteId = bookNoteRepository.save(new BookNote(otherBook, "다른 책 소감")).getId();
 
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "BOOK",
+                "shareType", "book",
                 "bookId", otherBookId,
-                "scope", "ALL",
-                "platform", "APP",
+                "scope", "all",
+                "platform", "app",
                 "bookNoteId", noteId
         ));
 
@@ -309,9 +315,9 @@ class ShareRecordControllerTest {
     @Test
     void shareType이_DASHBOARD인데_bookNoteId가_있으면_400() throws Exception {
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "DASHBOARD",
-                "scope", "ALL",
-                "platform", "APP",
+                "shareType", "dashboard",
+                "scope", "all",
+                "platform", "app",
                 "bookNoteId", noteId
         ));
 
@@ -332,10 +338,10 @@ class ShareRecordControllerTest {
                 new BookPhoto(otherBook, "https://example.com/other.jpg", null, null, null)).getId();
 
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "BOOK",
+                "shareType", "book",
                 "bookId", otherBookId,
-                "scope", "ALL",
-                "platform", "APP",
+                "scope", "all",
+                "platform", "app",
                 "photoIds", List.of(otherPhotoId, photoId)
         ));
 
@@ -355,10 +361,10 @@ class ShareRecordControllerTest {
         }
 
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "BOOK",
+                "shareType", "book",
                 "bookId", bookId,
-                "scope", "ALL",
-                "platform", "APP",
+                "scope", "all",
+                "platform", "app",
                 "photoIds", elevenPhotoIds
         ));
 
@@ -379,9 +385,9 @@ class ShareRecordControllerTest {
         bookRepository.save(completedBook);
 
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "DASHBOARD",
-                "scope", "ALL",
-                "platform", "APP",
+                "shareType", "dashboard",
+                "scope", "all",
+                "platform", "app",
                 "dashboardPeriod", "MONTH",
                 "dashboardDate", "2026-07"
         ));
@@ -400,10 +406,10 @@ class ShareRecordControllerTest {
     @Test
     void shareType이_BOOK인데_dashboardPeriod가_있으면_400() throws Exception {
         String body = objectMapper.writeValueAsString(Map.of(
-                "shareType", "BOOK",
+                "shareType", "book",
                 "bookId", bookId,
-                "scope", "ALL",
-                "platform", "APP",
+                "scope", "all",
+                "platform", "app",
                 "dashboardPeriod", "MONTH"
         ));
 
@@ -413,5 +419,24 @@ class ShareRecordControllerTest {
                         .content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("INVALID_REQUEST"));
+    }
+
+    @Test
+    void shareType을_대문자로_보내면_400() throws Exception {
+        // 2026-08-28: FINDING-20260827-04 수정 — API 계약을 소문자로 통일했다(Genre와 동일 패턴).
+        // 이전엔 대문자만 받아들였는데(프론트 타입/문서와 불일치), 지금은 반대로 대문자를 거부해서
+        // 계약이 소문자 하나로 고정됐는지 회귀 방지한다.
+        String body = objectMapper.writeValueAsString(Map.of(
+                "shareType", "DASHBOARD",
+                "scope", "all",
+                "platform", "app"
+        ));
+
+        mockMvc.perform(post("/api/share-records")
+                        .header("Authorization", sharerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("MALFORMED_REQUEST"));
     }
 }
