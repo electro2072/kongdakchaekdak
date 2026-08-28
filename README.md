@@ -1,9 +1,6 @@
-# 독서 기록 공유 앱 (reading-record-app)
+# 콩닥책닥 (kongdakchaekdak)
 
-대한민국 독서 자랑 어플 — 읽은 책을 기록하고 친구/그룹과 공유하는 앱입니다.
-
-## 이름
-콩닥책닥 (kongdakchaekdak)
+대한민국 독서 자랑 앱 — 읽은 책을 기록하고 친구/그룹과 공유하는 앱입니다.
 
 ## 구조
 - `backend/` — Spring Boot(Gradle) 백엔드. 현재 Step 1(프로젝트 뼈대 + Health check API)까지.

@@ -33,7 +33,7 @@
         </appender>
     </springProfile>
 
-    <logger name="com.bookflex" level="INFO"/>
+    <logger name="com.kongdakchaekdak" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
