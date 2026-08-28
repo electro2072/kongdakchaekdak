@@ -40,6 +40,12 @@ export interface ThemeColors {
   chart4: string;
   /** 시맨틱 토큰 */
   surface: string;
+  /**
+   * 앱 전체 배경(탭/스택 바탕) — surface(카드)와 구분되는 한 단계 더 낮은 위계.
+   * 테스터 리포트 FINDING-20260828-06: 기존엔 이 토큰이 없어 RootNavigator가 n50을
+   * 대신 썼는데, 다크모드에서 design의 `--d-surface-app`(#181a14)보다 밝게 나왔다.
+   */
+  appBackground: string;
   accentSolidBg: string;
   onAccentSolid: string;
   warnBg: string;
@@ -78,6 +84,8 @@ export const lightColors: ThemeColors = {
   chart3: '#efb94a',
   chart4: '#9b7ba8',
   surface: '#ffffff',
+  /** 라이트모드는 기존 RootNavigator가 쓰던 n50과 동일 — 변경 없음 */
+  appBackground: '#f6f7f3',
   /** accentSolidBg = p700 */
   accentSolidBg: '#485a21',
   onAccentSolid: '#ffffff',
@@ -97,8 +105,12 @@ export const darkColors: ThemeColors = {
   p700: '#8da267',
   p800: '#adc08b',
   p900: '#cfdeb7',
-  n50: '#1e211b',
-  n100: '#1a1d17',
+  // 테스터 리포트 FINDING-20260828-05: n50이 n100보다 밝아 다크 램프가 극단에서 뒤집혀
+  // 있었다(n50이 가장 어두워야 함). design엔 다크 뉴트럴 램프 10단계 명세가 없어(주로
+  // d-surface-*/d-text-* 토큰만 있음) 프론트가 자체 확장하며 순서를 놓친 것 — 두 값을
+  // 맞바꿔서 n50→n900이 어두움→밝음 단조 증가하도록 정정.
+  n50: '#1a1d17',
+  n100: '#1e211b',
   n200: '#373934',
   n300: '#454741',
   n400: '#5f625b',
@@ -117,6 +129,11 @@ export const darkColors: ThemeColors = {
   chart3: '#ce9b2b',
   chart4: '#7d588c',
   surface: '#242721',
+  /**
+   * design `--d-surface-app`(#181a14) — 카드(surface, #242721)보다 한 단계 더 어두운
+   * 앱 바탕색. FINDING-20260828-06 반영.
+   */
+  appBackground: '#181a14',
   /** 다크모드 accentSolidBg는 p700이 아니라 p500 — v1.2 때부터 이어진 규칙, 값만 교체 */
   accentSolidBg: '#748a48',
   onAccentSolid: '#0f1a00',

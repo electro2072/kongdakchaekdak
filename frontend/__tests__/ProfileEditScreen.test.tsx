@@ -12,7 +12,11 @@ const mockNavigate = jest.fn();
 const mockGoBack = jest.fn();
 
 jest.mock('@react-navigation/native', () => {
-  const actual = jest.requireActual('@react-navigation/native');
+  // 테스터 리포트 BUG-20260827-02 참고 (ProfileScreen.test.tsx와 동일한 원인/수정).
+  const actual =
+    jest.requireActual<typeof import('@react-navigation/native')>(
+      '@react-navigation/native',
+    );
   return {
     ...actual,
     useNavigation: () => ({navigate: mockNavigate, goBack: mockGoBack}),

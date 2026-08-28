@@ -21,7 +21,10 @@ export function RootNavigator() {
     colors: {
       ...base.colors,
       primary: colors.p700,
-      background: colors.n50,
+      // 테스터 리포트 FINDING-20260828-06: 카드(surface)와 구분되는 앱 바탕 전용 토큰이
+      // 없어 n50을 대신 쓰고 있었다 — 다크모드에서 design 의도(#181a14)보다 밝게 나오는
+      // 원인이었음. 전용 토큰(appBackground)으로 교체.
+      background: colors.appBackground,
       card: colors.surface,
       text: colors.n900,
       border: colors.hairline,

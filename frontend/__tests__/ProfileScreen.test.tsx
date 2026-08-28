@@ -12,7 +12,13 @@ type UseAuthResult = ReturnType<typeof useAuth>;
 const mockNavigate = jest.fn();
 
 jest.mock('@react-navigation/native', () => {
-  const actual = jest.requireActual('@react-navigation/native');
+  // 테스터 리포트 BUG-20260827-02: jest.requireActual()의 반환 타입은 기본적으로 unknown이라
+  // 스프레드({...actual})가 TS2698로 깨진다. jest 런타임(babel)은 타입을 무시해 테스트 자체는
+  // 통과했지만 `tsc --noEmit`이 실패했음 — 제네릭으로 실제 모듈 타입을 지정해서 해소한다.
+  const actual =
+    jest.requireActual<typeof import('@react-navigation/native')>(
+      '@react-navigation/native',
+    );
   return {
     ...actual,
     useNavigation: () => ({navigate: mockNavigate}),
