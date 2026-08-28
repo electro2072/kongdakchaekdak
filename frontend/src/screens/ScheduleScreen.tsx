@@ -36,7 +36,12 @@ const CURRENT_READING = {
 const UPCOMING_MEETING = {groupName: '책벙개', dateLabel: '7월 20일(토) 14:00'};
 const READING_NOW_COUNT = 2;
 
-/** Frame 02 · 일정 탭 (design/hifi_mockup_v1.html 기준: 이번달 독서 일정, 캘린더 스트립, 오늘의 리딩 카드) */
+/**
+ * Frame 02 · 일정 탭 (design/hifi_mockup_v1.html 기준: 이번달 독서 일정, 캘린더 스트립, 오늘의 리딩 카드)
+ *
+ * 종 아이콘(Frame 10 알림 목록)과 "이번주 일정 카드"(Frame 02.1 일정 상세)는 테스터 리포트
+ * FINDING-20260828-10 반영 — 이전엔 두 곳 다 진입점(onPress)이 없었다.
+ */
 export function ScheduleScreen() {
   const {colors, typography, radii} = useTheme();
   const navigation =
@@ -61,7 +66,11 @@ export function ScheduleScreen() {
               {MONTH_LABEL} · 지금까지 {COMPLETED_THIS_MONTH}권 완독
             </Text>
           </View>
-          <Bell size={20} color={colors.n600} />
+          <TouchableOpacity
+            testID="notifications-bell"
+            onPress={() => navigation.navigate('Notifications')}>
+            <Bell size={20} color={colors.n600} />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.weekRow}>
@@ -158,7 +167,8 @@ export function ScheduleScreen() {
           </TouchableOpacity>
         </View>
 
-        <View
+        <TouchableOpacity
+          testID="upcoming-meeting-card"
           style={[
             styles.card,
             {
@@ -166,7 +176,8 @@ export function ScheduleScreen() {
               borderColor: colors.hairline,
               borderRadius: radii.card,
             },
-          ]}>
+          ]}
+          onPress={() => navigation.navigate('ScheduleDetail')}>
           <View style={styles.meetingRow}>
             <CalendarDays size={16} color={colors.warning} />
             <Text
@@ -182,7 +193,7 @@ export function ScheduleScreen() {
             {UPCOMING_MEETING.dateLabel} · 독서모임 "
             {UPCOMING_MEETING.groupName}"
           </Text>
-        </View>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={[

@@ -34,4 +34,19 @@ export type MainStackParamList = {
   Dashboard: undefined;
   /** Frame 05.2 프로필 편집 — 프로필 탭 "프로필 편집" 버튼에서 진입, 탭바 없이 전체화면 */
   ProfileEdit: undefined;
+  /**
+   * Frame 04.1 그룹 관리 · 공유 이력 — 공유 탭 "그룹 관리 · 공유 이력" 카드에서 진입, 탭바 없이 전체화면.
+   * 테스터 리포트 FINDING-20260828-10 반영.
+   */
+  GroupManagement: undefined;
+  /**
+   * Frame 02.1 일정 상세 — 일정 탭 "이번주 일정 카드"에서 진입, 탭바 없이 전체화면.
+   * 테스터 리포트 FINDING-20260828-10 반영.
+   */
+  ScheduleDetail: undefined;
+  /**
+   * Frame 10 알림 목록 — 일정 탭 헤더 종 아이콘에서 진입, 탭바 없이 전체화면.
+   * 테스터 리포트 FINDING-20260828-10 반영.
+   */
+  Notifications: undefined;
 };

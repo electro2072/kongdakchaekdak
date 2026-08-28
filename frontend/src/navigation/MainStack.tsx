@@ -6,6 +6,9 @@ import {BookDetailScreen} from '../screens/BookDetailScreen';
 import {BookSearchScreen} from '../screens/BookSearchScreen';
 import {DashboardScreen} from '../screens/DashboardScreen';
 import {ProfileEditScreen} from '../screens/ProfileEditScreen';
+import {GroupManagementScreen} from '../screens/GroupManagementScreen';
+import {ScheduleDetailScreen} from '../screens/ScheduleDetailScreen';
+import {NotificationScreen} from '../screens/NotificationScreen';
 import {MOCK_LIBRARY_BOOKS} from '../mocks/libraryBooks';
 import {useTheme} from '../theme';
 
@@ -50,6 +53,21 @@ export function MainStack() {
         name="ProfileEdit"
         component={ProfileEditScreen}
         options={{title: '프로필 편집'}}
+      />
+      <Stack.Screen
+        name="GroupManagement"
+        component={GroupManagementScreen}
+        options={{title: '그룹 관리 · 공유 이력'}}
+      />
+      <Stack.Screen
+        name="ScheduleDetail"
+        component={ScheduleDetailScreen}
+        options={{title: '일정 상세'}}
+      />
+      <Stack.Screen
+        name="Notifications"
+        component={NotificationScreen}
+        options={{title: '알림'}}
       />
     </Stack.Navigator>
   );

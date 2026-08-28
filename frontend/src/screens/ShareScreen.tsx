@@ -7,15 +7,18 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import {useRoute, type RouteProp} from '@react-navigation/native';
+import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
+import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {
   BookOpen,
   Check,
   Bell,
+  ChevronRight,
   Share2,
   MessageCircle,
+  Users,
 } from 'lucide-react-native';
-import type {MainTabParamList} from '../navigation/types';
+import type {MainStackParamList, MainTabParamList} from '../navigation/types';
 import type {ShareScope} from '../types/share';
 import {MOCK_LIBRARY_BOOKS} from '../mocks/libraryBooks';
 import {MOCK_SHARE_GROUPS} from '../mocks/shareGroups';
@@ -27,10 +30,16 @@ const SCOPE_OPTIONS: {key: ShareScope; label: string}[] = [
   {key: 'custom', label: '인원 직접 선택'},
 ];
 
-/** Frame 04 · 공유 탭 — design/hifi_mockup_v1.html 기준. 그룹 관리·공유 이력(Frame 04.1)은 이후 작업 */
+/**
+ * Frame 04 · 공유 탭 — design/hifi_mockup_v1.html 기준.
+ * "그룹 관리 · 공유 이력" 카드는 Frame 04.1(GroupManagementScreen)로 이동 —
+ * 테스터 리포트 FINDING-20260828-10 반영(이전엔 이 화면 자체가 없어 진입점이 없었음).
+ */
 export function ShareScreen() {
   const {colors, typography, radii} = useTheme();
   const route = useRoute<RouteProp<MainTabParamList, 'Share'>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const bookId = route.params?.bookId;
   const book = bookId
     ? MOCK_LIBRARY_BOOKS.find(b => b.id === bookId)
@@ -48,10 +57,37 @@ export function ShareScreen() {
     return `${option.label} — ${summary}`;
   };
 
+  const groupLinkCard = (
+    <TouchableOpacity
+      testID="group-management-link"
+      style={[
+        styles.groupLinkCard,
+        {
+          backgroundColor: colors.p50,
+          borderColor: colors.hairline,
+          borderRadius: radii.card,
+        },
+      ]}
+      onPress={() => navigation.navigate('GroupManagement')}>
+      <View style={styles.groupLinkLeft}>
+        <Users size={18} color={colors.p700} />
+        <Text
+          style={[typography.bodyStrong, {color: colors.n900, fontSize: 12.5}]}>
+          그룹 관리 · 공유 이력
+        </Text>
+      </View>
+      <ChevronRight size={16} color={colors.n500} />
+    </TouchableOpacity>
+  );
+
   if (!book) {
     return (
       <SafeAreaView
         style={[styles.container, {backgroundColor: colors.surface}]}>
+        <View style={styles.emptyPageHeader}>
+          <Text style={[typography.h3, {color: colors.n900}]}>공유</Text>
+        </View>
+        <View style={styles.emptyPageHeader}>{groupLinkCard}</View>
         <View style={styles.emptyState}>
           <Share2 size={28} color={colors.p400} />
           <Text
@@ -74,6 +110,8 @@ export function ShareScreen() {
         <Text style={[typography.h3, {color: colors.n900, marginBottom: 12}]}>
           공유
         </Text>
+
+        {groupLinkCard}
 
         <View
           style={[
@@ -215,11 +253,28 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 24,
   },
+  emptyPageHeader: {
+    paddingHorizontal: 18,
+    marginBottom: 4,
+  },
   emptyState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 32,
+  },
+  groupLinkCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    padding: 12,
+    marginBottom: 14,
+  },
+  groupLinkLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   recordCard: {
     flexDirection: 'row',
