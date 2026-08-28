@@ -2,7 +2,7 @@
 # 실행: gradle bootRun --args="--spring.profiles.active=local"  (또는 ./gradlew 로 wrapper 사용 시 동일)
 spring:
   datasource:
-    url: jdbc:h2:mem:reading_record_app;MODE=MySQL
+    url: jdbc:h2:mem:kongdakchaekdak;MODE=MySQL
     driver-class-name: org.h2.Driver
     username: sa
     password:

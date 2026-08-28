@@ -75,9 +75,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.readingrecordapp"
+    namespace "com.kongdakchaekdak"
     defaultConfig {
-        applicationId "com.readingrecordapp"
+        applicationId "com.kongdakchaekdak"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

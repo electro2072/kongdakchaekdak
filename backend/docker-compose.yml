@@ -2,10 +2,10 @@ version: "3.8"
 services:
   mysql:
     image: mysql:8.0
-    container_name: reading-record-app-mysql
+    container_name: kongdakchaekdak-mysql
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: reading_record_app
+      MYSQL_DATABASE: kongdakchaekdak
       MYSQL_ROOT_PASSWORD: root
       TZ: Asia/Seoul
     ports:

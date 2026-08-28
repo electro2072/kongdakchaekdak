@@ -1,5 +1,5 @@
 {
-  "name": "ReadingRecordApp",
+  "name": "kongdakchaekdak",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -42,5 +42,5 @@
   "engines": {
     "node": ">=18"
   },
-  "description": "독서 기록 공유 앱 - React Native 프론트엔드"
+  "description": "콩닥책닥 - React Native 프론트엔드"
 }

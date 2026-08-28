@@ -6,14 +6,14 @@ server:
 
 spring:
   application:
-    name: reading-record-app-backend
+    name: kongdakchaekdak-backend
   datasource:
     # Step 6(배포, Railway): 호스트/포트/DB명을 분리해서 환경변수로 받도록 바꿈 — 로컬은 기존과
-    # 동일하게 docker-compose의 localhost:3306/reading_record_app을 기본값으로 그대로 쓰고,
+    # 동일하게 docker-compose의 localhost:3306/kongdakchaekdak을 기본값으로 그대로 쓰고,
     # Railway에서는 MySQL 플러그인의 MYSQLHOST/MYSQLPORT/MYSQLDATABASE 값을 이 서비스의
     # DB_HOST/DB_PORT/DB_NAME 변수에 참조 변수(${{MySQL.MYSQLHOST}} 등)로 연결해서 씀
     # (DB_USERNAME/DB_PASSWORD는 기존 변수명을 그대로 재사용, MYSQLUSER/MYSQLPASSWORD를 참조).
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:reading_record_app}?serverTimezone=UTC&characterEncoding=UTF-8
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:kongdakchaekdak}?serverTimezone=UTC&characterEncoding=UTF-8
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver

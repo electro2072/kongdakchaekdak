@@ -1,7 +1,7 @@
 # 테스트 실행 전용 설정: MySQL/Docker 없이 H2 인메모리로 테스트를 돌린다.
 spring:
   datasource:
-    url: jdbc:h2:mem:reading_record_app_test;MODE=MySQL
+    url: jdbc:h2:mem:kongdakchaekdak_test;MODE=MySQL
     driver-class-name: org.h2.Driver
     username: sa
     password:

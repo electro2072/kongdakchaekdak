@@ -1,1 +1,1 @@
-rootProject.name = "reading-record-app-backend"
+rootProject.name = "kongdakchaekdak-backend"
