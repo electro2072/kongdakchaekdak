@@ -1,6 +1,6 @@
-package com.bookflex.domain.user;
+package com.kongdakchaekdak.domain.user;
 
-import com.bookflex.security.JwtProvider;
+import com.kongdakchaekdak.security.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

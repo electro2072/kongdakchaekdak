@@ -1,10 +1,10 @@
-package com.bookflex.domain.booknote;
+package com.kongdakchaekdak.domain.booknote;
 
-import com.bookflex.domain.book.Book;
-import com.bookflex.domain.book.BookRepository;
-import com.bookflex.domain.user.User;
-import com.bookflex.domain.user.UserRepository;
-import com.bookflex.security.JwtProvider;
+import com.kongdakchaekdak.domain.book.Book;
+import com.kongdakchaekdak.domain.book.BookRepository;
+import com.kongdakchaekdak.domain.user.User;
+import com.kongdakchaekdak.domain.user.UserRepository;
+import com.kongdakchaekdak.security.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

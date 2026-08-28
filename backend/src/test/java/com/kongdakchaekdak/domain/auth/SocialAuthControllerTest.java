@@ -1,10 +1,10 @@
-package com.bookflex.domain.auth;
+package com.kongdakchaekdak.domain.auth;
 
-import com.bookflex.common.exception.InvalidCredentialsException;
-import com.bookflex.domain.auth.oauth2.GoogleOAuthClient;
-import com.bookflex.domain.auth.oauth2.KakaoOAuthClient;
-import com.bookflex.domain.auth.oauth2.NaverOAuthClient;
-import com.bookflex.domain.auth.oauth2.SocialUserInfo;
+import com.kongdakchaekdak.common.exception.InvalidCredentialsException;
+import com.kongdakchaekdak.domain.auth.oauth2.GoogleOAuthClient;
+import com.kongdakchaekdak.domain.auth.oauth2.KakaoOAuthClient;
+import com.kongdakchaekdak.domain.auth.oauth2.NaverOAuthClient;
+import com.kongdakchaekdak.domain.auth.oauth2.SocialUserInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

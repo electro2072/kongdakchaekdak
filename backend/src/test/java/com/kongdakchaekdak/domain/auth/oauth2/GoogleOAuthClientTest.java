@@ -1,6 +1,6 @@
-package com.bookflex.domain.auth.oauth2;
+package com.kongdakchaekdak.domain.auth.oauth2;
 
-import com.bookflex.common.exception.InvalidCredentialsException;
+import com.kongdakchaekdak.common.exception.InvalidCredentialsException;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.springframework.http.HttpEntity;
