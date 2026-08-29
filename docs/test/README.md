@@ -9,7 +9,8 @@
 | 경로 | 내용 |
 |---|---|
 | `scenarios/backend-api.md` | 백엔드 REST API 블랙박스 테스트 시나리오 (도메인별 케이스) |
-| `scenarios/social-login.md` | 카카오/구글/네이버 소셜 로그인 시나리오 (에러 경로 + 유효 토큰 해피패스) |
+| `scenarios/social-login.md` | 카카오/구글/네이버 소셜 로그인 시나리오 (백엔드 API 블랙박스) |
+| `scenarios/social-login-onboarding-e2e.md` | 소셜 로그인 온보딩 실기기(에뮬레이터) 시나리오 — 사람이 직접 실행 |
 | `scenarios/frontend.md` | 프론트엔드 화면·네비게이션·상태 시나리오 |
 | `scenarios/design-conformance.md` | 프론트 구현 ↔ `design/` 토큰·화면 대조 |
 | `requests/테스트코드작성요청_vN.md` | 개발 에이전트에게 보내는 테스트 코드 형식 요청서 |
