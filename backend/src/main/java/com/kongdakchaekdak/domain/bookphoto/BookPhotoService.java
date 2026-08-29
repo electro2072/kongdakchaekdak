@@ -9,7 +9,7 @@ import com.kongdakchaekdak.domain.bookphoto.dto.BookPhotoCreateRequest;
 import com.kongdakchaekdak.domain.bookphoto.dto.BookPhotoResponse;
 import com.kongdakchaekdak.domain.bookphoto.dto.PresignedUrlRequest;
 import com.kongdakchaekdak.domain.bookphoto.dto.PresignedUrlResponse;
-import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -21,8 +21,16 @@ import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * <p><b>(2026-08-28, BUG-20260827-03 조각1)</b> {@code S3Presigner} 빈 자체는 {@code S3Config}에서
+ * {@code @Lazy}로 선언돼 있지만, 이 클래스가 Lombok {@code @RequiredArgsConstructor}로 생성자 주입을
+ * 받으면 그 생성자 파라미터에는 {@code @Lazy}가 붙지 않아 컨텍스트 초기화 시점에 빈이 그대로
+ * 생성돼버린다(테스터가 {@code gradle bootRun}으로 실제 재현 — S3Config의 {@code @Lazy}만으로는
+ * 부족했던 이유). 그래서 Lombok을 걷어내고 생성자를 직접 써서 {@code s3Presigner} 파라미터에만
+ * {@code @Lazy}를 붙였다 — 이러면 Spring이 지연 프록시를 주입하고, 실제 빈 생성은 이 프록시의
+ * 메서드가 처음 호출되는 시점(사진 업로드 presigned URL 요청)까지 미뤄진다.</p>
+ */
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class BookPhotoService {
 
@@ -30,6 +38,16 @@ public class BookPhotoService {
     private final BookRepository bookRepository;
     private final S3Presigner s3Presigner;
     private final S3Properties s3Properties;
+
+    public BookPhotoService(BookPhotoRepository bookPhotoRepository,
+                             BookRepository bookRepository,
+                             @Lazy S3Presigner s3Presigner,
+                             S3Properties s3Properties) {
+        this.bookPhotoRepository = bookPhotoRepository;
+        this.bookRepository = bookRepository;
+        this.s3Presigner = s3Presigner;
+        this.s3Properties = s3Properties;
+    }
 
     /**
      * 사진 업로드 1단계 — 클라이언트가 S3에 직접 PUT할 수 있는 presigned URL을 발급한다.
