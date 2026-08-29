@@ -33,6 +33,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * <p>{@code 토큰_없이_me_조회하면_401}은 원래 AuthControllerTest(이메일/PW 로그인 테스트)에
  * 있었으나, 이메일/PW 로그인이 완전히 삭제되면서(2026-08-27) 이 클래스로 옮겨 커버리지를
  * 유지했다 — {@code /api/auth/me}는 소셜 로그인 사용자도 그대로 쓰는 공통 엔드포인트다.</p>
+ *
+ * <p>2026-08-29: {@code TokenResponse.isNewUser} 계약(신규 가입이면 true, 기존 회원 재로그인이면
+ * false) 검증을 추가했다 — 프론트요청 문서(신규회원판별_v1) 반영.</p>
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -66,6 +69,7 @@ class SocialAuthControllerTest {
                         .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.isNewUser").value(true))
                 .andReturn().getResponse().getContentAsString();
 
         String token = objectMapper.readTree(response).get("accessToken").asText();
@@ -76,7 +80,7 @@ class SocialAuthControllerTest {
     }
 
     @Test
-    void 같은_카카오_id로_다시_로그인하면_같은_회원으로_인식한다() throws Exception {
+    void 같은_카카오_id로_다시_로그인하면_같은_회원으로_인식하고_isNewUser가_false다() throws Exception {
         when(kakaoOAuthClient.fetchUserInfo("kakao-access-token"))
                 .thenReturn(new SocialUserInfo("22222", "재로그인유저"));
 
@@ -86,6 +90,7 @@ class SocialAuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isNewUser").value(true))
                 .andReturn().getResponse().getContentAsString();
         Long firstUserId = extractUserId(firstResponse);
 
@@ -93,6 +98,7 @@ class SocialAuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isNewUser").value(false))
                 .andReturn().getResponse().getContentAsString();
         Long secondUserId = extractUserId(secondResponse);
 
@@ -120,7 +126,8 @@ class SocialAuthControllerTest {
 
         mockMvc.perform(post("/api/auth/google").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tokenType").value("Bearer"));
+                .andExpect(jsonPath("$.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.isNewUser").value(true));
     }
 
     @Test
@@ -132,7 +139,8 @@ class SocialAuthControllerTest {
 
         mockMvc.perform(post("/api/auth/naver").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tokenType").value("Bearer"));
+                .andExpect(jsonPath("$.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.isNewUser").value(true));
     }
 
     @Test

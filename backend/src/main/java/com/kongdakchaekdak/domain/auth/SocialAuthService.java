@@ -25,6 +25,11 @@ import java.util.Optional;
  * <p>지금은 회원가입 시점에 성별/관심분야 등 추가 정보를 받지 않고 바로 로그인시켜서
  * "최소 기능으로 인증 구조 검증"에 집중한다 — 온보딩 화면(Frame 01.1)에서 추가 정보를 받는
  * 플로우는 프론트가 준비된 뒤 별도로 붙일 것.</p>
+ *
+ * <p>2026-08-29: {@link #loginWithProvider}가 "이번 호출에서 계정을 새로 만들었는지"를
+ * {@code isNewUser}로 추적해 {@link AuthService#issueToken}에 그대로 전달한다 — 프론트가
+ * 로그인 성공 응답(TokenResponse.isNewUser)만 보고 신규 회원가입 화면으로 보낼지, 바로 메인
+ * 화면으로 보낼지 분기할 수 있게 하기 위함이다.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -64,8 +69,10 @@ public class SocialAuthService {
                 provider, socialUserInfo.providerUserId());
 
         User user;
+        boolean isNewUser;
         if (existing.isPresent()) {
             user = existing.get();
+            isNewUser = false;
         } else {
             String nickname = (socialUserInfo.nicknameHint() == null || socialUserInfo.nicknameHint().isBlank())
                     ? randomNicknameGenerator.generate()
@@ -73,9 +80,10 @@ public class SocialAuthService {
             User newUser = User.forSocialLogin(nickname, provider, socialUserInfo.providerUserId());
             user = userRepository.save(newUser);
             auditLogger.event("USER_SIGNUP", user.getId(), "provider=" + provider);
+            isNewUser = true;
         }
 
         securityEventLogger.loginSuccess(provider, user.getId());
-        return authService.issueToken(user.getId());
+        return authService.issueToken(user.getId(), isNewUser);
     }
 }
