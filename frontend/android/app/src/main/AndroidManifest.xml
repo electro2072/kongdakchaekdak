@@ -21,5 +21,22 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
+
+      <!-- 카카오 로그인 OAuth 리다이렉트 수신용 — @react-native-seoul/kakao-login 필수 설정.
+           android:scheme은 strings.xml의 kakao_app_key와 동일한 값이어야 함(자동 동기화 안 되니 두 곳
+           다 함께 바뀌어야 함). 구글/네이버 로그인은 이 매니페스트에 별도 항목이 필요 없음(JS 설정만으로
+           충분). -->
+      <activity
+        android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
+        android:exported="true">
+        <intent-filter>
+          <action android:name="android.intent.action.VIEW" />
+          <category android:name="android.intent.category.DEFAULT" />
+          <category android:name="android.intent.category.BROWSABLE" />
+          <data
+            android:host="oauth"
+            android:scheme="kakaoa454c7fda7f467f834dc4f614afe03dc" />
+        </intent-filter>
+      </activity>
     </application>
 </manifest>

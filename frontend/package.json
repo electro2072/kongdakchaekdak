@@ -11,6 +11,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@react-native-google-signin/google-signin": "^16.1.4",
+    "@react-native-seoul/kakao-login": "^6.0.4",
+    "@react-native-seoul/naver-login": "^5.0.1",
     "@react-navigation/bottom-tabs": "^7.18.11",
     "@react-navigation/native": "^7.3.11",
     "@react-navigation/native-stack": "^7.18.3",
@@ -19,7 +22,7 @@
     "react-native": "0.74.0",
     "react-native-config": "^1.5.10",
     "react-native-safe-area-context": "^5.8.0",
-    "react-native-screens": "^3.37.0",
+    "react-native-screens": "~4.8.0",
     "react-native-svg": "^15.15.5"
   },
   "devDependencies": {

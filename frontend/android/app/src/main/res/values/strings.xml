@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">콩닥책닥</string>
+
+    <!-- 카카오 로그인 네이티브 앱 키 (Kakao Developers > 내 애플리케이션 > 앱 키 > 네이티브 앱 키).
+         AndroidManifest.xml의 OAuth 리다이렉트 scheme(kakao{키}://oauth)과 동일한 값이어야 함(두 곳 다
+         함께 바뀌어야 함, 자동 동기화 안 됨). 기존 KAKAO_API_KEY(.env, 알라딘/카카오 책 검색용 REST API
+         키)와는 다른 키. -->
+    <string name="kakao_app_key">a454c7fda7f467f834dc4f614afe03dc</string>
 </resources>

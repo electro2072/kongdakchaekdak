@@ -15,6 +15,12 @@ if linkage != nil
 end
 
 target 'ReadingRecordApp' do
+  # 카카오 로그인(@react-native-seoul/kakao-login) 공식 가이드 권장 — 필요한 서브스펙만 추가
+  # (패키지 자체 podspec이 이미 끌어올 수도 있지만, 누락 방지 차원에서 명시)
+  pod 'KakaoSDKCommon'
+  pod 'KakaoSDKAuth'
+  pod 'KakaoSDKUser'
+
   config = use_native_modules!
 
   use_react_native!(
