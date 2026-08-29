@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>콩닥책닥 — Hi-Fi 목업 v1</title>
+<title>콩닥책닥 — Hi-Fi 목업 v1.11</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/variable/pretendardvariable.min.css">
 <style>
   :root {
@@ -180,7 +180,8 @@
       · <b>관심분야·장르 선택 칩</b> — Frame 01.1/01.2/05.2에 남아있던 구버전(v1.2 시절 코랄→자기계발·시안→과학 매핑) 하드코딩 잔재를 새 매핑으로 정정(자기계발: 분홍→치자, 과학: 치자→신규 청화블루)하고, 인문·경제·경영 칩도 신규 색 적용. 칩은 채도 있는 배경 + 대비되는 텍스트 색(라이트/다크 각각 명도대비 계산 후 더 잘 보이는 쪽 선택 — 예: 다크모드 인문은 흰 글씨가 검정보다 대비가 더 높아 예외적으로 흰 글씨 사용) 규칙을 그대로 따랐습니다.<br>
       · <b>서재 목록 책 태그</b> — Frame 03(서재 목록) 폰·태블릿 카드에 장르 배지를 신규 추가(폰 2권·태블릿 6권, 예시용 장르 배정: 아몬드→소설, 채식주의자→에세이, 불편한 편의점→자기계발, 달러구트 꿈 백화점→인문, 구의 증명→과학, 저주토끼→경제·경영). 배지는 칩과 다른 톤 규칙(옅은 틴트 배경 + 진한 텍스트, 다크모드는 반전) 사용 — 기존 배지 표(예: 인문 <code>#602f72</code>)를 그대로 재사용하지 않고 채도 있는 칩 배경 대비용으로 새로 도출한 값과 구분해서 각 용도에 맞는 색만 사용했습니다.<br>
       3곳 모두 라이트·다크 각각 재검증, <code>&lt;div&gt;</code>/<code>&lt;/div&gt;</code> 태그 균형(1688=1688) 확인.<br>
-      <b>2026-08-28 추가 수정</b> — 앱 이름이 "콩닥책닥"(영문 kongdakchaekdak)으로 확정된 지 오래됐지만, 이 문서의 <code>&lt;title&gt;</code>과 <code>&lt;h1&gt;</code>에는 v1.6 이후로도 계속 임시 명칭 "독서 기록 공유 앱"이 남아있던 것을 발견해 "콩닥책닥"으로 교체했습니다(v1.6은 Frame 01 온보딩 화면 안의 워드마크 텍스트만 교체했을 뿐, 문서 자체의 제목·헤딩은 놓쳤던 것으로 확인됨). 화면 내용·색상·버전 번호는 변경 없음.
+      <b>2026-08-28 추가 수정</b> — 앱 이름이 "콩닥책닥"(영문 kongdakchaekdak)으로 확정된 지 오래됐지만, 이 문서의 <code>&lt;title&gt;</code>과 <code>&lt;h1&gt;</code>에는 v1.6 이후로도 계속 임시 명칭 "독서 기록 공유 앱"이 남아있던 것을 발견해 "콩닥책닥"으로 교체했습니다(v1.6은 Frame 01 온보딩 화면 안의 워드마크 텍스트만 교체했을 뿐, 문서 자체의 제목·헤딩은 놓쳤던 것으로 확인됨). <code>&lt;title&gt;</code>이 <code>&lt;h1&gt;</code>과 달리 버전 번호 없이 "v1"로만 멈춰있던 것도 함께 "v1.11"로 맞춤. 화면 내용·색상은 변경 없음.<br>
+      <b>2026-08-28 파일명 정리</b> — 파일명의 "_v1"이 실제로는 한 번도 "v2"로 이어진 적 없이 그냥 고정 식별자처럼 쓰여왔다는 점을 사용자와 확인, 의미 없는 접미사라 제거하기로 함 — <code>hifi_mockup_v1.html</code> → <code>hifi_mockup.html</code>로 리네임했습니다. 문서 내부의 <code>Ver 1.11</code> 같은 버전 표기(<code>.doc-note</code> changelog 기반)는 그대로 유지 — 파일 경로만 정리된 것이고 버전 추적 방식 자체는 바뀌지 않았습니다.
     </div>
   </div>
 
@@ -1537,7 +1538,7 @@
           <div class="browser-frame">
             <div class="browser-bar">
               <div class="dots"><span></span><span></span><span></span></div>
-              <div class="url">kongdakchaekdak.app/share/8f2a91c...</div>
+              <div class="url">bookflex.app/share/8f2a91c...</div>
             </div>
             <div style="padding:20px;">
               <div class="img-box" style="width:100%; height:160px; margin-bottom:14px;">{{icon:book-open}}</div>
@@ -1559,7 +1560,7 @@
           <div class="browser-frame">
             <div class="browser-bar">
               <div class="dots"><span></span><span></span><span></span></div>
-              <div class="url">kongdakchaekdak.app/share/8f2a91c...</div>
+              <div class="url">bookflex.app/share/8f2a91c...</div>
             </div>
             <div style="padding:20px;">
               <div class="img-box" style="width:100%; height:160px; margin-bottom:14px;">{{icon:book-open}}</div>
@@ -1583,7 +1584,7 @@
           <div class="browser-frame">
             <div class="browser-bar">
               <div class="dots"><span></span><span></span><span></span></div>
-              <div class="url">kongdakchaekdak.app/share/c91ff02...</div>
+              <div class="url">bookflex.app/share/c91ff02...</div>
             </div>
             <div style="padding:20px;">
               <div class="card-accent" style="text-align:center; padding:20px;">
@@ -1600,7 +1601,7 @@
           <div class="browser-frame">
             <div class="browser-bar">
               <div class="dots"><span></span><span></span><span></span></div>
-              <div class="url">kongdakchaekdak.app/share/c91ff02...</div>
+              <div class="url">bookflex.app/share/c91ff02...</div>
             </div>
             <div style="padding:20px;">
               <div class="card-accent" style="text-align:center; padding:20px;">

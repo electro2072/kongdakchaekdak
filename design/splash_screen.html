@@ -30,7 +30,7 @@
   .preview-card { display:flex; flex-direction:column; align-items:center; gap:10px; }
   .preview-card .cap { font-size:12px; color:var(--n600); text-align:center; }
 
-  /* 폰 프레임 (hifi_mockup_v1.html과 동일 스펙 재사용) */
+  /* 폰 프레임 (hifi_mockup.html과 동일 스펙 재사용) */
   .phone-frame { width:300px; height:648px; background:var(--mugwort); border:1px solid var(--n200); border-radius:46px; position:relative; flex-shrink:0; overflow:hidden; box-shadow:0 8px 24px rgba(17,18,15,0.1); }
   .statusbar { height:34px; display:flex; align-items:center; justify-content:space-between; padding:0 22px; font-size:12px; font-weight:600; color:var(--cream); font-variant-numeric:tabular-nums; position:relative; z-index:6; }
   .dynamic-island { position:absolute; top:7px; left:50%; transform:translateX(-50%); width:74px; height:20px; background:#000; border-radius:20px; z-index:5; }
@@ -58,7 +58,7 @@
     <span>Splash Screen — Final</span>
   </div>
   <div class="doc-note">
-    <b>결정 경위</b> — 스플래시 화면은 이전까지 계속 보류 상태였는데(앱 아이콘이 정해지지 않아서), 앱 아이콘이 v3 텍스트 워드마크형으로 확정된 뒤 진행했습니다. "① 심플 아이콘 중앙형"(크림 배경 + 작은 아이콘)과 "② 풀블리드 워드마크형"(그린 배경 전체 + 큰 워드마크) 두 방향을 시안으로 비교했고(<code>splash_screen_concept_v1.html</code>), 사용자가 <b>②번</b>을 선택해 확정했습니다.<br>
+    <b>결정 경위</b> — 스플래시 화면은 이전까지 계속 보류 상태였는데(앱 아이콘이 정해지지 않아서), 앱 아이콘이 v3 텍스트 워드마크형으로 확정된 뒤 진행했습니다. "① 심플 아이콘 중앙형"(크림 배경 + 작은 아이콘)과 "② 풀블리드 워드마크형"(그린 배경 전체 + 큰 워드마크) 두 방향을 시안으로 비교했고(<code>splash_screen_concept.html</code>), 사용자가 <b>②번</b>을 선택해 확정했습니다.<br>
     <b>왜 다크모드 짝이 없나요</b> — 스플래시는 OS가 앱 로딩 전에 가장 먼저 띄우는 화면이라 실제 iOS/Android 런치스크린 관례상 시스템 다크모드와 무관하게 보통 단일 버전으로 만듭니다. 이 문서도 라이트/다크 구분 없이 하나로 확정했습니다.<br>
     <b>색상 재사용</b> — 배경·텍스트 색 모두 앱 아이콘 v3와 동일한 값을 그대로 사용해, 아이콘 → 스플래시 → 앱 진입 화면까지 색이 끊기지 않고 이어지도록 했습니다.
   </div>
