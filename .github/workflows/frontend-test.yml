@@ -1,0 +1,47 @@
+name: Frontend Tests
+
+# frontend/ 폴더가 바뀔 때마다(push, PR 모두) 실제로 typecheck + jest를 돌려서
+# 타입 에러·테스트 회귀를 자동으로 잡는다. 테스터 리포트 FINDING-20260829-14/16
+# (docs/test/reports/2026-08-29.md) — 소셜 로그인 SDK 연동 라운드에서 실제로
+# `npm run typecheck`·`npm test`가 깨졌는데 프론트는 CI가 없어 리뷰에서만 걸러졌던
+# 것을 자동으로 잡기 위해 추가함. backend-test.yml과 동일한 트리거 패턴을 따른다.
+#
+# lint(`npm run lint`)는 아직 CRLF/prettier 노이즈로 469 errors가 남아있는 상태라서
+# (OBS-01, docs/test/reports 누적 항목) 이번엔 포함하지 않음 — lint가 실제로 정리되면
+# 별도 스텝으로 추가하는 걸 권장.
+
+on:
+  push:
+    paths:
+      - "frontend/**"
+  pull_request:
+    paths:
+      - "frontend/**"
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run typecheck
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test
