@@ -5,10 +5,14 @@
 ## 구조
 - `backend/` — Spring Boot(Gradle) 백엔드. 현재 Step 1(프로젝트 뼈대 + Health check API)까지.
 - `frontend/` — React Native(TypeScript) 프론트엔드. 현재 Frame 03 책 검색 컴포넌트까지.
+- `desing/` — 디자인. 앱 배포에 필요한 모든 디자인 문서 산출물
 - `docs/` — 기획서, 화면설계서(wireframe), 테이블정의서, 개발현황, 백엔드구축계획, TODO 리스트.
 
 ## 진행 상황
 자세한 내용은 `docs/독서기록앱_개발현황.md`, `docs/독서기록앱_TODO리스트_v2.md` 참고.
+
+## 개인정보처리방침
+[PRIVACY.md](PRIVACY.md)
 
 ## 백엔드 로컬 실행 (준비 중)
 ```bash
