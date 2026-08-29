@@ -1,7 +1,7 @@
 # ✅ 독서 기록 공유 앱 — 배포까지 TODO 리스트
 
-> 작성일: 2026-07-02 · 최종 업데이트: 2026-07-21
-> 참고 문서: 기획서, 테이블정의서, 화면설계서, 개발현황, 백엔드구축계획
+> 작성일: 2026-07-02 · 최종 업데이트: 2026-08-29
+> 참고 문서: 기획서, 테이블정의서, 화면설계서, 개발현황, 백엔드구축계획, **소셜로그인_설정현황.md**
 
 ---
 
@@ -12,7 +12,7 @@
 - [ ] 실제 MySQL(Docker Compose) 환경에서 `User` 테이블의 `(social_provider, social_id)` unique 제약이 잘 걸렸는지 확인 — `ddl-auto: update`는 이미 존재하는 테이블에 제약을 못 걸 수도 있어서, 안 걸려 있으면 테이블 재생성하거나 수동으로 `ALTER TABLE users ADD UNIQUE (social_provider, social_id);` 필요할 수 있음
 - [ ] (선택) `gradle bootRun --args="--spring.profiles.active=local"` 로 띄운 뒤 Swagger(`/swagger-ui.html`)에서 `POST /api/auth/signup` → `POST /api/auth/login` → `GET /api/auth/me` (Authorize에 토큰 입력) 순서로 직접 호출해보기
 - [ ] **(신규, `65d7480` 커밋)** `/api/users/**`, `/api/books/**` 를 이제 인증 없이 호출하면 401이 나는지 확인 (토큰 없이 `GET /api/users/1` 호출 → 401 예상), 그리고 Swagger Authorize에 토큰 넣은 뒤에는 정상 호출되는지 확인 — `gradle test`에서 `UserControllerTest`/`BookControllerTest`의 "토큰_없이_요청하면_401" 케이스로도 커버되지만, 실제 프론트/Postman에서 한 번 더 확인 권장
-- [ ] **(신규)** `backend/.env.example`을 복사해서 `backend/.env` 만들고, 카카오/구글/네이버 키를 발급받는 대로 채워넣기 — 파일이 없어도 `gradle bootRun`은 정상 동작하지만(경고 로그만 뜸) 소셜 로그인은 안 됨
+- [x] **(신규)** `backend/.env.example`을 복사해서 `backend/.env` 만들고, 카카오/구글/네이버 키를 발급받는 대로 채워넣기 — **2026-08-29: `backend/.env` 생성 + 카카오/구글/네이버 키 반영 완료** (AWS 키는 아래 별도 항목, 미입력이라 아직 `gradle bootRun` 기동은 실패)
 - [ ] **(신규)** 카카오/구글/네이버 소셜 로그인 코드(`gradle test`의 `SocialAuthControllerTest`, `GoogleOAuthClientTest`) 통과 확인 — 실제 앱 등록/`.env` 작성 전이라도 `@MockBean`으로 대체되어 있어서 지금 바로 `gradle test`만으로 검증 가능
 - [ ] **(신규, 2026-07-20)** 리소스 소유자 검증(`UserControllerTest`/`BookControllerTest`의 신규 403 테스트 4개) 통과 확인 — 다른 사용자 토큰으로 남의 프로필/책 수정·삭제·등록을 시도하면 403(`FORBIDDEN`)이 나는지, 실제 흐름(본인 것 수정/삭제)은 여전히 정상 동작하는지 Swagger/Postman으로도 한 번 확인 권장
 - [ ] **(신규, 2026-07-20)** AWS 계정 생성 + S3 버킷 생성 + IAM 사용자(해당 버킷 `s3:PutObject` 권한만) 액세스 키 발급 → `backend/.env`에 `AWS_S3_BUCKET`/`AWS_S3_REGION`/`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` 채워넣기 (`.env.example` 참고)
@@ -34,18 +34,18 @@
 - [ ] Google Play 콘솔 계정 등록 (1회 $25)
 - [x] 알라딘 Open API 키 발급 (2026-07-18 완료)
 - [x] 카카오 도서 검색 API 키 발급 (2026-07-18 완료)
-- [ ] 카카오 소셜 로그인 앱 등록 (Client ID/Secret)
-- [ ] 구글 소셜 로그인 OAuth 클라이언트 등록
-- [ ] 네이버 소셜 로그인 앱 등록
-- [ ] AWS 계정 생성 (S3, EC2, RDS) 또는 Firebase 프로젝트 생성
+- [x] 카카오 소셜 로그인 앱 등록 (2026-08-29 완료 — 앱 ID 1502106, 네이티브 앱 키 + Android/iOS 플랫폼, 로그인 활성화, 닉네임 선택동의. 해피패스 검증까지 완료. 상세: `소셜로그인_설정현황.md`)
+- [x] 구글 소셜 로그인 OAuth 클라이언트 등록 (2026-08-29 완료 — GCP 프로젝트 kongdakchaekdak, 웹/Android/iOS 클라이언트 3개, 동의화면 프로덕션 게시. 브랜딩 인증만 실도메인 대기)
+- [x] 네이버 소셜 로그인 앱 등록 (2026-08-29 완료 — 사용자 직접 등록, 앱 "콩닥책닥", Android/iOS 환경, 별명 제공. 개발중 상태 → 출시 전 검수 필요)
+- [ ] AWS 계정 생성 (S3, EC2, RDS) 또는 Firebase 프로젝트 생성 — `.env`의 `AWS_*` 미입력 상태, 이것 때문에 `gradle bootRun` 기동 실패 중
 
 ---
 
 ## 2. 법적 문서
 
-- [ ] 개인정보처리방침 작성 (스토어 심사 필수)
+- [x] 개인정보처리방침 작성 (스토어 심사 필수) — 2026-08-29 `PRIVACY.md` 초안 작성·커밋, GitHub URL을 구글 OAuth 동의화면에 등록. 앱 수집 항목 확정되면 갱신 필요
 - [ ] 이용약관 작성
-- [ ] 위치정보 수집·이용 동의 문구 (BookPhoto 위치 태그 기능 관련)
+- [ ] 위치정보 수집·이용 동의 문구 (BookPhoto 위치 태그 기능 관련) — `PRIVACY.md`에 위치 좌표 수집은 명시함. 앱 내 별도 동의 문구/화면은 아직
 - [ ] 사업자 등록 필요 여부 검토 (수익화 계획 시)
 
 ---
@@ -67,6 +67,7 @@
 > v2-5에서 그 내용 자체가 없어졌고(사용자 확인 완료), 서재 탭 목록/상세로 대체됨.
 
 - [x] Frame 01 로그인 / 온보딩 (소셜 로그인 버튼 UI — 실제 카카오/구글/네이버 SDK 연동은 별도)
+- [ ] **소셜 로그인 네이티브 SDK 연동** — 3사 콘솔 등록·`.env`는 완료(2026-08-29). 남은 것: `@react-native-seoul/kakao-login` / `@react-native-google-signin/google-signin` / `@react-native-seoul/naver-login` 설치 + 네이티브 설정(strings.xml·Info.plist·URL 스킴). 필요 키(`KAKAO_NATIVE_APP_KEY`, `GOOGLE_IOS_CLIENT_ID`, `NAVER_URL_SCHEME_IOS`)와 상세는 `docs/소셜로그인_설정현황.md`
 - [x] Frame 01.1 회원가입 (닉네임 필수 입력 + 성별/관심분야 다중선택/독서모임 검색·추가)
 - [x] Frame 02 일정 탭 (이번달 독서 일정, 캘린더 스트립, 오늘의 리딩 카드)
 - [x] Frame 03 서재 탭 (목록) — 읽고있는책/읽은책 필터, 검색, 책 카드 목록
@@ -122,4 +123,6 @@
 
 ---
 
-*우선순위: 알라딘/카카오 API 키 발급은 완료(2026-07-18). 이제 개인정보처리방침 초안 작성이 가장 급함. 이후 프론트/백엔드 병행 개발 진행.*
+*우선순위: 소셜 로그인 3사 콘솔 등록 + 개인정보처리방침 초안 작성 완료(2026-08-29). 다음 급한 것 —
+(1) `backend/.env`에 AWS 키 채워 `gradle bootRun` 기동 복구, (2) 프론트 소셜 로그인 네이티브 SDK 연동,
+(3) Gradle Wrapper 커밋 + Railway 배포. 상세는 `docs/소셜로그인_설정현황.md` 참고.*
