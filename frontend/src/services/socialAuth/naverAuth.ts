@@ -25,6 +25,12 @@ export async function signInWithNaver(): Promise<string | null> {
   const result = await NaverLogin.login();
 
   if (result.isSuccess) {
+    // 테스터 리포트 FINDING-20260829-13: @react-native-seoul/naver-login v5 타입 정의는
+    // isSuccess===true여도 successResponse를 non-optional로 좁혀주지 못한다(라이브러리 타입
+    // 한계) — `npm run typecheck`에서 TS18048로 걸림. 명시적으로 널 체크해서 좁혀준다.
+    if (!result.successResponse) {
+      throw new Error("네이버 로그인 응답에 successResponse가 없습니다.");
+    }
     return result.successResponse.accessToken;
   }
   if (result.failureResponse?.isCancel) {
