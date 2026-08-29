@@ -22,9 +22,9 @@
 - [ ] **(신규, 2026-07-20)** Step 5-1 `gradle test`의 `DashboardControllerTest` 통과 확인 — 월간/분기별/연간 집계, 완독 0권일 때 격려 문구, `date` 생략 시 이번 달 기본값, 토큰 없이 401 케이스 위주로 Swagger/Postman에서도 `GET /api/dashboard?period=month&date=2026-07` 등으로 한 번씩 확인 권장
 - [ ] **(신규, 2026-07-20)** Step 5-2 `gradle test`의 `PublicShareControllerTest`/`ShareRecordControllerTest` 신규 케이스 통과 확인, `gradle bootRun` 후 공유 하나 만들어서 `/public/share/{token}`을 브라우저(시크릿 모드 등 비로그인 상태)로 직접 열어보고, 카카오톡 링크 공유 디버거(https://developers.kakao.com/tool/debugger/sharing)로 OG 태그 미리보기가 정상 노출되는지 확인
 - [ ] **(신규, 2026-07-20)** `독서기록앱_테이블정의서.xlsx`에 Step 5-2에서 추가한 `ShareRecord.book_note_id`/`dashboard_snapshot` 컬럼, 신규 테이블 `ShareRecordPhoto` 반영 — 원본 스프레드시트에는 아직 없음
-- [ ] **(신규, 2026-07-21, 배포 전 블로킹)** `backend/` 디렉터리에서 `gradle wrapper --gradle-version 8.14.3` 실행 후 생성되는 `gradlew`/`gradlew.bat`/`gradle/wrapper/gradle-wrapper.properties`/`gradle/wrapper/gradle-wrapper.jar` 커밋 — 클라우드 세션은 Gradle Plugin Portal 접근이 막혀 있어 이 작업을 대신 못 함, Railway 자동 빌드에 필요
-- [ ] **(신규, 2026-07-21)** Railway 가입(railway.com, GitHub 계정으로) → 새 프로젝트 생성 후 이 저장소 연결(루트 디렉터리를 `backend`로 지정) → "Add Database"로 MySQL 플러그인 추가 → 앱 서비스 Variables 탭에서 환경변수 설정(백엔드구축계획 문서 Step 6 절의 "필요한 환경변수 목록" 표 참고, 최소 `DB_HOST`/`DB_PORT`/`DB_NAME`/`DB_USERNAME`/`DB_PASSWORD`/`JWT_SECRET`/`PUBLIC_BASE_URL`만 채워도 기동은 됨) → 첫 배포 후 `/health` 응답 확인
-- [ ] **(신규, 2026-07-21)** Railway 무료 체험 조건 숙지: 가입 시 $5 크레딧이 30일(또는 소진 시 그 전) 유효, 이후 월 $1 크레딧 Free 플랜으로 자동 전환 — 크레딧 만료 후 30일 안에 유료 전환 안 하면 MySQL 데이터(볼륨) 삭제되니 테스트만 하다가 데이터 날아가지 않게 결제 여부를 그 안에 결정할 것
+- [x] **(신규, 2026-07-21, 배포 전 블로킹)** `backend/` 디렉터리에서 `gradle wrapper --gradle-version 8.14.3` 실행 후 생성되는 `gradlew`/`gradlew.bat`/`gradle/wrapper/gradle-wrapper.properties`/`gradle/wrapper/gradle-wrapper.jar` 커밋 — **2026-08-29 완료 (`849a3e4`)**
+- [x] **(신규, 2026-07-21)** Railway 가입 → 프로젝트 생성 → 저장소 연결(루트 디렉터리 `backend`) → MySQL 플러그인 → 환경변수 설정 → `/health` 확인 — **2026-08-29 완료**. 배포 URL `https://kongdakchaekdak-production.up.railway.app` (`/health` 200, auth API 정상). 프로젝트 `intuitive-clarity` / 서비스 `kongdakchaekdak`, `main` push 시 자동 배포. ⚠️ **Custom Start Command 필수** — Railpack 기본 커맨드가 Spring Boot 이중 jar(`*.jar` + `*-plain.jar`)를 못 골라 크래시함 → `java -jar $(ls build/libs/*.jar | grep -v plain)` 로 지정함. 환경변수: `DB_*` 5개(MySQL 참조) + `JWT_SECRET` + `PUBLIC_BASE_URL` + `KAKAO_CLIENT_ID` + `GOOGLE_CLIENT_ID` + `NAVER_CLIENT_ID` + `NAVER_CLIENT_SECRET`
+- [ ] **(신규, 2026-07-21)** Railway 무료 체험 조건: $5 크레딧 30일(또는 소진 시 그 전) 유효. **크레딧 만료 전에 결제 여부 결정할 것** — 안 하면 MySQL 볼륨(데이터) 삭제됨
 
 ---
 
@@ -67,7 +67,7 @@
 > v2-5에서 그 내용 자체가 없어졌고(사용자 확인 완료), 서재 탭 목록/상세로 대체됨.
 
 - [x] Frame 01 로그인 / 온보딩 (소셜 로그인 버튼 UI — 실제 카카오/구글/네이버 SDK 연동은 별도)
-- [ ] **소셜 로그인 네이티브 SDK 연동** — 3사 콘솔 등록·`.env`는 완료(2026-08-29). 남은 것: `@react-native-seoul/kakao-login` / `@react-native-google-signin/google-signin` / `@react-native-seoul/naver-login` 설치 + 네이티브 설정(strings.xml·Info.plist·URL 스킴). 필요 키(`KAKAO_NATIVE_APP_KEY`, `GOOGLE_IOS_CLIENT_ID`, `NAVER_URL_SCHEME_IOS`)와 상세는 `docs/소셜로그인_설정현황.md`
+- [x] **소셜 로그인 네이티브 SDK 연동** — 3사 콘솔 등록·`.env`·백엔드 배포 완료(2026-08-29). 프론트: `@react-native-seoul/kakao-login` / `@react-native-google-signin/google-signin` / `@react-native-seoul/naver-login` 설치 + 네이티브 설정 + mock 구현 완료(`0e5c993`, `134f13e`). **남은 것: 실제 기기에서 카카오/구글/네이버 로그인 버튼 눌러보는 E2E 테스트** (구글/네이버 백엔드 해피패스도 이때 실검증). 키 상세는 `docs/소셜로그인_설정현황.md`
 - [x] Frame 01.1 회원가입 (닉네임 필수 입력 + 성별/관심분야 다중선택/독서모임 검색·추가)
 - [x] Frame 02 일정 탭 (이번달 독서 일정, 캘린더 스트립, 오늘의 리딩 카드)
 - [x] Frame 03 서재 탭 (목록) — 읽고있는책/읽은책 필터, 검색, 책 카드 목록
@@ -91,7 +91,7 @@
 - [x] Step 5. 소감/공유 기능 (BookNote, Group, ShareRecord API — 2026-07-20 완료, "기록 전용" 범위. 실제 열람 권한 제어·카드 이미지·공개 웹뷰는 Step 5-2로 분리)
 - [x] Step 5-1. 독서 대시보드(Recap) 통계 (`GET /api/dashboard` — 2026-07-20 완료, 월간/분기별/연간 집계 + 장르 비율 + 6개월 추이 + 하이라이트 + 자동 캡션, 본인 통계만 조회)
 - [x] Step 5-2. 공유 카드 이미지 + 공개 웹뷰 (2026-07-20 완료 — 카드 이미지 서버 생성은 보류(클라이언트 캡처 유지). `/public/share/{token}` 비로그인 공개 웹뷰(Thymeleaf, OG 태그 포함), ShareRecord에 소감(bookNoteId)/선택 사진(ShareRecordPhoto)/대시보드 스냅샷 데이터 모델 확장 완료)
-- [ ] Step 6. 배포 — **Railway로 결정(2026-07-21)**. 배포용 코드 준비(PORT/DB 환경변수 대응) 완료, Gradle Wrapper 생성 + Railway 대시보드 설정은 사용자가 로컬에서 진행 필요 (섹션 0 참고)
+- [x] Step 6. 배포 — **Railway 배포 완료(2026-08-29)**. `https://kongdakchaekdak-production.up.railway.app` 라이브(`/health` 200). 상세는 섹션 0 참고. 남은 것: 커스텀 도메인, 에러 모니터링, AWS 키(사진 업로드)
 
 ---
 
@@ -123,6 +123,6 @@
 
 ---
 
-*우선순위: 소셜 로그인 3사 콘솔 등록 + 개인정보처리방침 초안 작성 완료(2026-08-29). 다음 급한 것 —
-(1) `backend/.env`에 AWS 키 채워 `gradle bootRun` 기동 복구, (2) 프론트 소셜 로그인 네이티브 SDK 연동,
-(3) Gradle Wrapper 커밋 + Railway 배포. 상세는 `docs/소셜로그인_설정현황.md` 참고.*
+*우선순위: 소셜 로그인 3사 콘솔 등록 + 개인정보처리방침 + Railway 백엔드 배포 + 프론트 SDK 연동 완료(2026-08-29).
+다음 급한 것 — (1) **실제 기기에서 카카오/구글/네이버 로그인 E2E 테스트**, (2) AWS 키(사진 업로드),
+(3) 나머지 미완성 화면(03.1·04·04.1·05·05.1) → 릴리스 빌드 → 베타. 상세는 `docs/소셜로그인_설정현황.md`.*
