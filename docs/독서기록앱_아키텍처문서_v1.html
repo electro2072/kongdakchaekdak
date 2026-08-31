@@ -1,0 +1,470 @@
+<title>콩닥책닥 백엔드 아키텍처</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg: #f6f7f3;
+    --surface: #ffffff;
+    --surface-2: #eef1e8;
+    --border: #dde2d3;
+    --text: #232a1e;
+    --text-dim: #5b6350;
+    --accent: #5f7a49;
+    --accent-strong: #48602f;
+    --accent-cream: #f4efd8;
+    --accent-cream-text: #5c4e22;
+    --chip-coral: #e8927c;
+    --chip-cyan: #6fb3ae;
+    --chip-lavender: #a79bd1;
+    --chip-coral-bg: #fbe9e4;
+    --chip-cyan-bg: #e6f4f2;
+    --chip-lavender-bg: #efebf7;
+    --code-bg: #eef1e8;
+    --shadow: 0 1px 2px rgba(35,42,30,0.06), 0 8px 24px -12px rgba(35,42,30,0.18);
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #181a14;
+      --surface: #1f2318;
+      --surface-2: #262b1c;
+      --border: #333a26;
+      --text: #eceee4;
+      --text-dim: #a3ab93;
+      --accent: #9db97e;
+      --accent-strong: #b8d495;
+      --accent-cream: #2b2a1c;
+      --accent-cream-text: #e6d999;
+      --chip-coral-bg: #3a2620;
+      --chip-cyan-bg: #1e2f2c;
+      --chip-lavender-bg: #292440;
+      --code-bg: #262b1c;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #181a14;
+    --surface: #1f2318;
+    --surface-2: #262b1c;
+    --border: #333a26;
+    --text: #eceee4;
+    --text-dim: #a3ab93;
+    --accent: #9db97e;
+    --accent-strong: #b8d495;
+    --accent-cream: #2b2a1c;
+    --accent-cream-text: #e6d999;
+    --chip-coral-bg: #3a2620;
+    --chip-cyan-bg: #1e2f2c;
+    --chip-lavender-bg: #292440;
+    --code-bg: #262b1c;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Noto Sans KR', -apple-system, sans-serif;
+    line-height:1.7; font-size:15px;
+  }
+  code, .mono{ font-family:'IBM Plex Mono', ui-monospace, monospace; }
+
+  header.top{
+    position:sticky; top:0; z-index:20;
+    background:var(--bg); border-bottom:1px solid var(--border);
+    padding:14px 24px;
+    display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+  }
+  header.top .name{ font-weight:900; font-size:17px; letter-spacing:-0.01em; }
+  header.top .tag{
+    font-size:11px; font-weight:700; color:var(--accent-strong);
+    background:var(--surface-2); border:1px solid var(--border);
+    padding:2px 8px; border-radius:999px; letter-spacing:0.03em;
+  }
+  header.top .date{ font-size:12px; color:var(--text-dim); margin-left:auto; }
+
+  .shell{
+    display:grid; grid-template-columns: 220px minmax(0,1fr); gap:0;
+    max-width:1180px; margin:0 auto;
+  }
+  nav.toc{
+    padding:28px 16px; position:sticky; top:53px; align-self:start;
+    max-height:calc(100vh - 53px); overflow-y:auto;
+  }
+  nav.toc a{
+    display:block; padding:5px 10px; border-radius:6px;
+    color:var(--text-dim); text-decoration:none; font-size:13px;
+  }
+  nav.toc a:hover{ background:var(--surface-2); color:var(--text); }
+  @media (max-width: 860px){
+    .shell{ grid-template-columns: 1fr; }
+    nav.toc{ display:none; }
+  }
+
+  main{ padding:8px 28px 80px; min-width:0; }
+  .hero{
+    padding:40px 4px 28px; border-bottom:1px solid var(--border); margin-bottom:32px;
+  }
+  .hero h1{
+    font-size: clamp(26px, 4vw, 34px); font-weight:900; margin:0 0 10px;
+    text-wrap:balance; letter-spacing:-0.01em;
+  }
+  .hero p{ color:var(--text-dim); max-width:62ch; margin:0 0 18px; font-size:14.5px;}
+  .scope-box{
+    background:var(--accent-cream); color:var(--accent-cream-text);
+    border-radius:10px; padding:14px 16px; font-size:13px; max-width:70ch;
+    border:1px solid color-mix(in srgb, var(--accent-cream-text) 25%, transparent);
+  }
+  .scope-box b{ font-weight:700; }
+
+  section{ margin: 0 0 48px; scroll-margin-top: 70px; }
+  section h2{
+    font-size:20px; font-weight:900; margin:0 0 6px;
+    display:flex; align-items:center; gap:10px;
+  }
+  section h2 .num{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600;
+    color:var(--accent); background:var(--surface-2); border:1px solid var(--border);
+    border-radius:6px; padding:2px 7px;
+  }
+  section > p{ color:var(--text-dim); max-width:72ch; margin:10px 0 18px; }
+  section h3{ font-size:14px; font-weight:700; margin:24px 0 8px; color:var(--text); }
+
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; background:var(--surface);
+    border:1px solid var(--border); border-radius:10px; overflow:hidden; box-shadow:var(--shadow);}
+  th,td{ text-align:left; padding:9px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  tr:last-child td{ border-bottom:none; }
+  th{ background:var(--surface-2); font-size:12px; color:var(--text-dim); font-weight:700; }
+  td code{ background:var(--code-bg); padding:1px 6px; border-radius:5px; font-size:12.5px; }
+  .table-wrap{ overflow-x:auto; }
+
+  .cardgrid{ display:grid; grid-template-columns: repeat(auto-fill,minmax(210px,1fr)); gap:10px; margin:14px 0; }
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:12px 14px; box-shadow:var(--shadow);
+  }
+  .card .name{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:12.5px; color:var(--accent-strong); }
+  .card .desc{ font-size:12.5px; color:var(--text-dim); margin-top:4px; }
+
+  .chip{ display:inline-block; font-size:11px; font-weight:700; padding:2px 9px; border-radius:999px; margin-right:4px;}
+  .chip.major{ background:var(--chip-coral-bg); color:var(--chip-coral); }
+  .chip.minor{ background:var(--chip-cyan-bg); color:var(--chip-cyan); }
+
+  figure{ margin:20px 0; }
+  figure svg{ max-width:100%; height:auto; display:block; }
+  figcaption{ font-size:12px; color:var(--text-dim); margin-top:8px; text-align:center; }
+
+  pre.mermaid{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:18px; box-shadow:var(--shadow); overflow-x:auto;
+  }
+
+  .callout{
+    border-left:3px solid var(--accent); background:var(--surface-2);
+    padding:12px 16px; border-radius:0 10px 10px 0; font-size:13.5px; margin:16px 0;
+  }
+  .callout b{ color:var(--accent-strong); }
+
+  footer{
+    max-width:72ch; margin: 40px 0 0; padding-top:20px; border-top:1px solid var(--border);
+    font-size:12px; color:var(--text-dim);
+  }
+</style>
+
+<header class="top">
+  <span class="name">콩닥책닥 백엔드 아키텍처</span>
+  <span class="tag">v1</span>
+  <span class="date">2026-08-29 · 백엔드 에이전트 작성</span>
+</header>
+
+<div class="shell">
+  <nav class="toc">
+    <a href="#overview">1. 개요</a>
+    <a href="#stack">2. 기술 스택</a>
+    <a href="#system">3. 시스템 구조</a>
+    <a href="#domains">4. 백엔드 도메인</a>
+    <a href="#auth">5. 인증 흐름</a>
+    <a href="#upload">6. 이미지 업로드</a>
+    <a href="#share">7. 공개 공유 웹뷰</a>
+    <a href="#model">8. 도메인 모델</a>
+    <a href="#crosscutting">9. 횡단 관심사</a>
+    <a href="#infra">10. 인프라 · 배포</a>
+    <a href="#debt">11. 알려진 이슈</a>
+  </nav>
+
+  <main>
+    <div class="hero">
+      <h1>콩닥책닥 백엔드 아키텍처</h1>
+      <p>독서 기록을 남기고 공유하는 모바일 앱의 Spring Boot 백엔드 — REST API, 소셜 로그인 3사 연동,
+      S3 이미지 업로드, 비로그인 공개 공유 웹뷰로 구성됩니다. 프론트엔드/디자인은 각 담당 에이전트의
+      별도 문서를 참고하세요.</p>
+      <div class="scope-box">
+        <b>범위와 한계.</b> 이 문서는 <b>백엔드(Spring Boot)만</b> 다룹니다. 파일을 새로 읽지 않고,
+        이 대화 세션이 실제로 구현·검증한 내용만 근거로 작성했습니다. "지금 이 순간의 저장소"가
+        아니라 "이 세션이 알고 있는 최신 상태"의 스냅샷입니다.
+      </div>
+    </div>
+
+    <section id="overview">
+      <h2><span class="num">01</span>개요</h2>
+      <p>
+        사용자는 책을 검색해 등록하고, 사진·소감을 남기고, 독서 통계(대시보드)를 확인하고,
+        개별 책 또는 대시보드를 그룹/전체/커스텀 범위로 공유할 수 있습니다. 인증은 이메일/비밀번호
+        없이 <b>소셜 로그인(카카오/구글/네이버)만</b> 지원합니다 — 서버가 비밀번호 등 인증 정보를
+        직접 보관하지 않겠다는 제품 결정에 따른 것입니다. 이 백엔드(<code>backend/</code>)는 프로젝트
+        저장소 안의 한 영역이고, <code>frontend/</code>·<code>design/</code>은 각각 별도 에이전트가
+        담당합니다. 이 문서는 backend 담당 범위만 다룹니다.
+      </p>
+    </section>
+
+    <section id="stack">
+      <h2><span class="num">02</span>기술 스택</h2>
+      <div class="table-wrap">
+        <table>
+          <tr><th>영역</th><th>선택</th></tr>
+          <tr><td>백엔드</td><td>Spring Boot 3.2.5 · Java 17 · Gradle(Kotlin DSL) · 패키지 <code>com.kongdakchaekdak</code></td></tr>
+          <tr><td>DB</td><td>MySQL 8.0(운영/로컬 docker-compose) · H2 인메모리(local · test 프로필)</td></tr>
+          <tr><td>인증</td><td>JWT(jjwt) + 소셜 로그인 3사, 이메일/PW 없음</td></tr>
+          <tr><td>이미지</td><td>AWS S3, presigned URL(서버는 파일을 중계하지 않음)</td></tr>
+          <tr><td>공개 공유</td><td>별도 서비스 없이 Spring Boot 안 Thymeleaf 서버 렌더링</td></tr>
+          <tr><td>CI</td><td>GitHub Actions — <code>backend/**</code> 변경 시 <code>./gradlew test</code></td></tr>
+          <tr><td>배포 목표</td><td>Railway (환경변수 분리·Wrapper 커밋 완료, 배포 전)</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section id="system">
+      <h2><span class="num">03</span>전체 시스템 구조</h2>
+      <p>백엔드 관점에서 보면, Spring Boot 서버는 React Native 클라이언트의 REST 호출을 받고, 그와
+      별개로 두 종류의 외부 서비스(소셜 로그인 제공자, S3)를 서버가 직접 호출합니다. (도서 검색은
+      클라이언트가 외부 API를 직접 호출하며 백엔드를 거치지 않으므로 이 문서 범위 밖입니다.)
+      소셜 로그인은 서버가 인가 코드를 받는 방식이 아니라, <b>모바일 앱이 각 제공자 SDK로 이미
+      로그인해서 받은 토큰을 그대로 서버에 넘기고, 서버는 그 토큰으로 "누구세요?"만 물어보는
+      방식</b>입니다 — 서버 쪽에는 Client Secret이 필요 없습니다.</p>
+      <figure>
+        <svg viewBox="0 0 920 380" role="img" aria-label="React Native 앱이 Spring Boot 백엔드와 JWT REST로 통신하고, 백엔드는 MySQL/H2, 소셜 로그인 3사, S3에 연결되며, 비로그인 브라우저는 백엔드의 공개 공유 웹뷰에 직접 접근한다">
+          <defs>
+            <marker id="arw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <style>
+            .box{ fill:none; stroke:currentColor; stroke-width:1.4; }
+            .boxfill{ fill: var(--surface-2); stroke:currentColor; stroke-width:1.4; }
+            .accentbox{ fill: var(--accent); stroke:var(--accent); stroke-width:1.4; }
+            .lbl{ font-family:'IBM Plex Mono',monospace; font-size:11px; fill:currentColor; }
+            .title{ font-family:'Noto Sans KR',sans-serif; font-size:12.5px; font-weight:700; fill:currentColor; }
+            .sub{ font-family:'Noto Sans KR',sans-serif; font-size:10.5px; fill:currentColor; opacity:0.75; }
+            .edge{ stroke:currentColor; stroke-width:1.3; fill:none; marker-end:url(#arw); opacity:0.85; }
+            .edge.strong{ stroke:var(--accent); }
+          </style>
+
+          <!-- RN app -->
+          <rect x="30" y="150" width="150" height="80" rx="10" class="accentbox"/>
+          <text x="105" y="184" text-anchor="middle" class="title" fill="white">React Native</text>
+          <text x="105" y="200" text-anchor="middle" class="sub" fill="white">하단 탭 + 화면들</text>
+
+          <!-- backend -->
+          <rect x="330" y="90" width="220" height="200" rx="12" class="box"/>
+          <text x="440" y="112" text-anchor="middle" class="title">Spring Boot 백엔드</text>
+          <text x="440" y="126" text-anchor="middle" class="sub">com.kongdakchaekdak</text>
+          <rect x="352" y="140" width="176" height="46" rx="8" class="boxfill"/>
+          <text x="440" y="167" text-anchor="middle" class="lbl">REST API</text>
+          <rect x="352" y="196" width="176" height="46" rx="8" class="boxfill"/>
+          <text x="440" y="223" text-anchor="middle" class="lbl">PublicShareController</text>
+          <text x="440" y="270" text-anchor="middle" class="sub">Controller → Service → Repository</text>
+
+          <!-- DB -->
+          <rect x="330" y="330" width="220" height="40" rx="8" class="box"/>
+          <text x="440" y="355" text-anchor="middle" class="lbl">MySQL / H2</text>
+
+          <!-- Social -->
+          <rect x="640" y="20" width="250" height="46" rx="8" class="box"/>
+          <text x="765" y="47" text-anchor="middle" class="lbl">카카오 · 구글 · 네이버</text>
+
+          <!-- S3 -->
+          <rect x="640" y="100" width="250" height="46" rx="8" class="box"/>
+          <text x="765" y="127" text-anchor="middle" class="lbl">AWS S3</text>
+
+          <!-- Browser -->
+          <rect x="640" y="260" width="250" height="46" rx="8" class="box"/>
+          <text x="765" y="287" text-anchor="middle" class="lbl">비로그인 브라우저</text>
+
+          <!-- edges -->
+          <path class="edge strong" d="M180,175 L330,175"/>
+          <text x="255" y="168" text-anchor="middle" class="lbl">JWT REST</text>
+
+          <path class="edge" d="M180,195 C260,260 260,340 330,350"/>
+          <text x="200" y="255" text-anchor="middle" class="lbl" transform="rotate(0)">SDK 토큰</text>
+
+          <path class="edge" d="M550,150 C595,90 640,60 640,43"/>
+          <text x="600" y="80" class="lbl">provider 토큰 검증</text>
+
+          <path class="edge" d="M550,180 L640,138"/>
+          <text x="600" y="150" class="lbl">presign 발급</text>
+
+          <path class="edge" d="M440,290 L440,330"/>
+
+          <path class="edge" d="M890,283 C920,283 920,220 890,220" opacity="0" />
+          <path class="edge" d="M770,306 C650,340 550,300 460,286" />
+          <text x="600" y="335" class="lbl">/public/share/token</text>
+
+        </svg>
+        <figcaption>RN 앱은 JWT로 REST API를, SDK 토큰으로 소셜 로그인을 직접 처리하고 presigned URL로 S3에 직접 업로드한다. 백엔드는 provider 토큰 검증과 presign 발급만 수행하며, 비로그인 브라우저는 공개 공유 웹뷰로 직접 접근한다.</figcaption>
+      </figure>
+    </section>
+
+    <section id="domains">
+      <h2><span class="num">04</span>백엔드 도메인 구조</h2>
+      <p><code>domain/</code> 아래 도메인별 패키지로 나뉘고, 각 도메인은 Controller → Service →
+      Repository의 동일한 계층 구조를 따릅니다. 쓰기(수정/삭제) API는 <code>ForbiddenException</code>(403)으로
+      본인 소유가 아니면 거부하고, 조회 API는 공유 앱 특성상 의도적으로 열어둡니다.</p>
+      <div class="cardgrid">
+        <div class="card"><div class="name">user</div><div class="desc">회원 CRUD, 관심분야(Set&lt;Genre&gt;)</div></div>
+        <div class="card"><div class="name">book</div><div class="desc">독서 기록, 상태·장르</div></div>
+        <div class="card"><div class="name">bookphoto</div><div class="desc">S3 presigned 업로드 2단계</div></div>
+        <div class="card"><div class="name">booknote</div><div class="desc">책당 여러 개 소감</div></div>
+        <div class="card"><div class="name">group / groupmember</div><div class="desc">독서모임, 소유자 탈퇴 불가</div></div>
+        <div class="card"><div class="name">share</div><div class="desc">ShareRecord/Target/Photo, public_token</div></div>
+        <div class="card"><div class="name">dashboard</div><div class="desc">통계 실시간 집계, 별도 테이블 없음</div></div>
+        <div class="card"><div class="name">auth</div><div class="desc">소셜 로그인 3사, 이메일/PW 삭제됨</div></div>
+        <div class="card"><div class="name">common</div><div class="desc">예외 처리, 로깅(Audit/Security)</div></div>
+        <div class="card"><div class="name">security</div><div class="desc">JWT 발급·필터·SecurityConfig</div></div>
+        <div class="card"><div class="name">config</div><div class="desc">S3(지연 빈)·OpenAPI·PublicWeb</div></div>
+      </div>
+    </section>
+
+    <section id="auth">
+      <h2><span class="num">05</span>인증 흐름 — 소셜 로그인 + 신규/기존 판별</h2>
+      <p><code>TokenResponse.isNewUser</code>(2026-08-29 추가)가 프론트 분기의 핵심입니다.
+      신규 가입 시 닉네임은 카카오/네이버는 제공자 프로필 닉네임을 그대로 쓰고 없으면 랜덤 생성,
+      <b>구글은 실제 이름이 아니라 이메일 주소가 들어가는 알려진 결함</b>이 있습니다(§11).</p>
+      <pre class="mermaid">
+sequenceDiagram
+    participant App as RN 앱
+    participant Provider as 카카오/구글/네이버
+    participant API as POST /api/auth/provider
+    participant DB as User 테이블
+
+    App->>Provider: SDK로 로그인
+    Provider-->>App: access token 또는 ID token
+    App->>API: 토큰 전달
+    API->>Provider: 토큰으로 사용자 정보 조회
+    Provider-->>API: providerUserId, nicknameHint
+    API->>DB: (socialProvider, socialId) 조회
+    alt 기존 회원
+        DB-->>API: 기존 User
+        API-->>App: isNewUser false
+    else 신규
+        API->>DB: User 생성
+        API-->>App: isNewUser true
+    end
+    App->>App: 분기 - 회원가입 화면 또는 메인 진입
+      </pre>
+    </section>
+
+    <section id="upload">
+      <h2><span class="num">06</span>이미지 업로드 흐름</h2>
+      <p>서버는 실제 파일 바이트를 한 번도 거치지 않습니다. presigned URL 발급은 로컬 서명 연산이라
+      AWS로 네트워크 요청조차 나가지 않습니다. <code>S3Presigner</code> 빈은 자격증명이 없어도 서버가
+      기동 실패하지 않도록 <b>주입 지점까지 포함해</b> <code>@Lazy</code> 처리되어 있습니다(2026-08-28~29,
+      BUG-20260827-03 대응 — 빈 정의뿐 아니라 <code>BookPhotoService</code> 생성자 파라미터에도
+      <code>@Lazy</code>를 붙여야 실제로 지연됨을 확인).</p>
+      <pre class="mermaid">
+sequenceDiagram
+    participant App as RN 앱
+    participant API as BookPhotoController
+    participant S3 as AWS S3
+
+    App->>API: POST /photos/presigned-url
+    API->>S3: 로컬 서명(네트워크 호출 없음)
+    S3-->>API: 서명된 URL
+    API-->>App: presigned URL + 공개 URL
+    App->>S3: 파일 직접 PUT
+    App->>API: POST /photos (공개 URL)
+    API->>API: BookPhoto 레코드 생성
+      </pre>
+    </section>
+
+    <section id="share">
+      <h2><span class="num">07</span>공개 공유 웹뷰</h2>
+      <p><code>ShareRecord</code> 생성 시 항상 <code>public_token</code>(UUID)이 발급됩니다.
+      로그인 없이 <code>/public/share/{token}</code>으로 접근 가능하며, <code>PublicShareViewService</code>가
+      엔티티를 절대 템플릿에 넘기지 않고 완전히 평탄화한 뷰 레코드로 변환해 지연 로딩 문제를
+      원천 차단합니다. 대시보드 공유는 <b>공유 시점에 스냅샷으로 얼려 저장한</b> JSON을 보여줍니다 —
+      나중에 데이터가 바뀌어도 공유 당시 숫자가 그대로 보이게 하기 위함입니다.</p>
+    </section>
+
+    <section id="model">
+      <h2><span class="num">08</span>도메인 모델 요약</h2>
+      <p><code>ShareRecord.user_id</code>, <code>ShareRecordPhoto</code>, <code>ShareRecord.book_note_id</code>,
+      <code>User.interests</code>(조인테이블 <code>user_interests</code>)는 모두 원래 테이블정의서에
+      없던 컬럼/테이블로, 구현 과정에서 실용적 필요에 따라 추가됐습니다 — xlsx 반영이 밀려 있습니다.</p>
+      <pre class="mermaid">
+erDiagram
+    User ||--o{ Book : 소유
+    User ||--o{ Group : 생성
+    User ||--o{ ShareRecord : 공유함
+    Book ||--o{ BookPhoto : 사진
+    Book ||--o{ BookNote : 소감
+    Book ||--o{ ShareRecord : "공유 대상(옵션)"
+    Group ||--o{ GroupMember : 멤버
+    ShareRecord ||--o{ ShareRecordTarget : "공개 대상"
+    ShareRecord ||--o{ ShareRecordPhoto : "선택 사진"
+    ShareRecord }o--o| BookNote : "선택 소감(옵션)"
+      </pre>
+    </section>
+
+    <section id="crosscutting">
+      <h2><span class="num">09</span>횡단 관심사</h2>
+      <h3>로깅</h3>
+      <p><code>LogType</code>(ACCESS/SECURITY/AUDIT/ERROR/APPLICATION) 5종을 파일로 나누지 않고
+      stdout + MDC(<code>traceId</code>/<code>logType</code>)로 구분 — Railway 컨테이너 파일시스템이
+      휘발성이라 파일 appender는 <code>local</code> 프로필에서만 켭니다.</p>
+      <h3>예외 처리</h3>
+      <p><code>GlobalExceptionHandler</code>가 도메인 예외와 <code>HttpMessageNotReadableException</code>을
+      공통 <code>ErrorResponse</code> JSON으로 변환합니다. catch-all 핸들러도 있어 미처리 예외도
+      동일 포맷 500으로 나갑니다.</p>
+      <h3>enum ↔ JSON 계약</h3>
+      <p><code>Genre</code>·<code>ShareType</code>·<code>ShareScope</code>·<code>SharePlatform</code>·<code>ShareTargetType</code>은
+      <code>@JsonValue</code>/<code>@JsonCreator</code>로 API 계약을 고정하고, DB 매핑은 별도
+      <code>@Converter</code>로 독립 처리합니다. <code>DashboardPeriod</code>는 아직 이 패턴이 빠져
+      대문자만 허용되는 불일치가 남아 있습니다.</p>
+    </section>
+
+    <section id="infra">
+      <h2><span class="num">10</span>인프라 · 배포</h2>
+      <div class="table-wrap">
+        <table>
+          <tr><th>환경</th><th>구성</th></tr>
+          <tr><td>로컬</td><td>docker-compose(MySQL, DB명 <code>kongdakchaekdak</code>) 또는 <code>local</code> 프로필(H2)</td></tr>
+          <tr><td>테스트</td><td><code>test</code> 프로필, H2(<code>kongdakchaekdak_test</code>), 74개 테스트</td></tr>
+          <tr><td>CI</td><td>GitHub Actions — <code>backend/**</code> push/PR마다 <code>./gradlew test</code> 자동 실행</td></tr>
+          <tr><td>배포 목표</td><td>Railway — 환경변수 분리·Wrapper 커밋 완료, 실제 배포는 아직 전</td></tr>
+        </table>
+      </div>
+      <div class="callout">이 클라우드 에이전트 세션 자체는 Maven Central/Gradle Plugin Portal 접근이
+      막혀 있어 실제 빌드를 못 돌립니다. 그래서 회귀를 조기에 잡기 위해 2026-08-29에 CI를 붙였습니다.</div>
+    </section>
+
+    <section id="debt">
+      <h2><span class="num">11</span>알려진 이슈 / 기술부채</h2>
+      <div class="table-wrap">
+        <table>
+          <tr><th>구분</th><th>내용</th></tr>
+          <tr><td><span class="chip major">major</span></td><td>구글 소셜 로그인 신규 가입 시 닉네임 자리에 실제 이름 대신 이메일 주소가 들어감</td></tr>
+          <tr><td><span class="chip minor">minor</span></td><td><code>DashboardPeriod</code> enum이 대문자만 허용(다른 enum과 계약 불일치)</td></tr>
+          <tr><td><span class="chip minor">minor</span></td><td><code>domain/auth/oauth2/</code> 4개 파일에 소셜 로그인 실패 로깅 미반영</td></tr>
+          <tr><td><span class="chip minor">minor</span></td><td>잘못된 enum 값 응답에 필드 단위 에러 메시지 없음(OBS-06)</td></tr>
+          <tr><td>—</td><td>테이블정의서(xlsx)에 구현 중 추가된 컬럼/테이블 미반영</td></tr>
+          <tr><td>—</td><td>DB명 변경으로 기존 로컬/Railway DB가 고아가 됨 — 마이그레이션 안내 필요</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      이 페이지는 claude.ai 프로젝트의 <code>claude/독서기록앱_아키텍처문서_v1.md</code>와 같은 내용을
+      다룹니다. 실제 코드가 바뀌면 이 문서도 함께 갱신이 필요합니다 — 특히 §11은 시간이 지나면
+      빠르게 stale해질 항목들입니다.
+    </footer>
+  </main>
+</div>
