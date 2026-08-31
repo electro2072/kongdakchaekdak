@@ -15,7 +15,9 @@ import {
   INTEREST_OPTIONS,
   MIN_NICKNAME_LENGTH,
   type GenderKey,
+  type Genre,
 } from '../constants/profileOptions';
+import {GENRE_CHIP_COLORS} from '../constants/genreColors';
 import {useTheme} from '../theme';
 
 /**
@@ -32,7 +34,7 @@ import {useTheme} from '../theme';
  */
 export function SignupScreen() {
   const {login} = useAuth();
-  const {colors, typography, radii} = useTheme();
+  const {colors, typography, radii, isDark} = useTheme();
 
   const [nickname, setNickname] = useState('');
   const [gender, setGender] = useState<GenderKey | null>(null);
@@ -147,6 +149,9 @@ export function SignupScreen() {
           <View style={[styles.row, styles.wrap]}>
             {INTEREST_OPTIONS.map(item => {
               const selected = interests.includes(item);
+              // 6개 장르 고정색 전환(claude/독서기록앱_프론트요청_디자인_6개장르고정색전환_v1.md) —
+              // 선택된 칩은 항상 그 장르 고유색, 미선택은 기존처럼 중립색
+              const chipColor = GENRE_CHIP_COLORS[item as Genre][isDark ? 'dark' : 'light'];
               return (
                 <TouchableOpacity
                   key={item}
@@ -154,9 +159,7 @@ export function SignupScreen() {
                     styles.chip,
                     {
                       borderRadius: radii.pill,
-                      backgroundColor: selected
-                        ? colors.accentSolidBg
-                        : colors.n100,
+                      backgroundColor: selected ? chipColor.bg : colors.n100,
                     },
                   ]}
                   onPress={() => toggleInterest(item)}>
@@ -164,7 +167,7 @@ export function SignupScreen() {
                     style={[
                       typography.caption,
                       {
-                        color: selected ? colors.onAccentSolid : colors.n700,
+                        color: selected ? chipColor.text : colors.n700,
                         fontWeight: selected ? '600' : '400',
                       },
                     ]}>

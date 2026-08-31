@@ -3,6 +3,8 @@ import {View, Text, StyleSheet} from 'react-native';
 import Svg, {Circle} from 'react-native-svg';
 import type {GenreRatioDto} from '../../types/dashboard';
 import {useTheme} from '../../theme';
+import {GENRE_CHART_COLOR_KEY} from '../../constants/genreColors';
+import type {Genre} from '../../constants/profileOptions';
 
 interface GenreDonutChartProps {
   genreRatios: GenreRatioDto[];
@@ -20,28 +22,26 @@ const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 /**
- * Frame 05.1 장르 비율 도넛차트 — 디자인 확인 완료 규칙(claude/독서기록앱_프론트요청_디자인시스템v2동기화_v1.md 답변):
- * - genreRatios는 백엔드가 count 내림차순으로 이미 정렬해서 준다(장르 종류가 아니라 "그 사용자의 순위"로 색이 정해짐)
- * - 1위→chart1, 2위→chart2, 3위→chart3, 4위 이하는 전부 합산해 "기타" 1개 슬라이스(색: chart4가 아니라 n200)
- * - genreRatios가 3개 이하면 "기타" 슬라이스 자체를 만들지 않음
+ * Frame 05.1 장르 비율 도넛차트 — "장르별 고정" 매핑 규칙(claude/독서기록앱_프론트요청_디자인_6개장르고정색전환_v1.md,
+ * 2026-08-28에 등수 기반 가이드를 뒤집음):
+ * - 순위가 아니라 **장르 이름**이 항상 같은 색을 갖는다 (GENRE_CHART_COLOR_KEY, theme의 chart1~6 참조)
+ * - 6개 장르가 닫힌 열거형(백엔드 Genre.java에 자유 텍스트/"기타" 없음)이라 "기타"/회색(n200) 처리는 불필요 —
+ *   다만 예상 밖 문자열이 들어와도 화면이 깨지지 않도록 n200 폴백만 방어적으로 남겨둔다
+ * - genreRatios는 백엔드가 count 내림차순으로 이미 정렬해서 주므로, 그 순서를 그대로 범례 순서로 쓴다
+ *   (색은 더 이상 이 순서에 좌우되지 않는다)
  * - 완독 0권(genreRatios: [])이면 빈 회색 링만 보여준다
  */
 export function GenreDonutChart({genreRatios}: GenreDonutChartProps) {
   const {colors, typography} = useTheme();
 
-  const top3 = genreRatios.slice(0, 3);
-  const rest = genreRatios.slice(3);
-  const restRatio = rest.reduce((sum, genre) => sum + genre.ratio, 0);
-
-  const rankColors = [colors.chart1, colors.chart2, colors.chart3];
-  const slices: Slice[] = top3.map((genre, index) => ({
-    label: genre.genre,
-    ratio: genre.ratio,
-    color: rankColors[index],
-  }));
-  if (rest.length > 0) {
-    slices.push({label: '기타', ratio: restRatio, color: colors.n200});
-  }
+  const slices: Slice[] = genreRatios.map(genre => {
+    const colorKey = GENRE_CHART_COLOR_KEY[genre.genre as Genre];
+    return {
+      label: genre.genre,
+      ratio: genre.ratio,
+      color: colorKey ? colors[colorKey] : colors.n200,
+    };
+  });
 
   let offsetAccumulator = 0;
 

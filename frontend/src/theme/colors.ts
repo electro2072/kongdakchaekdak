@@ -38,6 +38,13 @@ export interface ThemeColors {
   chart2: string;
   chart3: string;
   chart4: string;
+  /**
+   * 6개 장르 고정 매핑 확장(2026-08-28, claude/독서기록앱_프론트요청_디자인_6개장르고정색전환_v1.md).
+   * 과학(chart5)·경제·경영(chart6) 전용 — dataviz 스킬 공식 검증기로 기존 4색과의 색약 안전성
+   * (protan/deutan 시뮬레이션, OKLab ΔE)까지 확인된 값.
+   */
+  chart5: string;
+  chart6: string;
   /** 시맨틱 토큰 */
   surface: string;
   /**
@@ -83,6 +90,10 @@ export const lightColors: ThemeColors = {
   chart2: '#e8929b',
   chart3: '#efb94a',
   chart4: '#9b7ba8',
+  /** 과학(청화블루) */
+  chart5: '#0089ff',
+  /** 경제·경영(먹빛 남색) */
+  chart6: '#1c1a46',
   surface: '#ffffff',
   /** 라이트모드는 기존 RootNavigator가 쓰던 n50과 동일 — 변경 없음 */
   appBackground: '#f6f7f3',
@@ -128,6 +139,8 @@ export const darkColors: ThemeColors = {
   chart2: '#cd717c',
   chart3: '#ce9b2b',
   chart4: '#7d588c',
+  chart5: '#009af3',
+  chart6: '#98bed3',
   surface: '#242721',
   /**
    * design `--d-surface-app`(#181a14) — 카드(surface, #242721)보다 한 단계 더 어두운

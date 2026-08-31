@@ -5,7 +5,8 @@ import type {DashboardPeriod, DashboardResponse} from '../types/dashboard';
 // 교체하면 되고, 이 파일이 정의하는 타입/데이터 형태 자체는 화면 코드가 그대로 재사용한다.
 //
 // month  — 일반적인 경우 (장르 2개, 하이라이트 있음)
-// quarter — 장르 4개 이상이라 "기타" 슬라이스가 생기는 경우
+// quarter — 장르 4개인 경우. 6개 장르 고정색 전환(2026-08-28) 이후로는 "기타" 슬라이스가 아니라
+//           4개 모두 각자 고유색(소설=chart1, 인문=chart4, 과학=chart5, 자기계발=chart3)으로 표시된다.
 // year   — 완독 0권(가입 직후 등) 특수 케이스 — genreRatios: [], highlights 전부 null,
 //          monthlyTrend도 전부 0이라 막대그래프 "전부 p100" 케이스까지 같이 검증한다.
 

@@ -23,4 +23,7 @@ export const INTEREST_OPTIONS = [
   '경제·경영',
 ] as const;
 
+/** 관심분야이자 책 장르(Book.genre)이기도 한 닫힌 6개 열거형 — constants/genreColors.ts가 이 타입 기준으로 색을 고정 매핑한다 */
+export type Genre = (typeof INTEREST_OPTIONS)[number];
+
 export const MIN_NICKNAME_LENGTH = 2;

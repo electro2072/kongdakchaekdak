@@ -14,11 +14,12 @@ import {Search, BookOpen, Camera, PenLine} from 'lucide-react-native';
 import type {MainStackParamList} from '../navigation/types';
 import {MOCK_LIBRARY_BOOKS, type BookStatus} from '../mocks/libraryBooks';
 import {EmptyState} from '../components/EmptyState';
+import {GENRE_BADGE_COLORS} from '../constants/genreColors';
 import {useTheme} from '../theme';
 
 /** Frame 03 · 서재 탭 (목록) — design/hifi_mockup_v1.html 기준. 카드 탭 시 Frame 03.1(책 상세)로 이동 */
 export function LibraryScreen() {
-  const {colors, typography, radii} = useTheme();
+  const {colors, typography, radii, isDark} = useTheme();
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
 
@@ -120,6 +121,9 @@ export function LibraryScreen() {
             books.map(book => {
               const photoCount = book.photos.length;
               const hasNote = Boolean(book.noteText);
+              // 6개 장르 고정색 전환(claude/독서기록앱_프론트요청_디자인_6개장르고정색전환_v1.md) —
+              // 서재 목록 책 태그: 옅은 틴트 배경 + 진한 텍스트(다크모드 반전)
+              const genreBadge = GENRE_BADGE_COLORS[book.genre][isDark ? 'dark' : 'light'];
               return (
                 <TouchableOpacity
                   key={book.id}
@@ -146,6 +150,19 @@ export function LibraryScreen() {
                       ]}>
                       {book.title} ({book.author})
                     </Text>
+                    <View
+                      style={[
+                        styles.genreBadge,
+                        {backgroundColor: genreBadge.bg, borderRadius: radii.pill},
+                      ]}>
+                      <Text
+                        style={[
+                          typography.caption,
+                          {color: genreBadge.text, fontSize: 9, fontWeight: '600'},
+                        ]}>
+                        {book.genre}
+                      </Text>
+                    </View>
                     <Text
                       style={[
                         typography.caption,
@@ -257,6 +274,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+  },
+  genreBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 3,
   },
   metaRow: {
     flexDirection: 'row',
