@@ -14,6 +14,8 @@ import {
   GENDER_OPTIONS,
   INTEREST_OPTIONS,
   MIN_NICKNAME_LENGTH,
+  MAX_NICKNAME_LENGTH,
+  sanitizeNickname,
   type GenderKey,
   type Genre,
 } from '../constants/profileOptions';
@@ -81,12 +83,18 @@ export function SignupScreen() {
           </Text>
         </View>
 
-        <Field label="닉네임 (필수)">
+        <Field
+          label="닉네임 (필수)"
+          hint={`${MIN_NICKNAME_LENGTH}~${MAX_NICKNAME_LENGTH}자, 한글/영문/숫자만`}>
           <TextInput
             value={nickname}
-            onChangeText={setNickname}
+            onChangeText={text => setNickname(sanitizeNickname(text))}
+            maxLength={MAX_NICKNAME_LENGTH}
             placeholder="닉네임을 입력해주세요"
             placeholderTextColor={colors.n400}
+            autoCorrect={false}
+            spellCheck={false}
+            textBreakStrategy="simple"
             style={[
               styles.input,
               {
@@ -190,6 +198,9 @@ export function SignupScreen() {
               onChangeText={setGroupQuery}
               placeholder="모임 이름으로 검색"
               placeholderTextColor={colors.n400}
+              autoCorrect={false}
+              spellCheck={false}
+              textBreakStrategy="simple"
               style={[typography.caption, {flex: 1, color: colors.n900}]}
               onSubmitEditing={addGroup}
             />

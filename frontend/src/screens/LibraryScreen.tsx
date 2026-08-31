@@ -89,6 +89,9 @@ export function LibraryScreen() {
               onChangeText={setQuery}
               placeholder="책 제목으로 검색"
               placeholderTextColor={colors.n400}
+              autoCorrect={false}
+              spellCheck={false}
+              textBreakStrategy="simple"
               style={[
                 typography.caption,
                 {flex: 1, color: colors.n900, marginLeft: 6, fontSize: 10.5},

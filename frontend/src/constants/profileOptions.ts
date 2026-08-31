@@ -27,3 +27,14 @@ export const INTEREST_OPTIONS = [
 export type Genre = (typeof INTEREST_OPTIONS)[number];
 
 export const MIN_NICKNAME_LENGTH = 2;
+export const MAX_NICKNAME_LENGTH = 10;
+
+/**
+ * 닉네임 허용 문자 — 한글/영문/숫자만, 공백·특수문자(이모지 포함) 전부 금지.
+ * 회원가입(Frame 01.1)·프로필 편집(Frame 05.2) 두 화면이 입력 즉시 이 규칙으로 필터링한다.
+ */
+export const NICKNAME_PATTERN = /^[가-힣a-zA-Z0-9]*$/u;
+
+export function sanitizeNickname(input: string): string {
+  return input.replace(/[^가-힣a-zA-Z0-9]/gu, '');
+}

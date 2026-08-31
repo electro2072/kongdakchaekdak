@@ -17,6 +17,8 @@ import {
   GENDER_OPTIONS,
   INTEREST_OPTIONS,
   MIN_NICKNAME_LENGTH,
+  MAX_NICKNAME_LENGTH,
+  sanitizeNickname,
   type GenderKey,
   type Genre,
 } from '../constants/profileOptions';
@@ -91,13 +93,19 @@ export function ProfileEditScreen() {
           </TouchableOpacity>
         </View>
 
-        <Field label="닉네임 (필수)">
+        <Field
+          label="닉네임 (필수)"
+          hint={`${MIN_NICKNAME_LENGTH}~${MAX_NICKNAME_LENGTH}자, 한글/영문/숫자만`}>
           <TextInput
             testID="nickname-input"
             value={nickname}
-            onChangeText={setNickname}
+            onChangeText={text => setNickname(sanitizeNickname(text))}
+            maxLength={MAX_NICKNAME_LENGTH}
             placeholder="닉네임을 입력해주세요"
             placeholderTextColor={colors.n400}
+            autoCorrect={false}
+            spellCheck={false}
+            textBreakStrategy="simple"
             style={[
               styles.input,
               {
@@ -129,6 +137,9 @@ export function ProfileEditScreen() {
             onChangeText={setBio}
             placeholder="나를 짧게 소개해보세요"
             placeholderTextColor={colors.n400}
+            autoCorrect={false}
+            spellCheck={false}
+            textBreakStrategy="simple"
             style={[
               styles.input,
               {
