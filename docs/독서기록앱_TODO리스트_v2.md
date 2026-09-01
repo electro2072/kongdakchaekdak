@@ -25,6 +25,10 @@
 - [x] **(신규, 2026-07-21, 배포 전 블로킹)** `backend/` 디렉터리에서 `gradle wrapper --gradle-version 8.14.3` 실행 후 생성되는 `gradlew`/`gradlew.bat`/`gradle/wrapper/gradle-wrapper.properties`/`gradle/wrapper/gradle-wrapper.jar` 커밋 — **2026-08-29 완료 (`849a3e4`)**
 - [x] **(신규, 2026-07-21)** Railway 가입 → 프로젝트 생성 → 저장소 연결(루트 디렉터리 `backend`) → MySQL 플러그인 → 환경변수 설정 → `/health` 확인 — **2026-08-29 완료**. 배포 URL `https://kongdakchaekdak-production.up.railway.app` (`/health` 200, auth API 정상). 프로젝트 `intuitive-clarity` / 서비스 `kongdakchaekdak`, `main` push 시 자동 배포. ⚠️ **Custom Start Command 필수** — Railpack 기본 커맨드가 Spring Boot 이중 jar(`*.jar` + `*-plain.jar`)를 못 골라 크래시함 → `java -jar $(ls build/libs/*.jar | grep -v plain)` 로 지정함. 환경변수: `DB_*` 5개(MySQL 참조) + `JWT_SECRET` + `PUBLIC_BASE_URL` + `KAKAO_CLIENT_ID` + `GOOGLE_CLIENT_ID` + `NAVER_CLIENT_ID` + `NAVER_CLIENT_SECRET`
 - [ ] **(신규, 2026-07-21)** Railway 무료 체험 조건: $5 크레딧 30일(또는 소진 시 그 전) 유효. **크레딧 만료 전에 결제 여부 결정할 것** — 안 하면 MySQL 볼륨(데이터) 삭제됨
+- [ ] **(신규, RENAME-02, 2026-08-31, backend-agent)** DB명 변경(`reading_record_app` → `kongdakchaekdak`) 마이그레이션 안내 — 아직 정식 배포 전이라 옮겨야 할 실 사용자 데이터가 없음. 그래서 "마이그레이션"이라기보다는 아래 정리만 하면 됨:
+  1. **로컬**: `docker-compose down -v && docker-compose up -d`로 MySQL 볼륨 재생성. 예전 `reading_record_app` 이름으로 쌓인 로컬 데이터는 테스트용이라 백업 없이 버려도 됨 — `ddl-auto: update`가 첫 기동 시 새 DB(`kongdakchaekdak`)에 스키마를 자동으로 만들어줌.
+  2. **Railway**: 앱 서비스 Variables의 `DB_NAME`이 이미 `kongdakchaekdak`을 가리키고 있으면(섹션 0의 Railway 배포 항목 참고) 별도 조치 없이 다음 배포에서 새 DB가 자동 생성됨. Railway 프로젝트에 예전 이름의 DB/서비스가 남아있다면 지금 앱이 안 쓰는 게 맞는지 확인 후 정리(삭제)해도 됨.
+  3. ⚠️ **이 절차는 "아직 실 사용자 데이터가 없다"는 전제에서만 유효함** — 정식 출시 이후 실 데이터가 쌓인 뒤에 DB명을 또 바꿀 일이 생기면, 이 볼륨 재생성 방식이 아니라 `mysqldump`로 백업 후 새 DB로 복원하는 진짜 마이그레이션 절차를 새로 작성해야 함.
 
 ---
 
