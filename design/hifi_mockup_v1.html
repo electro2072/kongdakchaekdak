@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>콩닥책닥 — Hi-Fi 목업 v1.11</title>
+<title>콩닥책닥 — Hi-Fi 목업 v1.12</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/variable/pretendardvariable.min.css">
 <style>
   :root {
@@ -133,6 +133,20 @@
   .skel::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg, transparent, color-mix(in srgb, var(--surface) 60%, transparent), transparent); animation: skel-shimmer 1.4s ease-in-out infinite; }
   @keyframes skel-shimmer { 0% { transform:translateX(-100%); } 100% { transform:translateX(100%); } }
 
+  /* 전체 화면 로딩 오버레이 · dim (Frame 07.2, color_chips.html v2.1 스피너 스펙 적용) */
+  @keyframes cdc-spin { to { transform:rotate(360deg); } }
+  .screen-dim-overlay {
+    position:absolute; inset:0; z-index:30;
+    background: rgba(10,11,8,0.58);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;
+  }
+  .screen-dim-overlay .spinner {
+    width:40px; height:40px; border-width:4px; border-radius:50%; border-style:solid;
+    border-color: rgba(255,255,255,0.28); border-top-color:#ffffff;
+    animation: cdc-spin 0.8s linear infinite;
+  }
+  .screen-dim-overlay .dim-label { color:#fff; font-size:12.5px; font-weight:600; }
+
   /* 필드 검증 에러 (Frame 01.2) */
   .field-error { border-color: var(--error) !important; }
   .field-error-msg { display:flex; align-items:center; gap:5px; font-size:10.5px; color:var(--error); margin-top:6px; }
@@ -143,14 +157,14 @@
 <body>
 
   <div class="doc-header">
-    <h1>📱 콩닥책닥 — Hi-Fi 목업 v1.11</h1>
+    <h1>📱 콩닥책닥 — Hi-Fi 목업 v1.12</h1>
     <p>화면설계서(wireframe v2-5)의 프레임 구조를 그대로 따라가면서, 디자인 시스템 v1(컬러/타이포/아이콘)을 실제로 입힌 시안입니다.</p>
     <div class="meta">
-      <span>Ver 1.11</span>
+      <span>Ver 1.12</span>
       <span>375 × 812 (iPhone 기준)</span>
       <span>High-fidelity Mockup</span>
       <span>최초 작성 2026-07-21</span>
-      <span>최종 수정 2026-08-28</span>
+      <span>최종 수정 2026-08-31</span>
     </div>
     <div class="doc-note">
       <b>이 문서와 와이어프레임의 관계</b> — 화면 구조·문구·플로우는 <code>화면설계서_wireframe_v2-5.html</code>과 동일합니다 (프레임 번호도 그대로 대응). 이 문서는 그 구조 위에 실제 컬러 팔레트·Pretendard·Lucide 아이콘만 입힌 것으로, 기능 스펙에 대한 상세 설명(각 요소 번호별 주석)은 원본 와이어프레임을 참고해주세요. 여기서는 시각적으로 어떻게 보이는지에만 집중합니다.<br>
@@ -181,7 +195,8 @@
       · <b>서재 목록 책 태그</b> — Frame 03(서재 목록) 폰·태블릿 카드에 장르 배지를 신규 추가(폰 2권·태블릿 6권, 예시용 장르 배정: 아몬드→소설, 채식주의자→에세이, 불편한 편의점→자기계발, 달러구트 꿈 백화점→인문, 구의 증명→과학, 저주토끼→경제·경영). 배지는 칩과 다른 톤 규칙(옅은 틴트 배경 + 진한 텍스트, 다크모드는 반전) 사용 — 기존 배지 표(예: 인문 <code>#602f72</code>)를 그대로 재사용하지 않고 채도 있는 칩 배경 대비용으로 새로 도출한 값과 구분해서 각 용도에 맞는 색만 사용했습니다.<br>
       3곳 모두 라이트·다크 각각 재검증, <code>&lt;div&gt;</code>/<code>&lt;/div&gt;</code> 태그 균형(1688=1688) 확인.<br>
       <b>2026-08-28 추가 수정</b> — 앱 이름이 "콩닥책닥"(영문 kongdakchaekdak)으로 확정된 지 오래됐지만, 이 문서의 <code>&lt;title&gt;</code>과 <code>&lt;h1&gt;</code>에는 v1.6 이후로도 계속 임시 명칭 "독서 기록 공유 앱"이 남아있던 것을 발견해 "콩닥책닥"으로 교체했습니다(v1.6은 Frame 01 온보딩 화면 안의 워드마크 텍스트만 교체했을 뿐, 문서 자체의 제목·헤딩은 놓쳤던 것으로 확인됨). <code>&lt;title&gt;</code>이 <code>&lt;h1&gt;</code>과 달리 버전 번호 없이 "v1"로만 멈춰있던 것도 함께 "v1.11"로 맞춤. 화면 내용·색상은 변경 없음.<br>
-      <b>2026-08-28 파일명 정리</b> — 파일명의 "_v1"이 실제로는 한 번도 "v2"로 이어진 적 없이 그냥 고정 식별자처럼 쓰여왔다는 점을 사용자와 확인, 의미 없는 접미사라 제거하기로 함 — <code>hifi_mockup_v1.html</code> → <code>hifi_mockup.html</code>로 리네임했습니다. 문서 내부의 <code>Ver 1.11</code> 같은 버전 표기(<code>.doc-note</code> changelog 기반)는 그대로 유지 — 파일 경로만 정리된 것이고 버전 추적 방식 자체는 바뀌지 않았습니다.
+      <b>2026-08-28 파일명 정리</b> — 파일명의 "_v1"이 실제로는 한 번도 "v2"로 이어진 적 없이 그냥 고정 식별자처럼 쓰여왔다는 점을 사용자와 확인, 의미 없는 접미사라 제거하기로 함 — <code>hifi_mockup_v1.html</code> → <code>hifi_mockup.html</code>로 리네임했습니다. 문서 내부의 <code>Ver 1.11</code> 같은 버전 표기(<code>.doc-note</code> changelog 기반)는 그대로 유지 — 파일 경로만 정리된 것이고 버전 추적 방식 자체는 바뀌지 않았습니다.<br>
+      <b>v1.12 변경 이력 (2026-08-31)</b> — "로딩바를 만든 적 있냐"는 질문에서 시작해 <code>color_chips.html</code> v2.1에 범용 로딩 스피너 컴포넌트를 신규 추가한 것과 같은 라운드. 이어서 "화면 자체에 dim 깔고 위에 표시되는 것도 있으면 좋겠다"는 요청을 받아, 실제 화면 위에 적용된 모습을 보여주는 <b>Frame 07.2 서재 탭 (전체 화면 로딩 오버레이 · dim)</b>을 신규 추가했습니다 — Frame 03과 동일한 실제 책 목록 콘텐츠 위에 반투명 어두운 스크림(<code>rgba(10,11,8,0.58)</code>)을 깔고 중앙에 흰색 스피너(40px) + "불러오는 중..." 라벨을 배치. 기존 콘텐츠가 이미 있는 상태에서 새로고침/재조회할 때 쓰는 패턴이라, 콘텐츠가 아예 없을 때 쓰는 <b>Frame 07.1 로딩 스켈레톤</b>과는 용도가 다릅니다(스켈레톤을 대체하는 게 아니라 별도 상황을 위한 신규 프레임). 스크림 위 스피너·라벨은 라이트/다크 화면 배경과 무관하게 흰색으로 고정 — 스크림 자체가 이미 어둡기 때문에 라이트/다크 모드에 따라 반전시킬 필요가 없다고 판단했습니다. "상태 UI 세트" 섹션이 4종 → 5종으로 늘었습니다. 라이트·다크 각각 Playwright 스크린샷 확인, <code>&lt;div&gt;</code>/<code>&lt;/div&gt;</code> 태그 균형 재확인.
     </div>
   </div>
 
@@ -2099,7 +2114,7 @@
 
     <div class="tab-divider">
       <div class="section-title">{{icon:library}} 상태 UI 세트 — 빈 상태 / 로딩 / 에러</div>
-      <div class="section-sub">와이어프레임·목업 어디에도 없었지만 앱 출시 전 반드시 필요한 공통 상태 4종</div>
+      <div class="section-sub">와이어프레임·목업 어디에도 없었지만 앱 출시 전 반드시 필요한 공통 상태 5종 (2026-08-31: 전체 화면 로딩 오버레이 추가)</div>
     </div>
 
     <!-- ============ Frame 07 서재 탭 (빈 상태) ============ -->
@@ -2264,6 +2279,109 @@
             </div>
           </div>
           <div class="frame-cap">↳ 다크모드</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ Frame 07.2 서재 탭 (전체 화면 로딩 오버레이 · dim) ============ -->
+    <div class="frame-block">
+      <div class="frame-label">Frame 07.2 · 서재 탭 (전체 화면 로딩 오버레이 · dim)</div>
+      <div class="frame-row">
+        <div>
+          <div class="phone-frame">
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
+            <div class="screen has-tabbar">
+              <h4 class="scr-title">서재</h4>
+              <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <div class="chip selected" style="flex:1;">읽고 있는 책</div>
+                <div class="chip" style="flex:1;">읽은 책</div>
+              </div>
+              <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <div style="flex:1; height:32px; border-radius:8px; background:var(--n50); border:1px solid var(--n200); display:flex; align-items:center; padding:0 10px; gap:6px; color:var(--n400);">{{icon:search}}<span style="font-size:10.5px;">책 제목으로 검색</span></div>
+                <div class="chip" style="flex-shrink:0;">최근순 ▾</div>
+              </div>
+              <div class="card" style="display:flex; gap:10px; margin-bottom:8px;">
+                <div class="img-box" style="width:42px; height:58px; flex-shrink:0;">{{icon:book-open}}</div>
+                <div style="flex:1;">
+                  <div style="font-size:12.5px; font-weight:700;">아몬드 (손원평)<span style="display:inline-block; font-size:8.5px; font-weight:700; padding:1px 6px; border-radius:5px; background:#f4f9eb; color:#485a21; margin-left:6px; vertical-align:1px;">소설</span></div>
+                  <div style="font-size:10px; color:var(--n600); margin:3px 0;">2026.06.20 ~ 2026.06.28 (9일)</div>
+                  <div style="display:flex; gap:10px; font-size:9.5px; color:var(--n500);">
+                    <span style="display:flex; align-items:center; gap:3px;">{{icon:camera}} 사진 3장</span>
+                    <span style="display:flex; align-items:center; gap:3px;">{{icon:pen-line}} 소감 있음</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card" style="display:flex; gap:10px;">
+                <div class="img-box" style="width:42px; height:58px; flex-shrink:0;">{{icon:book-open}}</div>
+                <div style="flex:1;">
+                  <div style="font-size:12.5px; font-weight:700;">채식주의자 (한강)<span style="display:inline-block; font-size:8.5px; font-weight:700; padding:1px 6px; border-radius:5px; background:#ffe7e9; color:#430011; margin-left:6px; vertical-align:1px;">에세이</span></div>
+                  <div style="font-size:10px; color:var(--n600); margin:3px 0;">2026.06.25 ~ 진행중</div>
+                  <div style="display:flex; gap:10px; font-size:9.5px; color:var(--n400);">
+                    <span>사진 없음</span><span>소감 없음</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tabbar">
+              <div class="tab-item">{{icon:calendar-days}}<span>일정</span></div>
+              <div class="tab-item active">{{icon:library}}<span>서재</span></div>
+              <div class="tab-item">{{icon:share-2}}<span>공유</span></div>
+              <div class="tab-item">{{icon:user}}<span>프로필</span></div>
+            </div>
+            <div class="screen-dim-overlay">
+              <div class="spinner"></div>
+              <div class="dim-label">불러오는 중...</div>
+            </div>
+          </div>
+          <div class="frame-cap">↳ 새 프레임 (기존 화면 위에 dim + 스피너 — 새로고침/재조회 등 콘텐츠가 이미 있는 상태에서 다시 불러올 때)</div>
+        </div>
+        <div class="dark">
+          <div class="phone-frame">
+            <div class="statusbar"><div class="dynamic-island"></div><span>9:41</span><div class="status-icons"><svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="currentColor"/><rect x="9" y="3" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="currentColor"/></svg><svg width="15" height="11" viewBox="0 0 16 12" fill="none"><path d="M8 9.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z" fill="currentColor"/><path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M1.8 4.4a9 9 0 0 1 12.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.75" y="0.75" width="20.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1" opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.7" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx="0.9" fill="currentColor" opacity="0.4"/></svg></div></div>
+            <div class="screen has-tabbar">
+              <h4 class="scr-title">서재</h4>
+              <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <div class="chip selected" style="flex:1;">읽고 있는 책</div>
+                <div class="chip" style="flex:1;">읽은 책</div>
+              </div>
+              <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <div style="flex:1; height:32px; border-radius:8px; background:var(--n50); border:1px solid var(--n200); display:flex; align-items:center; padding:0 10px; gap:6px; color:var(--n400);">{{icon:search}}<span style="font-size:10.5px;">책 제목으로 검색</span></div>
+                <div class="chip" style="flex-shrink:0;">최근순 ▾</div>
+              </div>
+              <div class="card" style="display:flex; gap:10px; margin-bottom:8px;">
+                <div class="img-box" style="width:42px; height:58px; flex-shrink:0;">{{icon:book-open}}</div>
+                <div style="flex:1;">
+                  <div style="font-size:12.5px; font-weight:700;">아몬드 (손원평)<span style="display:inline-block; font-size:8.5px; font-weight:700; padding:1px 6px; border-radius:5px; background:#070a03; color:#748a48; margin-left:6px; vertical-align:1px;">소설</span></div>
+                  <div style="font-size:10px; color:var(--n600); margin:3px 0;">2026.06.20 ~ 2026.06.28 (9일)</div>
+                  <div style="display:flex; gap:10px; font-size:9.5px; color:var(--n500);">
+                    <span style="display:flex; align-items:center; gap:3px;">{{icon:camera}} 사진 3장</span>
+                    <span style="display:flex; align-items:center; gap:3px;">{{icon:pen-line}} 소감 있음</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card" style="display:flex; gap:10px;">
+                <div class="img-box" style="width:42px; height:58px; flex-shrink:0;">{{icon:book-open}}</div>
+                <div style="flex:1;">
+                  <div style="font-size:12.5px; font-weight:700;">채식주의자 (한강)<span style="display:inline-block; font-size:8.5px; font-weight:700; padding:1px 6px; border-radius:5px; background:#1c080b; color:#cd717c; margin-left:6px; vertical-align:1px;">에세이</span></div>
+                  <div style="font-size:10px; color:var(--n600); margin:3px 0;">2026.06.25 ~ 진행중</div>
+                  <div style="display:flex; gap:10px; font-size:9.5px; color:var(--n400);">
+                    <span>사진 없음</span><span>소감 없음</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tabbar">
+              <div class="tab-item">{{icon:calendar-days}}<span>일정</span></div>
+              <div class="tab-item active">{{icon:library}}<span>서재</span></div>
+              <div class="tab-item">{{icon:share-2}}<span>공유</span></div>
+              <div class="tab-item">{{icon:user}}<span>프로필</span></div>
+            </div>
+            <div class="screen-dim-overlay">
+              <div class="spinner"></div>
+              <div class="dim-label">불러오는 중...</div>
+            </div>
+          </div>
+          <div class="frame-cap">↳ 다크모드 (dim 배경·스피너는 라이트/다크 동일 — 어두운 스크림 위라 반전 불필요)</div>
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>콩닥책닥 — 컬러 칩 (쑥송편 테마) v2</title>
+<title>콩닥책닥 — 컬러 칩 (쑥송편 테마) v2.1</title>
 <style>
   :root {
     --p50:#f4f9eb; --p100:#ebf5db; --p200:#d6e5bd; --p300:#b9cd98; --p400:#99ae73;
@@ -107,6 +107,37 @@
   .dark-progress-fill { background: var(--d-p400); height: 100%; border-radius: 999px; }
   .dark-streak-chip { background: var(--d-p500); color: var(--d-dark-on-btn); font-weight: 800; font-size: 13px; padding: 6px 12px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; }
 
+  /* 로딩 스피너 (v2.1 신규, 2026-08-31) */
+  @keyframes cdc-spin { to { transform: rotate(360deg); } }
+  .spinner {
+    display: inline-block; border-radius: 50%; border-style: solid;
+    border-color: var(--p100); border-top-color: var(--p600);
+    animation: cdc-spin 0.8s linear infinite; flex-shrink: 0;
+  }
+  .spinner-sm { width: 16px; height: 16px; border-width: 2px; }
+  .spinner-md { width: 28px; height: 28px; border-width: 3px; }
+  .spinner-lg { width: 40px; height: 40px; border-width: 4px; }
+  .btn-loading { display: inline-flex; align-items: center; gap: 8px; opacity: 0.85; cursor: not-allowed; }
+  .spinner-box { display: flex; align-items: center; justify-content: center; height: 80px; background: var(--n100); border-radius: 8px; }
+  .overlay-demo {
+    position: relative; background: var(--n100); border-radius: 8px; height: 150px;
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+  }
+  .overlay-demo .overlay-behind { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--n400); font-size: 12px; }
+  .overlay-demo .overlay-bg {
+    position: absolute; inset: 0; background: rgba(255,255,255,0.72);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  }
+  .overlay-demo .overlay-label { font-size: 12px; color: var(--n700); font-weight: 600; }
+
+  /* 다크모드 변형 */
+  .dark-spinner { border-color: var(--d-border); border-top-color: var(--d-p400); }
+  .dark-spinner-box { background: var(--d-surface-card); border: 1px solid var(--d-border); }
+  .dark-overlay-demo { background: var(--d-surface-card); }
+  .dark-overlay-demo .overlay-behind { color: var(--d-text-muted); }
+  .dark-overlay-demo .overlay-bg { background: rgba(24,26,20,0.72); }
+  .dark-overlay-demo .overlay-label { color: var(--d-text-secondary); }
+
   footer { margin-top: 60px; font-size: 12px; color: var(--n500); border-top: 1px solid var(--n200); padding-top: 16px; }
   .doc-note { margin: 14px 0 30px; background: var(--p50); border: 1px solid var(--p200); border-radius: 8px; padding: 10px 14px; font-size: 12.5px; line-height: 1.7; color: var(--p900); }
   .doc-note b { color: var(--p800); }
@@ -120,14 +151,15 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>🥮 콩닥책닥 — 컬러 팔레트 v2 (책거리 · 송편)</h1>
-  <p class="sub">메인 테마: 쑥송편 초록(Mugwort Green) · OKLCH 기반 설계 · 대비 검증 완료 · v2 개정 2026-08-09</p>
+  <h1>🥮 콩닥책닥 — 컬러 팔레트 v2.1 (책거리 · 송편)</h1>
+  <p class="sub">메인 테마: 쑥송편 초록(Mugwort Green) · OKLCH 기반 설계 · 대비 검증 완료 · v2.1 개정 2026-08-31</p>
   <div class="doc-note">
     <b>v1 (2026-07-21)</b> — 프라이머리 그린(hue 128°) 라이트/다크 램프, Neutral, Status(success/warning/error/info) 확정.<br>
     <b>v1.1 (2026-07-21)</b> — 카테고리 구분용 포인트 멀티컬러(코랄·시안·라벤더) 추가.<br>
     <b>v1.2 (2026-07-21)</b> — "칙칙하다"는 피드백에 따라 프라이머리 그린 hue를 128°→140°로 재도출, 채도 상향. 포인트 멀티컬러를 파스텔톤으로 재조정.<br>
     <b>v2 (2026-08-09)</b> — 브랜드 컨셉을 <b>"책거리"(조선시대 책·문방구를 그린 민화) × "송편"</b>으로 전환. 사용자가 검토한 <code>branding_proposal_songpyeon.html</code>의 "옵션 B"를 채택 — 주 브랜드색을 비비드 그린(hue 140°)에서 <b>쑥송편 초록(hue 124.6°, 재래식 톤)</b>으로 교체하고, 카테고리 포인트 컬러를 코랄·시안·라벤더에서 <b>송편의 나머지 천연 염색색(분홍·치자·자색)</b>으로 교체했습니다. 상세 계산 과정은 이 문서 맨 아래 "v2 색상 도출 과정" 참고.<br>
-    <b>2026-08-27 갱신</b> — 앱 이름이 <b>"콩닥책닥"</b>으로 확정되어 문서 제목의 임시 명칭("독서 자랑 어플")을 교체했습니다. 색상 값 자체는 변경 없음 — 라벨 텍스트만 갱신.
+    <b>2026-08-27 갱신</b> — 앱 이름이 <b>"콩닥책닥"</b>으로 확정되어 문서 제목의 임시 명칭("독서 자랑 어플")을 교체했습니다. 색상 값 자체는 변경 없음 — 라벨 텍스트만 갱신.<br>
+    <b>v2.1 (2026-08-31)</b> — 범용 <b>로딩 스피너</b> 컴포넌트 신규 추가(맨 아래 "10. 로딩 스피너" 참고). 버튼 내부(16px)·섹션/카드(28px)·전체 화면 오버레이(40px) 3가지 크기, 라이트/다크 각각. 기존 팔레트 색상 값은 변경 없음 — 새 컴포넌트 하나 추가된 것뿐.
   </div>
 
   <h2>0. 브랜드 스토리 — 송편 5색</h2>
@@ -337,8 +369,62 @@
     6) <b>미실행:</b> dataviz 스킬의 <code>validate_palette.js</code> 색맹 시뮬레이션(protan/deutan/tritan ΔE) — 이 세션에 스킬 파일이 로드되지 않아 생략, OKLCH 명도 간격 확인으로 대체. 다음에 그 도구를 쓸 수 있는 세션에서 <code>--pairs all</code>로 재검증 권장.
   </p>
 
+  <h2>10. 로딩 스피너 — 범용 로딩 인디케이터 (v2.1 신규, 2026-08-31)</h2>
+  <p class="note">"앱/네트워크 로딩바를 만든 적 있냐"는 질문에서 시작 — 지금까지는 서재 탭 전용 "로딩 스켈레톤"(<code>hifi_mockup.html</code> Frame 07.1)만 있었고, 화면 어디서나 재사용 가능한 범용 로딩 인디케이터는 없었습니다. 원형 스피너 하나를 크기 3단계로 만들어 버튼 내부 로딩부터 전체 화면 오버레이까지 공용으로 쓸 수 있게 했습니다(형태는 스피너로 결정 — 상단 진행 바 방식은 채택하지 않음, React Native 앱에서 더 흔한 패턴 기준).</p>
+  <div class="mock-row">
+    <div class="card">
+      <h4>버튼 내부 로딩 · 16px</h4>
+      <p>저장/제출 등 액션 진행 중. 버튼 텍스트는 유지, 스피너는 텍스트 앞, 클릭은 비활성화</p>
+      <button class="btn btn-primary btn-loading"><span class="spinner spinner-sm"></span>저장 중...</button>
+    </div>
+    <div class="card">
+      <h4>섹션/카드 로딩 · 28px</h4>
+      <p>대시보드 통계, 목록 일부 등 화면 일부만 로딩 중일 때 그 영역 중앙에 표시</p>
+      <div class="spinner-box"><span class="spinner spinner-md"></span></div>
+    </div>
+    <div class="card">
+      <h4>전체 화면 오버레이 · 40px</h4>
+      <p>화면 전환 직후처럼 콘텐츠 전체가 아직 없을 때 — 반투명 오버레이 + 중앙 스피너 + 라벨</p>
+      <div class="overlay-demo">
+        <div class="overlay-behind">(뒤 콘텐츠 자리)</div>
+        <div class="overlay-bg">
+          <span class="spinner spinner-lg"></span>
+          <span class="overlay-label">불러오는 중...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">💡 색상 규칙: 회전하지 않는 트랙은 <code>--p100</code>, 회전하는 호는 <code>--p600</code> — 기존 진행률 바(트랙 <code>--n200</code> + 채움 <code>--p600</code>)와 같은 "채움/강조색 = p600" 원칙을 그대로 따랐습니다. 애니메이션은 <code>@keyframes cdc-spin</code>으로 0.8s linear 무한 회전. <b>접근성 참고</b> — 이 문서는 시각 스펙만 기록한 것이고, 실제 구현 시 <code>prefers-reduced-motion: reduce</code> 환경에서는 회전 애니메이션을 끄거나 느리게 하는 처리를 프론트에서 추가하는 걸 권장합니다(이 세션에서 검증기로 확인한 사항은 아님).</p>
+
+  <div class="dark-section">
+    <h3>다크모드</h3>
+    <div class="mock-row">
+      <div class="dark-card">
+        <h4>버튼 내부 로딩</h4>
+        <p>다크 버튼 배경(p500) 위에서도 트랙/호 대비 유지</p>
+        <button class="btn dark-btn-primary btn-loading"><span class="spinner dark-spinner spinner-sm"></span>저장 중...</button>
+      </div>
+      <div class="dark-card">
+        <h4>섹션/카드 로딩</h4>
+        <p>다크 카드 배경 위 스피너</p>
+        <div class="spinner-box dark-spinner-box"><span class="spinner dark-spinner spinner-md"></span></div>
+      </div>
+      <div class="dark-card">
+        <h4>전체 화면 오버레이</h4>
+        <p>다크 배경 위 반투명 오버레이</p>
+        <div class="overlay-demo dark-overlay-demo">
+          <div class="overlay-behind">(뒤 콘텐츠 자리)</div>
+          <div class="overlay-bg">
+            <span class="spinner dark-spinner spinner-lg"></span>
+            <span class="overlay-label">불러오는 중...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer>
-    콩닥책닥 디자인 시스템 v2 · culori(OKLCH)로 색공간 변환 및 램프 생성 · WCAG 대비는 자체 구현 공식으로 검증 · 색맹 안전성은 명도(L) 분산 확인으로 약식 대체(정식 <code>validate_palette.js</code> 재검증 권장) · 브랜드 컨셉: 책거리 × 송편 (2026-08-09)
+    콩닥책닥 디자인 시스템 v2.1 · culori(OKLCH)로 색공간 변환 및 램프 생성 · WCAG 대비는 자체 구현 공식으로 검증 · 색맹 안전성은 명도(L) 분산 확인으로 약식 대체(정식 <code>validate_palette.js</code> 재검증 권장) · 브랜드 컨셉: 책거리 × 송편 (2026-08-09) · 로딩 스피너 컴포넌트 추가 (2026-08-31)
   </footer>
 </div>
 
