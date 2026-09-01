@@ -22,7 +22,7 @@ import {
   Share2,
 } from 'lucide-react-native';
 import type {MainStackParamList} from '../navigation/types';
-import {MOCK_LIBRARY_BOOKS} from '../mocks/libraryBooks';
+import {useLibrary} from '../navigation/LibraryContext';
 import {useTheme} from '../theme';
 
 /** Frame 03.1 · 서재 탭(책 상세) — design/hifi_mockup_v1.html 기준. 탭바 없이 전체화면으로 push된다 */
@@ -31,7 +31,8 @@ export function BookDetailScreen() {
   const route = useRoute<RouteProp<MainStackParamList, 'BookDetail'>>();
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const book = MOCK_LIBRARY_BOOKS.find(b => b.id === route.params.bookId);
+  const {books} = useLibrary();
+  const book = books.find(b => b.id === route.params.bookId);
 
   // TODO: PATCH /api/books/{id}/complete 연동 전이라 로컬 state로만 완독 처리 여부를 표시한다.
   const [isDone, setIsDone] = useState(book?.status === 'done');

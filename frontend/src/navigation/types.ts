@@ -1,3 +1,5 @@
+import type {Book} from '../types/book';
+
 /** 로그인 전 스택 (Frame 01 로그인 → Frame 01.1 회원가입) */
 export type AuthStackParamList = {
   Login: undefined;
@@ -30,6 +32,11 @@ export type MainStackParamList = {
   BookDetail: {bookId: string};
   /** Frame 03 책 검색/등록 — 일정 탭 "새 책 등록하기", 서재 탭 빈 상태 CTA에서 모달로 진입 */
   BookSearch: undefined;
+  /**
+   * Frame 08.2 책 등록 확인 — BookSearch(Frame 03)에서 검색 결과를 선택하면 진입, 장르를
+   * 단일선택한 뒤 서재에 등록한다. 테스터 리포트 FINDING-20260828-08 반영.
+   */
+  BookRegisterConfirm: {book: Book};
   /** Frame 05.1 독서 대시보드(Recap) — 프로필 탭 "이번 분기 리캡 보기" 카드에서 진입, 탭바 없이 전체화면 */
   Dashboard: undefined;
   /** Frame 05.2 프로필 편집 — 프로필 탭 "프로필 편집" 버튼에서 진입, 탭바 없이 전체화면 */

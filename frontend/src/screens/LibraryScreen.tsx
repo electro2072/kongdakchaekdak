@@ -12,7 +12,8 @@ import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Search, BookOpen, Camera, PenLine} from 'lucide-react-native';
 import type {MainStackParamList} from '../navigation/types';
-import {MOCK_LIBRARY_BOOKS, type BookStatus} from '../mocks/libraryBooks';
+import {type BookStatus} from '../mocks/libraryBooks';
+import {useLibrary} from '../navigation/LibraryContext';
 import {EmptyState} from '../components/EmptyState';
 import {GENRE_BADGE_COLORS} from '../constants/genreColors';
 import {useTheme} from '../theme';
@@ -22,11 +23,12 @@ export function LibraryScreen() {
   const {colors, typography, radii, isDark} = useTheme();
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const {books: libraryBooks} = useLibrary();
 
   const [statusFilter, setStatusFilter] = useState<BookStatus>('reading');
   const [query, setQuery] = useState('');
 
-  const books = MOCK_LIBRARY_BOOKS.filter(
+  const books = libraryBooks.filter(
     book => book.status === statusFilter && book.title.includes(query.trim()),
   );
 

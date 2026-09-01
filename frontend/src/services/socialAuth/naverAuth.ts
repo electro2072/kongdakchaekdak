@@ -22,7 +22,18 @@ export function initializeNaverLogin() {
  * successResponse의 만료시간 필드는 expiresAt이 아니라 expiresAtUnixSecondString이다).
  */
 export async function signInWithNaver(): Promise<string | null> {
-  const result = await NaverLogin.login();
+  // 테스터 리포트(docs/test/requests/소셜로그인_App초기화_리그레션_수정요청_v1.md 3장):
+  // NaverLogin.login()이 SDK 문제 시 콜백을 안 부르고 promise가 영영 안 끝나는 케이스가 있어
+  // 무한 로딩으로 보임 — 30초 타임아웃 가드로 최소한 "로그인 실패" 처리는 되게 한다.
+  const result = await Promise.race([
+    NaverLogin.login(),
+    new Promise<never>((_, reject) =>
+      setTimeout(
+        () => reject(new Error('네이버 로그인 응답이 없습니다 (시간 초과)')),
+        30000,
+      ),
+    ),
+  ]);
 
   if (result.isSuccess) {
     // 테스터 리포트 FINDING-20260829-13: @react-native-seoul/naver-login v5 타입 정의는
