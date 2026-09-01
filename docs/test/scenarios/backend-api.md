@@ -13,24 +13,25 @@
    gradle bootRun --args="--spring.profiles.active=local"
    ```
    `GET http://localhost:8080/health` → `{"status":"ok",...}` 확인.
-   ⚠️ 2026-08-27 현재 `.env` 없이 기동하면 `S3Presigner` 빈 생성 실패로 컨텍스트가 죽는다
-   (reports/2026-08-27b.md BUG-20260827-03). 해소 전까지는 더미 AWS 자격증명을 넣고 기동:
-   `AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_S3_BUCKET=test AWS_S3_REGION=ap-northeast-2 gradle bootRun ...`
-   그리고 `gradle bootRun`은 백그라운드 실행이 필요하다 — `&`나 `timeout` 래핑 말고
-   실행 도구의 백그라운드 모드를 쓸 것(안 그러면 셸 종료 시 같이 죽음).
+   ~~2026-08-27 `.env` 없이 기동 시 S3Presigner NPE~~ → BUG-20260827-03 **조각1(`6b710b1`)로 해소** —
+   `.env` AWS 키 없이도 `gradle bootRun --args="--spring.profiles.active=local"` 정상 기동. 더미 env 불필요.
+   `gradle bootRun`은 백그라운드 실행 — `&`/`timeout` 래핑 말고 실행 도구의 백그라운드 모드를 쓸 것.
 
-2. **테스트용 JWT 발급.** `local` 프로필 시크릿(환경변수 미설정 시 기본값):
-   `please-change-this-dev-only-jwt-secret-before-deploying`
-   - HS256, payload: `{ "sub": "<userId>", "iat": <epoch>, "exp": <epoch+3600> }`
-   - `sub`는 실제로 존재하는 User의 id여야 인증 이후 로직이 통과된다. **소셜 로그인 외에
-     User를 만들 방법이 없다**(reports/2026-08-27b.md GAP). h2-console(`/h2-console`,
-     url `jdbc:h2:mem:reading_record_app;MODE=MySQL`, user `sa`, pw 없음)로 `users`/`books`
-     행을 직접 seed한다. 컬럼: `users(id,nickname,social_provider,social_id,created_at,updated_at)`,
-     `books(id,user_id,title,author,genre,total_pages,status,start_date,end_date,created_at,updated_at)`
-     — `genre`는 한글 라벨, `status`는 소문자 `reading`/`done`.
-   - 토큰 생성 헬퍼: [../tools/mint-jwt.mjs](../tools/mint-jwt.mjs) — `node docs/test/tools/mint-jwt.mjs <userId>`.
-   - curl로 한글 본문을 보낼 때는 인라인 `-d` 대신 UTF-8 파일 + `--data-binary @file`
-     (Windows 셸에서 인라인 문자열이 CP949로 깨져 `MALFORMED_REQUEST` 오탐 발생).
+2. **테스트용 JWT 발급.**
+   - ⚠️ **시크릿**: 로컬 `gradle bootRun`은 `backend/.env`의 `JWT_SECRET`을 읽어 쓴다
+     (`application.yml`의 기본값 `please-change-...` 아님). Railway는 Railway 환경변수 `JWT_SECRET`.
+   - HS256, payload: `{ "sub": "<userId>", "iat": <epoch>, "exp": <epoch+3600> }`.
+   - `sub`는 실제로 존재하는 User의 id여야 인증 이후 로직이 통과된다. **소셜 로그인 외에 User를
+     만드는 API가 없으므로** DB에 직접 seed한다:
+     - 대시보드용 완비 시드: `docs/test/fixtures/dashboard-seed.sql` (유저 9001 + 완독 22권).
+     - 최소 수동: h2-console(`/h2-console`, url `jdbc:h2:mem:kongdakchaekdak;MODE=MySQL`, user `sa`, pw 없음)에서
+       `users(id,nickname,social_provider,social_id,created_at,updated_at)` /
+       `books(user_id,title,author,genre,total_pages,status,start_date,end_date,created_at,updated_at)`
+       INSERT. `genre`=한글 라벨, `status`=소문자 `reading`/`done`.
+   - 토큰 헬퍼: [../tools/mint-jwt.mjs](../tools/mint-jwt.mjs) —
+     `node docs/test/tools/mint-jwt.mjs <userId> "$(grep '^JWT_SECRET=' backend/.env | cut -d= -f2-)"`.
+   - curl로 한글 본문 보낼 때 인라인 `-d` 말고 UTF-8 파일 + `--data-binary @file`
+     (Windows 셸 인라인 문자열이 CP949로 깨져 `MALFORMED_REQUEST` 오탐).
 
 3. 공통 에러 응답 포맷 확인: 실패 응답은 `{ "error": "<CODE>", "message": "<...>" }` 형태여야 한다
    (`GlobalExceptionHandler`). 401도 같은 포맷(`JwtAuthenticationEntryPoint`).

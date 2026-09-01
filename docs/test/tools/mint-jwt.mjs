@@ -1,6 +1,11 @@
-// 로컬 블랙박스 테스트용 JWT 발급기 (외부 의존성 없음, HS256).
+// 블랙박스 테스트용 JWT 발급기 (외부 의존성 없음, HS256).
 // 사용: node docs/test/tools/mint-jwt.mjs <userId> [secret] [expSeconds]
-// 기본 secret = local 프로필 기본값(application.yml의 JWT_SECRET 미설정 시).
+//
+// ⚠️ secret 은 반드시 실제로 서버가 쓰는 값을 넣을 것:
+//   - 로컬 gradle bootRun: backend/.env 의 JWT_SECRET  (application.yml 기본값 아님!)
+//       node docs/test/tools/mint-jwt.mjs 9001 "$(grep '^JWT_SECRET=' backend/.env | cut -d= -f2-)"
+//   - Railway: Railway 환경변수 JWT_SECRET
+//   생략 시 application.yml 의 기본값을 쓰는데, .env 나 배포 환경에선 대부분 401 난다.
 import crypto from 'node:crypto';
 
 const userId = process.argv[2] ?? '1';
