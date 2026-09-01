@@ -1,6 +1,7 @@
 package com.kongdakchaekdak.domain.bookphoto;
 
 import com.kongdakchaekdak.common.exception.ForbiddenException;
+import com.kongdakchaekdak.common.exception.ImageStorageUnavailableException;
 import com.kongdakchaekdak.common.exception.ResourceNotFoundException;
 import com.kongdakchaekdak.config.S3Properties;
 import com.kongdakchaekdak.domain.book.Book;
@@ -12,6 +13,7 @@ import com.kongdakchaekdak.domain.bookphoto.dto.PresignedUrlResponse;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
@@ -29,6 +31,12 @@ import java.util.UUID;
  * 부족했던 이유). 그래서 Lombok을 걷어내고 생성자를 직접 써서 {@code s3Presigner} 파라미터에만
  * {@code @Lazy}를 붙였다 — 이러면 Spring이 지연 프록시를 주입하고, 실제 빈 생성은 이 프록시의
  * 메서드가 처음 호출되는 시점(사진 업로드 presigned URL 요청)까지 미뤄진다.</p>
+ *
+ * <p><b>(2026-08-31, BUG-20260827-03 "조각2")</b> 조각1은 "서버 기동이 실패하지 않게" 만들었을
+ * 뿐, 그 이후 실제로 presigned URL을 요청하면 그 시점에 지연됐던 빈이 생성되면서 자격증명이
+ * 비어있을 경우 여전히 예외가 난다 — 다만 이번엔 요청 하나만 실패해야 정상이다. {@link
+ * #issuePresignedUploadUrl}에서 이 예외를 잡아 {@link ImageStorageUnavailableException}(503)으로
+ * 감싸서, 사용자에게 의미 없는 500 대신 "이미지 업로드를 지금 쓸 수 없다"는 명확한 응답을 준다.</p>
  */
 @Service
 @Transactional(readOnly = true)
@@ -75,7 +83,16 @@ public class BookPhotoService {
                 .putObjectRequest(objectRequest)
                 .build();
 
-        PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
+        PresignedPutObjectRequest presignedRequest;
+        try {
+            // 이 호출이 처음 실행될 때 지연됐던 S3Presigner 빈이 실제로 생성된다(클래스 상단 Javadoc
+            // "조각2" 참고) — 자격증명이 비어 있으면 여기서 IllegalArgumentException, 그 외 AWS SDK
+            // 설정 문제는 SdkException 계열로 터진다. 둘 다 잡아서 503으로 감싼다.
+            presignedRequest = s3Presigner.presignPutObject(presignRequest);
+        } catch (IllegalArgumentException | SdkException e) {
+            throw new ImageStorageUnavailableException(
+                    "이미지 업로드용 presigned URL 발급에 실패했습니다 — 서버의 AWS S3 자격증명 설정을 확인해야 합니다.", e);
+        }
 
         return new PresignedUrlResponse(
                 presignedRequest.url().toString(),

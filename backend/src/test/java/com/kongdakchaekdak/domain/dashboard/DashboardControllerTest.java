@@ -140,7 +140,9 @@ class DashboardControllerTest {
     void date를_생략하면_이번_달_기준으로_동작한다() throws Exception {
         mockMvc.perform(get("/api/dashboard").header("Authorization", bearerToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.period").value("MONTH"));
+                // 2026-08-31: FINDING-20260827-04 잔여 수정 — DashboardPeriod 응답 직렬화가
+                // shareType 등과 동일한 소문자 계약으로 바뀌면서 "MONTH" → "month".
+                .andExpect(jsonPath("$.period").value("month"));
     }
 
     @Test

@@ -67,6 +67,20 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(HttpStatus.BAD_REQUEST.value(), "INVALID_REQUEST", ex.getMessage()));
     }
 
+    /**
+     * (2026-08-31 추가, BUG-20260827-03 "조각2") 이미지 업로드 관련 AWS 설정 문제(자격증명 없음 등)로
+     * presigned URL 발급 자체가 불가능한 경우. 클라이언트/서버 어느 쪽 잘못도 아니라 400/500이 아니라
+     * 503(SERVICE_UNAVAILABLE)로 응답해 "이 기능이 아직 준비되지 않았다"는 의미를 명확히 전달한다.
+     * 원인(자격증명 등)은 응답 바디에 노출하지 않고 서버 로그에만 스택트레이스와 함께 남긴다.
+     */
+    @ExceptionHandler(ImageStorageUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleImageStorageUnavailable(ImageStorageUnavailableException ex) {
+        log.error("이미지 업로드 기능 사용 불가 (S3 설정 문제): {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ErrorResponse.of(HttpStatus.SERVICE_UNAVAILABLE.value(), "IMAGE_STORAGE_UNAVAILABLE",
+                        "이미지 업로드 기능을 지금 사용할 수 없습니다. 잠시 후 다시 시도해주세요."));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         List<ErrorResponse.FieldErrorDetail> fieldErrors = ex.getBindingResult().getFieldErrors().stream()

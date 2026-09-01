@@ -388,7 +388,9 @@ class ShareRecordControllerTest {
                 "shareType", "dashboard",
                 "scope", "all",
                 "platform", "app",
-                "dashboardPeriod", "MONTH",
+                // 2026-08-31: FINDING-20260827-04 잔여 수정 — DashboardPeriod도 shareType/scope/platform과
+                // 동일하게 소문자 전용 계약으로 통일됐다(아래 dashboardPeriod를_대문자로_보내면_400 참고).
+                "dashboardPeriod", "month",
                 "dashboardDate", "2026-07"
         ));
 
@@ -410,7 +412,7 @@ class ShareRecordControllerTest {
                 "bookId", bookId,
                 "scope", "all",
                 "platform", "app",
-                "dashboardPeriod", "MONTH"
+                "dashboardPeriod", "month"
         ));
 
         mockMvc.perform(post("/api/share-records")
@@ -430,6 +432,26 @@ class ShareRecordControllerTest {
                 "shareType", "DASHBOARD",
                 "scope", "all",
                 "platform", "app"
+        ));
+
+        mockMvc.perform(post("/api/share-records")
+                        .header("Authorization", sharerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("MALFORMED_REQUEST"));
+    }
+
+    @Test
+    void dashboardPeriod를_대문자로_보내면_400() throws Exception {
+        // 2026-08-31: FINDING-20260827-04 잔여 수정 — DashboardPeriod도 shareType과 동일하게 소문자
+        // 전용 계약으로 통일했다. shareType을_대문자로_보내면_400()과 같은 패턴의 회귀 방지 테스트.
+        String body = objectMapper.writeValueAsString(Map.of(
+                "shareType", "dashboard",
+                "scope", "all",
+                "platform", "app",
+                "dashboardPeriod", "MONTH",
+                "dashboardDate", "2026-07"
         ));
 
         mockMvc.perform(post("/api/share-records")
