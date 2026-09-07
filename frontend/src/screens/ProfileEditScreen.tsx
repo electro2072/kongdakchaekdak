@@ -75,7 +75,7 @@ export function ProfileEditScreen() {
       gender,
       interests,
     });
-    showToast({type: 'success', message: '저장했어요'});
+    showToast({type: 'success', message: '수정한 내역을 저장했어요'});
     navigation.goBack();
   };
 
