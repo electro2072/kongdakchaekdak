@@ -11,7 +11,10 @@ import {
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import type {AuthStackParamList} from '../navigation/types';
 import {useAuth} from '../navigation/AuthContext';
+import {useProfile} from '../navigation/ProfileContext';
 import {useTheme} from '../theme';
+import {useToast} from '../components/Toast';
+import {logger} from '../utils/logger';
 import {socialLogin} from '../services/authApi';
 import {
   GOOGLE_SIGN_IN_CANCELLED,
@@ -50,7 +53,9 @@ type SocialProviderKey = 'naver' | 'kakao' | 'google';
  */
 export function LoginScreen({navigation}: Props) {
   const {login, setAccessToken} = useAuth();
+  const {profile} = useProfile();
   const {colors, typography, radii} = useTheme();
+  const {showToast} = useToast();
   const [loadingProvider, setLoadingProvider] =
     useState<SocialProviderKey | null>(null);
 
@@ -58,6 +63,15 @@ export function LoginScreen({navigation}: Props) {
    * 신규 계정이면 회원가입(추가 정보 입력) 화면으로, 기존 계정이면 화면 이동 없이 바로
    * 로그인 완료 처리한다. accessToken은 두 경우 모두 먼저 저장해둔다 — SignupScreen의
    * "시작하기"가 호출하는 login()은 인자가 없고, 이미 저장된 accessToken을 그대로 쓴다.
+   *
+   * 신규 계정 쪽은 여기서 별도 "환영" 토스트를 띄우지 않는다 — SignupScreen "시작하기"를
+   * 누르면 뜨는 "가입을 환영해요!" 온보딩 다이얼로그가 이미 그 역할을 하기 때문에, 로그인
+   * 완료 토스트까지 겹치면 환영 메시지가 두 번 뜨는 셈이라 일부러 뺐다
+   * (claude/독서기록앱_프론트_토스트알림_프론트로거_설계_v1.md 6장 참고).
+   *
+   * 기존 계정 쪽은 아직 로그인 응답에 실제 닉네임이 없어서(ProfileContext가 여전히
+   * mock-first) 임시로 ProfileContext의 mock 닉네임을 쓴다 — 실제 로그인 응답에 사용자
+   * 정보가 포함되도록 백엔드 계약이 확장되면 그 값으로 교체할 것.
    */
   const completeSocialLogin = (accessToken: string, isNewUser: boolean) => {
     setAccessToken(accessToken);
@@ -65,12 +79,12 @@ export function LoginScreen({navigation}: Props) {
       navigation.navigate('Signup');
     } else {
       login();
+      showToast({type: 'success', message: `${profile.nickname}님, 환영해요!`});
     }
   };
 
   const handleSocialLoginError = (label: string, error: unknown) => {
-    // eslint-disable-next-line no-console
-    console.error(`[소셜 로그인:${label}] 실패`, error);
+    logger.error('LoginScreen', `소셜 로그인 실패 (${label})`, error);
     Alert.alert('로그인 실패', '잠시 후 다시 시도해주세요.');
   };
 
@@ -205,7 +219,10 @@ export function LoginScreen({navigation}: Props) {
 
       <TouchableOpacity
         style={styles.guestLink}
-        onPress={login}
+        onPress={() => {
+          login();
+          showToast({type: 'success', message: '둘러보기를 시작할게요!'});
+        }}
         disabled={isBusy}>
         <Text
           style={[

@@ -20,6 +20,7 @@ import {useLibrary} from '../navigation/LibraryContext';
 import {INTEREST_OPTIONS, type Genre} from '../constants/profileOptions';
 import {GENRE_CHIP_COLORS} from '../constants/genreColors';
 import {useTheme} from '../theme';
+import {useToast} from '../components/Toast';
 
 /** 오늘 날짜를 "YYYY.MM.DD" 형식으로 — 서재 목록/상세의 기존 dateRangeLabel 표기와 동일한 포맷 */
 function formatDateDot(date: Date): string {
@@ -47,6 +48,7 @@ export function BookRegisterConfirmScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const {addBook} = useLibrary();
+  const {showToast} = useToast();
   const {book} = route.params;
 
   const [genre, setGenre] = useState<Genre | null>(null);
@@ -64,6 +66,7 @@ export function BookRegisterConfirmScreen() {
       photos: [],
       genre,
     });
+    showToast({type: 'success', message: '서재에 등록했어요'});
     // 뒤로가기 시 검색 화면이 아니라 서재 탭으로 돌아가도록 스택 맨 아래(Tabs)까지 걷어낸 뒤 push
     navigation.popToTop();
     navigation.navigate('BookDetail', {bookId: book.id});

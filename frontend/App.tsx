@@ -12,6 +12,7 @@ import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {AuthProvider} from './src/navigation/AuthContext';
 import {ProfileProvider} from './src/navigation/ProfileContext';
 import {LibraryProvider} from './src/navigation/LibraryContext';
+import {ToastProvider} from './src/components/Toast';
 import {RootNavigator} from './src/navigation/RootNavigator';
 import {initializeNaverLogin} from './src/services/socialAuth/naverAuth';
 import {useTheme} from './src/theme';
@@ -34,11 +35,13 @@ function App(): React.JSX.Element {
     <AuthProvider>
       <ProfileProvider>
         <LibraryProvider>
-          <StatusBar
-            barStyle={isDark ? 'light-content' : 'dark-content'}
-            backgroundColor={colors.surface}
-          />
-          <RootNavigator />
+          <ToastProvider>
+            <StatusBar
+              barStyle={isDark ? 'light-content' : 'dark-content'}
+              backgroundColor={colors.surface}
+            />
+            <RootNavigator />
+          </ToastProvider>
         </LibraryProvider>
       </ProfileProvider>
     </AuthProvider>

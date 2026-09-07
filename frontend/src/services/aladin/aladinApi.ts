@@ -3,6 +3,7 @@ import { Book } from "../../types/book";
 import { BookProviderId } from "../../types/bookProviderId";
 import { BookSearchProvider } from "../../types/bookProvider";
 import { AladinSearchResponse } from "./aladinApi.types";
+import { logger } from "../../utils/logger";
 
 // .env 의 ALADIN_API_KEY 사용 (.env.example 참고, react-native-config로 로드)
 const ALADIN_API_KEY = Config.ALADIN_API_KEY ?? "";
@@ -20,13 +21,20 @@ export class AladinApi implements BookSearchProvider {
       query
     )}&QueryType=Title&MaxResults=20&start=1&SearchTarget=Book&output=js&Version=20131101`;
 
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`알라딘 API 요청 실패: ${response.status}`);
-    }
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`알라딘 API 요청 실패: ${response.status}`);
+      }
 
-    const data: AladinSearchResponse = await response.json();
-    return (data.item ?? []).map((raw) => this.toDomain(raw));
+      const data: AladinSearchResponse = await response.json();
+      const books = (data.item ?? []).map((raw) => this.toDomain(raw));
+      logger.debug("aladinApi", "도서 검색 성공", { query, count: books.length });
+      return books;
+    } catch (error) {
+      logger.error("aladinApi", "도서 검색 실패", { query, error });
+      throw error;
+    }
   }
 
   private toDomain(raw: AladinSearchResponse["item"][number]): Book {

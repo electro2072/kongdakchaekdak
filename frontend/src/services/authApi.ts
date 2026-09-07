@@ -1,4 +1,5 @@
 import Config from "react-native-config";
+import {logger} from "../utils/logger";
 
 /**
  * 백엔드 API 서버 주소. .env의 API_BASE_URL을 우선 쓰고, 없으면 안드로이드 에뮬레이터 기준
@@ -51,15 +52,23 @@ export async function socialLogin(
   const url = `${API_BASE_URL}${SOCIAL_LOGIN_PATH[provider]}`;
   const bodyKey = SOCIAL_LOGIN_BODY_KEY[provider];
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({[bodyKey]: providerToken}),
-  });
+  logger.info("authApi", "소셜 로그인 요청", {provider});
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({[bodyKey]: providerToken}),
+    });
 
-  if (!response.ok) {
-    throw new Error(`소셜 로그인 API 요청 실패 (${provider}): ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`소셜 로그인 API 요청 실패 (${provider}): ${response.status}`);
+    }
+
+    const data: TokenResponse = await response.json();
+    logger.info("authApi", "소셜 로그인 성공", {provider, isNewUser: data.isNewUser});
+    return data;
+  } catch (error) {
+    logger.error("authApi", "소셜 로그인 실패", {provider, error});
+    throw error;
   }
-
-  return response.json();
 }

@@ -24,6 +24,7 @@ import {
 } from '../constants/profileOptions';
 import {GENRE_CHIP_COLORS} from '../constants/genreColors';
 import {useTheme} from '../theme';
+import {useToast} from '../components/Toast';
 
 /**
  * Frame 05.2 · 프로필 편집 — claude/독서기록앱_디자인시스템_Hifi목업_v1.md(v1.3.2) 기준:
@@ -44,6 +45,7 @@ export function ProfileEditScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const {profile, updateProfile} = useProfile();
+  const {showToast} = useToast();
 
   const [nickname, setNickname] = useState(profile.nickname);
   const [bio, setBio] = useState(profile.bio);
@@ -73,6 +75,7 @@ export function ProfileEditScreen() {
       gender,
       interests,
     });
+    showToast({type: 'success', message: '저장했어요'});
     navigation.goBack();
   };
 

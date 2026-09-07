@@ -21,6 +21,7 @@ import {
 } from '../constants/profileOptions';
 import {GENRE_CHIP_COLORS} from '../constants/genreColors';
 import {useTheme} from '../theme';
+import {ConfirmDialog} from '../components/ConfirmDialog';
 
 /**
  * Frame 01.1 · 회원가입 (design/hifi_mockup_v1.html 기준)
@@ -35,7 +36,7 @@ import {useTheme} from '../theme';
  * constants/profileOptions.ts 한 곳에만 정의하고 두 화면이 함께 가져다 쓴다.
  */
 export function SignupScreen() {
-  const {login} = useAuth();
+  const {login, setPendingBookSearchOnEntry} = useAuth();
   const {colors, typography, radii, isDark} = useTheme();
 
   const [nickname, setNickname] = useState('');
@@ -43,6 +44,11 @@ export function SignupScreen() {
   const [interests, setInterests] = useState<string[]>([]);
   const [groupQuery, setGroupQuery] = useState('');
   const [groups, setGroups] = useState<string[]>([]);
+  // "가입을 환영해요!" 온보딩 다이얼로그(2026-09-07 신규, 사용자 제안) — "시작하기"를 누르면
+  // login()을 바로 부르지 않고 이 다이얼로그를 먼저 띄운다. login()이 호출되는 순간
+  // RootNavigator가 AuthStack(이 화면 포함)을 통째로 언마운트하고 MainStack으로 바꾸기 때문에,
+  // 다이얼로그는 반드시 login() 호출 "전에" 이 화면 위에서 떠 있어야 한다.
+  const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
 
   const trimmedNickname = nickname.trim();
   const nicknameError =
@@ -252,12 +258,29 @@ export function SignupScreen() {
           {backgroundColor: colors.accentSolidBg, borderRadius: radii.pill},
           !canSubmit && {opacity: 0.5},
         ]}
-        onPress={login}
+        onPress={() => setShowWelcomeDialog(true)}
         disabled={!canSubmit}>
         <Text style={[typography.button, {color: colors.onAccentSolid}]}>
           시작하기
         </Text>
       </TouchableOpacity>
+
+      <ConfirmDialog
+        visible={showWelcomeDialog}
+        title="가입을 환영해요!"
+        message="지금 바로 서재에 책을 꽂아보시겠어요?"
+        cancelLabel="건너뛰기"
+        confirmLabel="네"
+        onCancel={() => {
+          setShowWelcomeDialog(false);
+          login();
+        }}
+        onConfirm={() => {
+          setShowWelcomeDialog(false);
+          setPendingBookSearchOnEntry(true);
+          login();
+        }}
+      />
     </SafeAreaView>
   );
 }

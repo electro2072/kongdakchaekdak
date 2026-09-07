@@ -1,4 +1,5 @@
 import React, {createContext, useContext, useMemo, useState} from 'react';
+import {logger} from '../utils/logger';
 
 interface AuthContextValue {
   isLoggedIn: boolean;
@@ -16,6 +17,16 @@ interface AuthContextValue {
    */
   login: () => void;
   logout: () => void;
+  /**
+   * 신규 가입 온보딩 다이얼로그("가입을 환영해요! 지금 바로 서재에 책을 꽂아보시겠어요?")에서
+   * "네"를 선택했을 때 true로 설정 — MainStack(정확히는 MainTabs)이 처음 마운트되자마자
+   * BookSearch 모달을 자동으로 열기 위한 1회성 신호. true로 세팅한 즉시 login()을 호출해야
+   * 하고, 소비하는 쪽(MainTabs)이 읽자마자 다시 false로 되돌려야 한다 — 그래야 다음에
+   * 로그아웃 후 재로그인했을 때 의도치 않게 또 열리지 않는다.
+   * (claude/독서기록앱_프론트_토스트알림_프론트로거_설계_v1.md 참고)
+   */
+  pendingBookSearchOnEntry: boolean;
+  setPendingBookSearchOnEntry: (value: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -32,19 +43,27 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({children}: {children: React.ReactNode}) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accessToken, setAccessTokenState] = useState<string | null>(null);
+  const [pendingBookSearchOnEntry, setPendingBookSearchOnEntry] = useState(false);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       isLoggedIn,
       accessToken,
       setAccessToken: (token: string) => setAccessTokenState(token),
-      login: () => setIsLoggedIn(true),
+      login: () => {
+        logger.info('AuthContext', '로그인 완료 처리 (isLoggedIn=true)');
+        setIsLoggedIn(true);
+      },
       logout: () => {
+        logger.info('AuthContext', '로그아웃');
         setAccessTokenState(null);
         setIsLoggedIn(false);
+        setPendingBookSearchOnEntry(false);
       },
+      pendingBookSearchOnEntry,
+      setPendingBookSearchOnEntry,
     }),
-    [isLoggedIn, accessToken],
+    [isLoggedIn, accessToken, pendingBookSearchOnEntry],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
