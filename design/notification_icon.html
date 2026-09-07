@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>콩닥책닥 — 알림(푸시) 아이콘 v1</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --n50:#f6f7f3; --n100:#eeefea; --n200:#dadbd6; --n600:#52534d; --n800:#262723; --n900:#11120f;
+    --p50:#f4f9eb; --p200:#d6e5bd; --p800:#32410f; --p900:#1e2903;
+    --font: 'Pretendard Variable', 'Pretendard', -apple-system, "Apple SD Gothic Neo", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:0 0 80px; background:var(--n100); font-family:var(--font); color:var(--n900); }
+  .doc-header { padding:36px 48px 22px; background:#fff; border-bottom:1px solid var(--n200); }
+  .doc-header h1 { margin:0 0 6px; font-size:22px; font-weight:800; }
+  .doc-header p { margin:0; font-size:13px; color:var(--n600); line-height:1.6; }
+  .doc-header .meta { margin-top:10px; display:flex; gap:10px; font-size:12px; color:var(--n600); flex-wrap:wrap; }
+  .doc-header .meta span { background:var(--n100); padding:3px 9px; border-radius:6px; }
+  .doc-note { margin-top:14px; background:var(--p50); border:1px solid var(--p200); border-radius:8px; padding:10px 14px; font-size:12.5px; line-height:1.7; color:var(--p900); }
+  .doc-note b { color:var(--p800); }
+
+  .board { padding:40px 48px 80px; max-width:1100px; margin:0 auto; }
+  .section-title { font-size:15px; font-weight:800; margin:24px 0 14px; }
+  p.note { font-size:12.5px; color:var(--n600); max-width:720px; line-height:1.7; }
+
+  .preview-grid { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:20px; }
+  .preview-card { background:#fff; border:1px solid var(--n200); border-radius:14px; padding:20px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .preview-card .label { font-size:12px; color:var(--n600); text-align:center; }
+
+  .fg-checker {
+    background-image: linear-gradient(45deg,#ccc 25%,transparent 25%), linear-gradient(-45deg,#ccc 25%,transparent 25%), linear-gradient(45deg,transparent 75%,#ccc 75%), linear-gradient(-45deg,transparent 75%,#ccc 75%);
+    background-size:16px 16px; background-position:0 0,0 8px,8px -8px,-8px 0px;
+    border-radius:8px;
+  }
+
+  /* 상태 표시줄(status bar) 시뮬레이션 — 실제 배포물이 아니라 미리보기 확인용 */
+  .statusbar-demo { background:#0b0c0a; border-radius:10px; padding:8px 14px; display:flex; align-items:center; gap:10px; width:220px; }
+  .statusbar-demo .time { color:#fff; font-size:12px; font-weight:600; flex:1; }
+
+  /* ---- 실제 내보내기용 요소 (Playwright로 그대로 스크린샷) ---- */
+  .export-block { margin-bottom:10px; }
+  .export-block .cap { font-size:12px; color:var(--n600); margin-bottom:8px; }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <h1>🔔 콩닥책닥 — 알림(푸시) 아이콘 v1</h1>
+  <p>Android 상태 표시줄 알림 전용 실루엣 아이콘. 앱 아이콘(텍스트 워드마크형)과는 별개의 신규 산출물입니다.</p>
+  <div class="meta">
+    <span>Ver 1 (신규)</span>
+    <span>최초 작성 2026-09-07</span>
+    <span>최종 수정 2026-09-07</span>
+    <span>Notification Icon — Android 전용</span>
+  </div>
+  <div class="doc-note">
+    <b>왜 필요한가</b> — 사용자가 "앱 알림용 아이콘은 따로 없어도 되나요?"라고 질문. 확인해보니 <code>design/</code>에 앱 아이콘·스플래시만 있고 알림 전용 아이콘은 없었습니다. <b>iOS는 알림에 앱 아이콘을 그대로 재사용</b>해서 별도 에셋이 필요 없지만, <b>Android는 상태 표시줄 알림 아이콘을 OS가 강제로 흰색 실루엣 + 완전 투명 배경으로 렌더링</b>합니다(원본에 색이나 그라데이션을 넣어도 무시되고 단색 실루엣으로 표시됨) — 그래서 배경이 있는 지금의 앱 아이콘을 그대로 쓸 수 없습니다.<br>
+    <b>왜 앱 아이콘을 축소해서 쓰지 않는가</b> — 확정된 앱 아이콘(<code>app_icon.html</code> v2.1)은 "콩닥 / 책닥" 두 줄 텍스트 워드마크라, 24px 안팎의 아주 작은 실루엣으로 축소하면 글자가 뭉개져 알아보기 어렵습니다. 그래서 앱 아이콘과는 완전히 별개의 신규 심볼이 필요합니다.<br>
+    <b>심볼 선택</b> — 사용자가 "'콩' 하나로, 그냥 글자로" 만들어달라고 요청 — 앱 이름("콩닥책닥")의 첫 글자 한 글자만 굵게 사용하는 단순한 방식으로 결정했습니다. 두 줄 워드마크보다 훨씬 단순해서 작은 실루엣에서도 알아보기 쉽습니다.<br>
+    <b>안전 여백</b> — Android 상태 표시줄 아이콘은 캔버스 가장자리까지 꽉 채우면 다른 아이콘들과 나란히 놓였을 때 잘리거나 붙어 보이기 쉬워, 글리프를 캔버스의 약 70% 크기로 중앙 배치하고 나머지를 여백으로 남겼습니다(앱 아이콘의 Android adaptive 전경 레이어에 적용한 "안전영역" 원칙과 같은 사고방식).
+  </div>
+</div>
+
+<div class="board">
+
+  <h2 class="section-title">미리보기</h2>
+  <div class="preview-grid">
+    <div class="preview-card">
+      <div class="fg-checker" style="width:96px;height:96px;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 100 100" width="72" height="72" class="clone"></svg></div>
+      <div class="label">글리프 단독<br>(체크무늬 = 투명 배경 확인용, 실제 에셋엔 없음)</div>
+    </div>
+    <div class="preview-card">
+      <div class="statusbar-demo">
+        <svg viewBox="0 0 100 100" width="18" height="18" class="clone"></svg>
+        <svg viewBox="0 0 100 100" width="18" height="18" class="clone" style="opacity:0.9;"></svg>
+        <span class="time">9:41</span>
+      </div>
+      <div class="label">상태 표시줄 배치 예시<br>(다크 배경 위 흰 실루엣 — 실제 배포엔 아이콘 1개만 표시)</div>
+    </div>
+    <div class="preview-card">
+      <div style="background:#fff;border:1px solid var(--n200);border-radius:8px;width:96px;height:96px;display:flex;align-items:center;justify-content:center;">
+        <svg viewBox="0 0 100 100" width="72" height="72" class="clone"></svg>
+      </div>
+      <div class="label">⚠️ 흰 배경 위 (참고용)<br>실제로는 항상 다크 상태 표시줄 위에만 표시됨</div>
+    </div>
+  </div>
+  <p class="note">💡 위 세 번째 카드처럼 흰 배경 위에 놓이면 아이콘이 거의 보이지 않습니다 — 정상입니다. Android 상태 표시줄은 항상 어두운 배경이라 흰 실루엣이 항상 또렷하게 보이도록 설계된 규격입니다.</p>
+
+  <h2 class="section-title">실제 내보내기 요소 (Android 5개 밀도, 24dp 기준)</h2>
+  <p class="note">아래 5개 블록은 Android 표준 밀도별 실제 픽셀 크기(24dp 기준 × 배율)로 렌더링되어 있고, Playwright로 이 요소들을 투명 배경 그대로 스크린샷해서 PNG로 추출합니다 — 별도 이미지 생성 없이 벡터 기반으로 정확한 크기를 뽑았습니다. 실제 React Native/Android 프로젝트에는 밀도별 <code>drawable-mdpi</code>/<code>-hdpi</code>/<code>-xhdpi</code>/<code>-xxhdpi</code>/<code>-xxxhdpi</code> 폴더에 같은 파일명(예: <code>ic_stat_notify.png</code>)으로 각각 넣으면 됩니다.</p>
+
+  <div class="export-block">
+    <div class="cap">① mdpi — 24×24px (1x, 기준 밀도)</div>
+    <div id="export-mdpi" style="width:24px;height:24px;"></div>
+  </div>
+  <div class="export-block">
+    <div class="cap">② hdpi — 36×36px (1.5x)</div>
+    <div id="export-hdpi" style="width:36px;height:36px;"></div>
+  </div>
+  <div class="export-block">
+    <div class="cap">③ xhdpi — 48×48px (2x)</div>
+    <div id="export-xhdpi" style="width:48px;height:48px;"></div>
+  </div>
+  <div class="export-block">
+    <div class="cap">④ xxhdpi — 72×72px (3x)</div>
+    <div id="export-xxhdpi" style="width:72px;height:72px;"></div>
+  </div>
+  <div class="export-block">
+    <div class="cap">⑤ xxxhdpi — 96×96px (4x)</div>
+    <div id="export-xxxhdpi" style="width:96px;height:96px;"></div>
+  </div>
+
+  <h2 class="section-title">iOS는 왜 없는가</h2>
+  <p class="note">iOS는 알림 배너·잠금화면·알림 센터 어디에서도 앱 아이콘을 자동으로 그대로 사용합니다(별도 규격이 없음). 리치 푸시 알림(이미지 첨부 등)을 위한 Notification Service Extension을 나중에 도입하게 되면 그때 별도로 다룰 수 있지만, 현재 범위에서는 iOS용 알림 아이콘 에셋이 필요 없습니다.</p>
+
+</div>
+
+<script>
+  const GLYPH = "콩";
+  const FILL = "#ffffff";
+  const FONT_WEIGHT = 800;
+  const FONT_FAMILY = "'Pretendard Variable','Pretendard',sans-serif";
+
+  // 100x100 기준 뷰박스, 글리프는 캔버스의 약 70% 크기로 중앙 배치(안전 여백 확보)
+  function glyphMarkup() {
+    return `<text x="50" y="72" text-anchor="middle" font-family="${FONT_FAMILY}" font-weight="${FONT_WEIGHT}" font-size="63" fill="${FILL}">${GLYPH}</text>`;
+  }
+
+  const markup = glyphMarkup();
+
+  document.querySelectorAll('.clone').forEach(el => {
+    el.innerHTML = markup;
+    el.setAttribute('viewBox', '0 0 100 100');
+  });
+
+  const sizes = [
+    ['export-mdpi', 24],
+    ['export-hdpi', 36],
+    ['export-xhdpi', 48],
+    ['export-xxhdpi', 72],
+    ['export-xxxhdpi', 96],
+  ];
+  sizes.forEach(([id, px]) => {
+    document.getElementById(id).innerHTML =
+      `<svg viewBox="0 0 100 100" width="${px}" height="${px}">${markup}</svg>`;
+  });
+</script>
+
+</body>
+</html>

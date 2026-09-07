@@ -1,0 +1,73 @@
+# commit_commands.txt — 디자인 에이전트가 준비한 git 명령
+#
+# 디자인 에이전트는 git commit/push를 직접 실행할 수 없습니다(원칙).
+# 아래 명령을 순서대로 로컬에서 직접 실행해주세요 (Sourcetree 또는 터미널).
+# 누적 라운드: "_v1" 파일명 접미사 제거 + 로딩 스피너 + 토스트/스낵바 + 확인 다이얼로그/액션 시트
+#
+# ⚠️ 순서 중요 — hifi_mockup_v1.html 관련 내용 변경(1번)을 먼저 커밋한 뒤에
+# git mv(2번)로 리네임해야 합니다. 아직 로컬 파일명은 hifi_mockup_v1.html
+# 그대로이니(리네임 전) 순서대로 진행하면 문제 없습니다.
+
+## 1. hifi_mockup_v1.html 등 내용 변경 커밋 (파일명은 아직 그대로)
+# - hifi_mockup_v1.html: title/h1 "콩닥책닥" 일관성 정정(v1.11) + 파일명 정리 예정 changelog +
+#   Frame 07.2(전체 화면 dim 로딩 오버레이) 신규 추가, v1.11 → v1.12
+# - branding_proposal_songpyeon_v1.html: hifi_mockup.html 교차참조 정정, footer-note 추가
+# - app_icon_text_concept_v1.html: 파일명 정리 예정 changelog 추가
+# - splash_screen_concept_v1.html: hifi_mockup.html 교차참조 정정, 파일명 정리 예정 changelog 추가
+# - color_chips.html: branding_proposal_songpyeon.html 교차참조 정정(3곳) + v2.1(로딩 스피너 컴포넌트 신규)
+# - splash_screen.html: hifi_mockup.html / splash_screen_concept.html 교차참조 정정
+# - app_icon.html: app_icon_text_concept.html 교차참조 정정
+# - README.md: 파일명 정리 콜아웃 + 로딩 스피너/Frame 07.2 콜아웃 + 산출물 표 버전 갱신(hifi_mockup v1.12, color_chips v2.1)
+
+git add hifi_mockup_v1.html branding_proposal_songpyeon_v1.html app_icon_text_concept_v1.html splash_screen_concept_v1.html color_chips.html splash_screen.html app_icon.html README.md
+git commit -m "design: 로딩 스피너 컴포넌트(color_chips v2.1) + dim 오버레이 실화면 예시(hifi_mockup v1.12) 추가, 파일명 정리 예정 changelog + 교차참조 정정"
+
+## 2. 파일명에서 "_v1" 제거 (git mv로 이력 보존)
+
+git mv hifi_mockup_v1.html hifi_mockup.html
+git mv branding_proposal_songpyeon_v1.html branding_proposal_songpyeon.html
+git mv app_icon_text_concept_v1.html app_icon_text_concept.html
+git mv splash_screen_concept_v1.html splash_screen_concept.html
+git commit -m "design: 파일명의 의미 없는 '_v1' 접미사 제거 (hifi_mockup, branding_proposal_songpyeon, app_icon_text_concept, splash_screen_concept)"
+
+## 3. 토스트/스낵바 메시지 컴포넌트 신규 추가 (2026-09-07)
+# - hifi_mockup.html: v1.12 → v1.13 — Frame 05.3(프로필 편집 저장 완료 토스트) 신규 추가
+# - color_chips.html: v2.1 → v2.2 — "11. 토스트/스낵바 메시지" 섹션 신규 추가 (성공/오류/경고/정보 4종)
+# - README.md: 산출물 표 버전 갱신(hifi_mockup v1.13, color_chips v2.2) + 상단 콜아웃 추가
+
+git add hifi_mockup.html color_chips.html README.md
+git commit -m "design: color_chips.html v2.2 — 토스트/스낵바 메시지 컴포넌트 신규 추가, hifi_mockup v1.13 — Frame 05.3 저장 완료 토스트 실화면 예시"
+
+## 4. 확인/경고 다이얼로그 + 하단 액션 시트 컴포넌트 신규 추가 (2026-09-07)
+# ⚠️ 이 세션은 이번 라운드 내내 사용자 컴퓨터에 연결되지 않은 상태로 작업했습니다 — 아래 세 파일은
+#    아직 로컬 기기에 반영되지 않았고, 이 채팅에 파일로 전달했습니다(SendUserFile). 받으신 파일을
+#    design/ 폴더의 같은 이름 파일에 덮어써주세요. 또한 위 1~2번을 이미 실행하셨다면 파일명은
+#    hifi_mockup.html이고, 아직 실행 전이라면 hifi_mockup_v1.html입니다 — 실제 폴더 상태에 맞는
+#    파일명으로 아래 명령의 파일명을 바꿔서 실행해주세요.
+#
+# - hifi_mockup(_v1).html: v1.13 → v1.14 — Frame 05.4(프로필 탭 로그아웃 확인 다이얼로그),
+#   Frame 03.2(서재 탭 기록 카드 액션 시트) 신규 추가. 신규 CSS 변수 --on-error 추가(다크모드
+#   위험 버튼 텍스트 대비 확보).
+# - color_chips.html: v2.2 → v2.3 — "12. 확인/경고 다이얼로그", "13. 하단 액션 시트" 섹션 신규
+#   추가(각각 라이트/다크 구분 — 토스트와 달리 화면 표면을 따르는 컴포넌트라서 고정 서피스 아님).
+#   아이콘 trash-2 신규.
+# - README.md: 산출물 표 버전 갱신(hifi_mockup v1.14, color_chips v2.3) + 상단 콜아웃 추가
+
+git add hifi_mockup.html color_chips.html README.md
+git commit -m "design: color_chips.html v2.3 — 확인/경고 다이얼로그 + 하단 액션 시트 컴포넌트 신규 추가, hifi_mockup v1.14 — Frame 05.4/03.2 실화면 예시"
+
+## 5. 알림(푸시) 아이콘 신규 제작 (2026-09-07)
+# ⚠️ 이 세션도 사용자 컴퓨터에 연결되지 않은 상태로 작업했습니다 — 아래 신규 파일들은 아직 로컬
+#    기기에 없고, 이 채팅에 전달했습니다(SendUserFile). 받으신 파일을 design/ 폴더 및 하위
+#    assets/icon/notification/ 폴더(신규 생성 필요)에 넣어주세요.
+#
+# - notification_icon.html: 신규 파일 — Android 알림 전용 실루엣 아이콘("콩" 한 글자) 디자인 소스
+# - assets/icon/notification/notification_mdpi_24.png, _hdpi_36.png, _xhdpi_48.png,
+#   _xxhdpi_72.png, _xxxhdpi_96.png: 신규 — Android 5개 밀도별 투명 배경 PNG
+# - README.md: 산출물 표에 6개 행 추가(notification_icon.html + PNG 5종) + 상단 콜아웃 추가
+
+git add notification_icon.html assets/icon/notification/notification_mdpi_24.png assets/icon/notification/notification_hdpi_36.png assets/icon/notification/notification_xhdpi_48.png assets/icon/notification/notification_xxhdpi_72.png assets/icon/notification/notification_xxxhdpi_96.png README.md
+git commit -m "design: 알림(푸시) 아이콘 신규 제작 (notification_icon.html, Android 5개 밀도 PNG) — '콩' 글자 실루엣, iOS는 앱 아이콘 재사용이라 대상 아님"
+
+## 6. (선택) 원격에 반영
+git push

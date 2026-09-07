@@ -32,6 +32,8 @@
 
 > **📌 확인/경고 다이얼로그 + 하단 액션 시트 컴포넌트 신규 추가 (2026-09-07): `color_chips.html` v2.3 + `hifi_mockup.html` v1.14** — 토스트 작업 직후 "우리 그냥 메시지도 없지 않아요? 요즘은 그런 메시지창 안 만드나?"는 질문을 받아 확인해보니, 화면 전체를 채우는 책 검색/등록 모달(Frame 08)은 있었지만 "정말 로그아웃하시겠어요?" 식의 작은 확인/경고 다이얼로그는 없었습니다(Frame 05 로그아웃 버튼이 확인창 없이 바로 실행되는 구조였음). 사용자가 AskUserQuestion에서 "둘 다 만들기"(중앙 확인 다이얼로그 + 하단 액션 시트)를 선택해 `color_chips.html`에 "12. 확인/경고 다이얼로그"·"13. 하단 액션 시트" 섹션을 신규 추가했습니다. **토스트/로딩 오버레이와 반대로, 다이얼로그와 액션 시트는 화면 콘텐츠와 같은 표면이라고 판단해 화면 자체의 라이트/다크 테마를 그대로 따르도록 설계**했습니다(고정 서피스 아님). 다크모드에서 위험 버튼(`--error`가 밝은 톤 `#eb596e`)에 흰 텍스트를 쓰면 대비가 부족해 신규 `--on-error` 변수(라이트 흰색/다크 진한 텍스트)를 추가했습니다. 아이콘 `trash-2` 신규 추가. 실제 화면 적용 예시로 `hifi_mockup.html`에 **Frame 05.4 프로필 탭 (로그아웃 확인 다이얼로그)**, **Frame 03.2 서재 탭 (기록 카드 액션 시트)**를 신규 추가했습니다. 프론트 구현 필요 사항은 별도 요청 문서(`독서기록앱_프론트요청_디자인_확인다이얼로그액션시트컴포넌트.md`) 참고.
 
+> **📌 알림(푸시) 아이콘 신규 제작 (2026-09-07): `notification_icon.html` v1 (신규 파일)** — "우리 앱 알림용 아이콘은 따로 없어도 되나요?"라는 질문에 확인해보니 앱 아이콘·스플래시만 있고 알림 전용 아이콘은 없었던 것으로 확인. **iOS는 알림에 앱 아이콘을 그대로 재사용**해서 별도 에셋이 필요 없지만, **Android는 상태 표시줄 알림 아이콘을 OS가 강제로 흰색 실루엣 + 완전 투명 배경으로 렌더링**하기 때문에 배경이 있는 지금의 앱 아이콘을 그대로 쓸 수 없고, 두 줄 텍스트 워드마크(콩닥/책닥)는 작은 실루엣으로 축소하면 알아보기 어려워 완전히 별개의 신규 심볼이 필요했습니다. 사용자가 AskUserQuestion에서 "'콩' 하나로, 그냥 글자로" 만들어달라고 요청 — 앱 이름 첫 글자 한 글자만 굵게 사용하는 단순한 방식으로 결정했습니다. Android 표준 5개 밀도(mdpi 24×24 · hdpi 36×36 · xhdpi 48×48 · xxhdpi 72×72 · xxxhdpi 96×96) 투명 배경 PNG로 내보냈습니다(`assets/icon/notification/`, RGBA 알파 확인 완료). iOS는 별도 에셋 대상이 아닙니다. 프론트 참고 사항은 별도 안내 문서(`독서기록앱_디자인요청_프론트_알림아이콘안내.md`) 참고.
+
 이 폴더는 앱의 비주얼 디자인 산출물(컬러 팔레트, 타이포그래피/아이콘, Hi-Fi 목업)의 실제 소스 파일을 담습니다. 각 산출물의 결정 사항 요약은 claude.ai 프로젝트 문서함에도 마크다운으로 정리되어 있습니다:
 
 - `콩닥책닥_디자인시스템_컬러팔레트.md`
@@ -54,6 +56,12 @@
 | `assets/icon/android_adaptive_fg_432.png` | v2 | Android adaptive icon 전경 레이어, 432×432, **투명 배경**(RGBA 알파 확인 완료) + 안전영역(66% 원, 반지름 142.5px) 안에 여유 있게 들어가는 "콩닥/책닥" 텍스트 |
 | `assets/icon/ios_icon_dark_1024.png` | v1 | iOS 18 다크 모드 아이콘, 1024×1024, 알파 없음. 배경 `--p900`(`#1e2903`) + 크림 텍스트(라이트 버전과 동일 색) |
 | `assets/icon/ios_icon_tinted_1024.png` | v1 | iOS 18 틴트드 아이콘, 1024×1024, 알파 없음, **그레이스케일**(RGB 채널 간 최대 오차 5 이내로 색 없음 확인). 배경 `#848484` / 텍스트 `#f1f1f1` — 원본 그린/크림과 같은 지각 휘도로 변환한 값. 시스템이 사용자가 고른 임의의 틴트 컬러를 이 위에 얹음 |
+| `notification_icon.html` | v1 (신규) | Android 상태 표시줄 알림 전용 실루엣 아이콘 디자인 소스 — 앱 이름 첫 글자 "콩" 한 글자, 흰색, 투명 배경. iOS는 알림에 앱 아이콘을 그대로 재사용해 별도 에셋 대상 아님(문서 내 "iOS는 왜 없는가" 참고) |
+| `assets/icon/notification/notification_mdpi_24.png` | v1 | Android 알림 아이콘, mdpi 밀도, 24×24, 투명 배경(RGBA 알파 확인 완료) |
+| `assets/icon/notification/notification_hdpi_36.png` | v1 | Android 알림 아이콘, hdpi 밀도, 36×36, 투명 배경 |
+| `assets/icon/notification/notification_xhdpi_48.png` | v1 | Android 알림 아이콘, xhdpi 밀도, 48×48, 투명 배경 |
+| `assets/icon/notification/notification_xxhdpi_72.png` | v1 | Android 알림 아이콘, xxhdpi 밀도, 72×72, 투명 배경 |
+| `assets/icon/notification/notification_xxxhdpi_96.png` | v1 | Android 알림 아이콘, xxxhdpi 밀도, 96×96, 투명 배경 |
 | `deprecated/assets/icon/*.png` | v1 (보관용) | 이전 쑥송편 아이콘의 최종 PNG 3종을 그대로 보관(내용 동일, 위치만 이동). (2026-08-27) `assets/icon/archive_songpyeon_v1/`에서 `design/deprecated/assets/icon/`으로 재이동 |
 | `store_assets.html` | v1 | **스토어 등록용 그래픽** — Google Play 피처 그래픽(1024×500), 고해상도 아이콘(512×512). 사양은 Google Play/Apple 공식 문서 확인 후 정확한 픽셀 크기로 제작. 실제 앱 화면이 필요한 마케팅 스크린샷(App Store 6.5"/6.9" 등)은 어떤 화면을 보여줄지·캡션 문구를 먼저 정한 뒤 별도 라운드에서 진행 예정 — 아직 미착수 |
 | `assets/store/play_feature_graphic_1024x500.png` | v1 | Google Play 피처 그래픽, 1024×500, 알파 없음 |
