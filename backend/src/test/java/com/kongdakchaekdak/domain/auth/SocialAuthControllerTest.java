@@ -153,6 +153,30 @@ class SocialAuthControllerTest {
     }
 
     @Test
+    void 로그인_성공시_me_응답에_lastLoginAt과_daysSinceLastLogin이_포함된다() throws Exception {
+        // 비활성 사용자 인앱 알림 설계(claude/독서기록앱_백엔드_비활성사용자_알림_설계_v1.md)
+        // 5번 엣지케이스 — 가입 자체가 첫 로그인이므로 daysSinceLastLogin은 항상 0이어야 한다.
+        // "정확히 며칠 지났는지" 계산 로직 자체(30일 등 경계값)는 UserResponseTest에서
+        // 시각을 직접 조작해 별도로 검증한다 — 여기서는 로그인→/me API 계약만 확인한다.
+        when(kakaoOAuthClient.fetchUserInfo("kakao-access-token"))
+                .thenReturn(new SocialUserInfo("88888", "최근접속유저"));
+
+        String body = objectMapper.writeValueAsString(Map.of("accessToken", "kakao-access-token"));
+
+        String loginResponse = mockMvc.perform(post("/api/auth/kakao")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String token = objectMapper.readTree(loginResponse).get("accessToken").asText();
+
+        mockMvc.perform(get("/api/auth/me").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.lastLoginAt").exists())
+                .andExpect(jsonPath("$.daysSinceLastLogin").value(0));
+    }
+
+    @Test
     void 토큰_없이_me_조회하면_401() throws Exception {
         mockMvc.perform(get("/api/auth/me"))
                 .andExpect(status().isUnauthorized())

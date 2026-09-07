@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
@@ -30,6 +31,13 @@ import java.util.Optional;
  * {@code isNewUser}로 추적해 {@link AuthService#issueToken}에 그대로 전달한다 — 프론트가
  * 로그인 성공 응답(TokenResponse.isNewUser)만 보고 신규 회원가입 화면으로 보낼지, 바로 메인
  * 화면으로 보낼지 분기할 수 있게 하기 위함이다.</p>
+ *
+ * <p>2026-09-07: {@link #loginWithProvider}가 로그인 성공마다(신규 가입/기존 회원 재로그인
+ * 둘 다) {@code user.updateLastLoginAt(...)}을 호출한다 — "한 달 이상 미접속 사용자에게
+ * 인앱 알림" 기능 설계({@code claude/독서기록앱_백엔드_비활성사용자_알림_설계_v1.md}) 반영.
+ * 신규 가입자는 {@link User}의 생성자에서 이미 한 번 세팅되지만, 여기서 다시 명시적으로
+ * 세팅해 "로그인 성공 = lastLoginAt 갱신"이라는 계약을 두 분기 모두에서 코드로도 분명히
+ * 드러낸다(생성자 타이밍에 암묵적으로 의존하지 않음).</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -82,6 +90,7 @@ public class SocialAuthService {
             auditLogger.event("USER_SIGNUP", user.getId(), "provider=" + provider);
             isNewUser = true;
         }
+        user.updateLastLoginAt(LocalDateTime.now());
 
         securityEventLogger.loginSuccess(provider, user.getId());
         return authService.issueToken(user.getId(), isNewUser);

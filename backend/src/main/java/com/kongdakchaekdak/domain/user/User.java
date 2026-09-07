@@ -104,6 +104,14 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // (2026-09-07 추가, 비활성 사용자 인앱 알림 설계 v1) 가장 최근 로그인(=소셜 로그인 성공) 시각.
+    // 생성자에서 가입 시점 값으로 한 번 세팅되고(아래 참고), 그 뒤로는 SocialAuthService가
+    // 로그인 성공마다 updateLastLoginAt으로 갱신한다. 이 기능 배포 이전에 이미 가입돼 있던
+    // 회원은 DB에 NULL로 남아있을 수 있음 — UserResponse.from()이 그 경우 daysSinceLastLogin을
+    // null로 내려주도록 처리한다(클라이언트 계약: null이면 배너 안 띄움).
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+
     public User(String nickname, String profileImage, String bio, Gender gender,
                  String socialProvider, String socialId) {
         this.nickname = nickname;
@@ -112,6 +120,9 @@ public class User {
         this.gender = gender == null ? Gender.NONE : gender;
         this.socialProvider = socialProvider;
         this.socialId = socialId;
+        // 가입 자체가 첫 로그인이므로 생성 시점에 lastLoginAt을 채워둔다 → 가입 직후
+        // daysSinceLastLogin은 항상 0 (엣지 케이스, 설계 v1의 5번 참고).
+        this.lastLoginAt = LocalDateTime.now();
     }
 
     /**
@@ -149,5 +160,13 @@ public class User {
         }
         this.interests.clear();
         this.interests.addAll(interests);
+    }
+
+    /**
+     * (2026-09-07) {@link com.kongdakchaekdak.domain.auth.SocialAuthService#loginWithProvider}가
+     * 로그인 성공(신규 가입/기존 회원 재로그인 둘 다) 시마다 호출해 최근 로그인 시각을 갱신한다.
+     */
+    public void updateLastLoginAt(LocalDateTime lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
     }
 }
