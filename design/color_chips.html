@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>콩닥책닥 — 컬러 칩 (쑥송편 테마) v2.1</title>
+<title>콩닥책닥 — 컬러 칩 (쑥송편 테마) v2.3</title>
 <style>
   :root {
     --p50:#f4f9eb; --p100:#ebf5db; --p200:#d6e5bd; --p300:#b9cd98; --p400:#99ae73;
@@ -138,6 +138,64 @@
   .dark-overlay-demo .overlay-bg { background: rgba(24,26,20,0.72); }
   .dark-overlay-demo .overlay-label { color: var(--d-text-secondary); }
 
+  /* 토스트 / 스낵바 메시지 (v2.2 신규, 2026-09-07) — 화면 테마와 무관하게 고정 다크 서피스 */
+  .toast-stage { position: relative; background: var(--n100); border-radius: 8px; height: 90px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .toast {
+    position: absolute; left: 18px; right: 18px; bottom: 14px;
+    background: #262723; color: #f6f7f3;
+    display: flex; align-items: center; gap: 8px;
+    padding: 11px 16px; border-radius: 12px; font-size: 12.5px; font-weight: 600;
+    box-shadow: 0 6px 20px rgba(17,18,15,0.28);
+  }
+  .toast svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .toast-success svg { color: #a9c37e; }
+  .toast-error svg { color: #f18ea0; }
+  .toast-warning svg { color: #e8b84a; }
+  .toast-info svg { color: #9dc1f5; }
+
+  /* 확인/경고 다이얼로그 (v2.3 신규, 2026-09-07) — 화면 표면을 따르는 컴포넌트(토스트와 달리 고정 서피스 아님) */
+  .dialog-stage { position: relative; background: var(--n100); border-radius: 8px; height: 190px; overflow: hidden; }
+  .dialog-overlay { position: absolute; inset: 0; background: rgba(10,11,8,0.58); display: flex; align-items: center; justify-content: center; padding: 0 20px; }
+  .dialog-card { width: 100%; max-width: 220px; background: #fff; border-radius: 18px; padding: 18px 16px 14px; text-align: center; box-shadow: 0 12px 32px rgba(17,18,15,0.22); }
+  .dialog-title { font-size: 13px; font-weight: 700; color: var(--n900); margin-bottom: 6px; }
+  .dialog-body { font-size: 11px; color: var(--n600); line-height: 1.5; margin-bottom: 14px; }
+  .dialog-actions { display: flex; gap: 8px; }
+  .dialog-btn { flex: 1; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .dialog-btn-cancel { background: var(--n100); color: var(--n700); }
+  .dialog-btn-primary { background: var(--p700); color: #fff; }
+  .dialog-btn-danger { background: var(--error); color: #fff; }
+
+  .dark-dialog-stage { background: var(--d-surface-card); }
+  .dark-dialog-overlay { background: rgba(0,0,0,0.6); }
+  .dark-dialog-card { background: var(--d-surface-card); box-shadow: 0 12px 32px rgba(0,0,0,0.44); }
+  .dark-dialog-title { color: var(--d-text-primary); }
+  .dark-dialog-body { color: var(--d-text-secondary); }
+  .dark-dialog-btn-cancel { background: var(--d-surface-app); color: var(--d-text-secondary); border: 1px solid var(--d-border); }
+  .dark-dialog-btn-primary { background: var(--d-p500); color: var(--d-dark-on-btn); }
+  .dark-dialog-btn-danger { background: #eb596e; color: #2a070d; }
+
+  /* 하단 액션 시트 (v2.3 신규, 2026-09-07) */
+  .sheet-stage { position: relative; background: var(--n100); border-radius: 8px; height: 232px; overflow: hidden; }
+  .sheet-overlay { position: absolute; inset: 0; background: rgba(10,11,8,0.58); display: flex; align-items: flex-end; }
+  .sheet-card { width: 100%; background: #fff; border-radius: 20px 20px 0 0; padding: 10px 16px 16px; box-shadow: 0 -8px 24px rgba(17,18,15,0.20); }
+  .sheet-handle { width: 34px; height: 4px; border-radius: 2px; background: var(--n300); margin: 0 auto 10px; }
+  .sheet-title { font-size: 10.5px; color: var(--n500); text-align: center; margin-bottom: 6px; font-weight: 600; }
+  .sheet-row { height: 42px; display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 600; color: var(--n900); padding: 0 4px; }
+  .sheet-row svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .sheet-row-danger { color: var(--error); }
+  .sheet-divider { height: 1px; background: var(--n200); margin: 2px 0 6px; }
+  .sheet-row-cancel { justify-content: center; color: var(--n600); font-weight: 700; }
+
+  .dark-sheet-stage { background: var(--d-surface-card); }
+  .dark-sheet-overlay { background: rgba(0,0,0,0.6); }
+  .dark-sheet-card { background: var(--d-surface-card); box-shadow: 0 -8px 24px rgba(0,0,0,0.44); }
+  .dark-sheet-handle { background: var(--d-border); }
+  .dark-sheet-title { color: var(--d-text-muted); }
+  .dark-sheet-row { color: var(--d-text-primary); }
+  .dark-sheet-row-danger { color: #f18ea0; }
+  .dark-sheet-divider { background: var(--d-border); }
+  .dark-sheet-row-cancel { color: var(--d-text-secondary); }
+
   footer { margin-top: 60px; font-size: 12px; color: var(--n500); border-top: 1px solid var(--n200); padding-top: 16px; }
   .doc-note { margin: 14px 0 30px; background: var(--p50); border: 1px solid var(--p200); border-radius: 8px; padding: 10px 14px; font-size: 12.5px; line-height: 1.7; color: var(--p900); }
   .doc-note b { color: var(--p800); }
@@ -151,15 +209,17 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>🥮 콩닥책닥 — 컬러 팔레트 v2.1 (책거리 · 송편)</h1>
-  <p class="sub">메인 테마: 쑥송편 초록(Mugwort Green) · OKLCH 기반 설계 · 대비 검증 완료 · v2.1 개정 2026-08-31</p>
+  <h1>🥮 콩닥책닥 — 컬러 팔레트 v2.3 (책거리 · 송편)</h1>
+  <p class="sub">메인 테마: 쑥송편 초록(Mugwort Green) · OKLCH 기반 설계 · 대비 검증 완료 · v2.3 개정 2026-09-07</p>
   <div class="doc-note">
     <b>v1 (2026-07-21)</b> — 프라이머리 그린(hue 128°) 라이트/다크 램프, Neutral, Status(success/warning/error/info) 확정.<br>
     <b>v1.1 (2026-07-21)</b> — 카테고리 구분용 포인트 멀티컬러(코랄·시안·라벤더) 추가.<br>
     <b>v1.2 (2026-07-21)</b> — "칙칙하다"는 피드백에 따라 프라이머리 그린 hue를 128°→140°로 재도출, 채도 상향. 포인트 멀티컬러를 파스텔톤으로 재조정.<br>
     <b>v2 (2026-08-09)</b> — 브랜드 컨셉을 <b>"책거리"(조선시대 책·문방구를 그린 민화) × "송편"</b>으로 전환. 사용자가 검토한 <code>branding_proposal_songpyeon.html</code>의 "옵션 B"를 채택 — 주 브랜드색을 비비드 그린(hue 140°)에서 <b>쑥송편 초록(hue 124.6°, 재래식 톤)</b>으로 교체하고, 카테고리 포인트 컬러를 코랄·시안·라벤더에서 <b>송편의 나머지 천연 염색색(분홍·치자·자색)</b>으로 교체했습니다. 상세 계산 과정은 이 문서 맨 아래 "v2 색상 도출 과정" 참고.<br>
     <b>2026-08-27 갱신</b> — 앱 이름이 <b>"콩닥책닥"</b>으로 확정되어 문서 제목의 임시 명칭("독서 자랑 어플")을 교체했습니다. 색상 값 자체는 변경 없음 — 라벨 텍스트만 갱신.<br>
-    <b>v2.1 (2026-08-31)</b> — 범용 <b>로딩 스피너</b> 컴포넌트 신규 추가(맨 아래 "10. 로딩 스피너" 참고). 버튼 내부(16px)·섹션/카드(28px)·전체 화면 오버레이(40px) 3가지 크기, 라이트/다크 각각. 기존 팔레트 색상 값은 변경 없음 — 새 컴포넌트 하나 추가된 것뿐.
+    <b>v2.1 (2026-08-31)</b> — 범용 <b>로딩 스피너</b> 컴포넌트 신규 추가(맨 아래 "10. 로딩 스피너" 참고). 버튼 내부(16px)·섹션/카드(28px)·전체 화면 오버레이(40px) 3가지 크기, 라이트/다크 각각. 기존 팔레트 색상 값은 변경 없음 — 새 컴포넌트 하나 추가된 것뿐.<br>
+    <b>v2.2 (2026-09-07)</b> — "저장했습니다" 같은 확인 메시지를 위한 <b>토스트/스낵바</b> 컴포넌트 신규 추가(맨 아래 "11. 토스트/스낵바 메시지" 참고). 화면 하단에 뜨는 스낵바 스타일, 성공/오류/경고/정보 4가지 상태. 로딩 오버레이와 같은 원칙으로 라이트/다크 화면 구분 없이 고정된 어두운 서피스 사용. 기존 팔레트 색상 값은 변경 없음.<br>
+    <b>v2.3 (2026-09-07)</b> — "그런 메세지창"(정말 로그아웃하시겠어요? 식의 확인/경고 팝업) 관련 문의로 두 컴포넌트를 신규 추가: <b>확인/경고 다이얼로그</b>(맨 아래 "12." 참고)와 <b>하단 액션 시트</b>("13." 참고). 토스트·로딩 오버레이와 달리 이 둘은 화면 콘텐츠와 같은 표면이라 라이트/다크 테마를 그대로 따릅니다. 기존 팔레트 색상 값은 변경 없음.
   </div>
 
   <h2>0. 브랜드 스토리 — 송편 5색</h2>
@@ -423,8 +483,162 @@
     </div>
   </div>
 
+  <h2>11. 토스트 / 스낵바 메시지 (v2.2 신규, 2026-09-07)</h2>
+  <p class="note">"저장했습니다" 같은 짧은 확인 메시지를 위한 컴포넌트입니다. 위 로딩 스피너/오버레이와 같은 원칙 — <b>화면이 라이트든 다크든 항상 고정된 어두운 서피스</b>를 씁니다(요소가 화면 위에 떠 있는 동안은 밑에 무엇이 있든 일관된 대비를 유지해야 하기 때문). 그래서 이 섹션은 다른 컴포넌트와 달리 다크모드용 절을 별도로 두지 않았습니다 — 라이트/다크 화면 어디에 놓아도 이 데모 하나로 충분합니다.</p>
+  <div class="mock-row">
+    <div class="card">
+      <h4>성공</h4>
+      <p>저장/완료 등 긍정적 액션 결과</p>
+      <div class="toast-stage">
+        <div class="toast toast-success"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>저장했습니다</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>오류</h4>
+      <p>요청이 실패했을 때</p>
+      <div class="toast-stage">
+        <div class="toast toast-error"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>저장하지 못했어요</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>경고</h4>
+      <p>주의가 필요한 상태 (신규 아이콘)</p>
+      <div class="toast-stage">
+        <div class="toast toast-warning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>오프라인 상태예요</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>정보</h4>
+      <p>참고용 안내 (신규 아이콘)</p>
+      <div class="toast-stage">
+        <div class="toast toast-info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>링크가 복사됐어요</div>
+      </div>
+    </div>
+  </div>
+  <p class="note">💡 규칙: 배경 <code>#262723</code>(n800 계열, 라이트/다크 공통 고정값) + 텍스트 <code>#f6f7f3</code>(n50) 고정, 아이콘 색만 상태별로 구분(success <code>#a9c37e</code> / error <code>#f18ea0</code> / warning <code>#e8b84a</code> / info <code>#9dc1f5</code> — 이미 "7. 다크모드" 섹션의 다크 배지 텍스트 색과 동일한 값이라 어두운 서피스 위에서 대비가 검증된 조합입니다). 아이콘은 기존 24종 핵심 세트에 없던 <code>alert-triangle</code>(경고)·<code>info</code>(정보)를 이번에 신규로 가져왔습니다(<code>check-circle</code>·<code>alert-circle</code>은 기존 세트에 이미 있음) — Lucide 라이브러리 확장은 별도 승인 없이 허용되는 범위입니다(<code>typography_and_icons.html</code> 참고). 위치는 화면 좌우 18px 여백, 하단 탭바 위 14px 지점. 자동으로 몇 초 후 사라지는 방식(2~3초 권장)을 가정했고, 여러 개가 겹칠 때 쌓이는 방식(스택)은 이 문서에서 다루지 않았습니다 — 필요하면 후속 요청으로 다뤄주세요.</p>
+
+  <h2>12. 확인/경고 다이얼로그 (v2.3 신규, 2026-09-07)</h2>
+  <p class="note">"정말 로그아웃하시겠어요?" 같은 확인/경고 메시지를 위한 컴포넌트입니다. 위 토스트·로딩 오버레이는 <b>화면 테마와 무관한 고정 서피스</b>였지만, 다이얼로그는 <b>화면 콘텐츠와 같은 표면</b>이라 판단해 라이트/다크 테마를 그대로 따르도록 설계했습니다 — 그래서 대부분의 다른 컴포넌트처럼 이 섹션도 라이트/다크를 따로 나눠 보여줍니다. 뒤를 덮는 배경 스크림은 로딩 오버레이와 같은 <code>rgba(10,11,8,0.58)</code>을 재사용했습니다(요소가 떠 있을 때 배경을 어둡게 하는 규칙은 그대로 유지).</p>
+  <div class="mock-row">
+    <div class="card">
+      <h4>일반 확인</h4>
+      <p>되돌릴 수 있는 일반 액션 — 확인 버튼은 브랜드색</p>
+      <div class="dialog-stage">
+        <div class="dialog-overlay">
+          <div class="dialog-card">
+            <div class="dialog-title">완독 처리할까요?</div>
+            <div class="dialog-body">서재 목록에서 "읽은 책"으로 이동해요.</div>
+            <div class="dialog-actions">
+              <div class="dialog-btn dialog-btn-cancel">취소</div>
+              <div class="dialog-btn dialog-btn-primary">확인</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>위험 액션</h4>
+      <p>되돌리기 어렵거나 세션이 끊기는 액션 — 확인 버튼은 error색</p>
+      <div class="dialog-stage">
+        <div class="dialog-overlay">
+          <div class="dialog-card">
+            <div class="dialog-title">로그아웃하시겠어요?</div>
+            <div class="dialog-body">다시 로그인하려면 소셜 계정으로 인증해야 해요.</div>
+            <div class="dialog-actions">
+              <div class="dialog-btn dialog-btn-cancel">취소</div>
+              <div class="dialog-btn dialog-btn-danger">로그아웃</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">💡 규칙: 카드 배경은 화면 서피스(라이트 <code>#fff</code> / 다크 <code>--d-surface-card</code>), 버튼은 항상 <b>취소(보조) + 확인(주요)</b> 2개, 좌→우 순서 고정. 확인 버튼 색은 액션 성격에 따라 브랜드색(<code>--p700</code>, 일반) 또는 <code>--error</code>(위험 — 로그아웃·삭제 등) 중 골라 씁니다. 버튼이 3개 이상 필요하거나 입력 필드가 들어가는 경우는 이 컴포넌트 범위 밖입니다.</p>
+
+  <div class="dark-section">
+    <h3>다크모드</h3>
+    <div class="mock-row">
+      <div class="dark-card">
+        <h4>일반 확인</h4>
+        <p>다크 카드 서피스 + 브랜드 버튼(진한 텍스트)</p>
+        <div class="dialog-stage dark-dialog-stage">
+          <div class="dialog-overlay dark-dialog-overlay">
+            <div class="dialog-card dark-dialog-card">
+              <div class="dialog-title dark-dialog-title">완독 처리할까요?</div>
+              <div class="dialog-body dark-dialog-body">서재 목록에서 "읽은 책"으로 이동해요.</div>
+              <div class="dialog-actions">
+                <div class="dialog-btn dark-dialog-btn-cancel">취소</div>
+                <div class="dialog-btn dark-dialog-btn-primary">확인</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dark-card">
+        <h4>위험 액션</h4>
+        <p>흰 텍스트 대신 진한 텍스트로 대비 확보(7번 섹션의 다크 버튼 원칙과 동일)</p>
+        <div class="dialog-stage dark-dialog-stage">
+          <div class="dialog-overlay dark-dialog-overlay">
+            <div class="dialog-card dark-dialog-card">
+              <div class="dialog-title dark-dialog-title">로그아웃하시겠어요?</div>
+              <div class="dialog-body dark-dialog-body">다시 로그인하려면 소셜 계정으로 인증해야 해요.</div>
+              <div class="dialog-actions">
+                <div class="dialog-btn dark-dialog-btn-cancel">취소</div>
+                <div class="dialog-btn dark-dialog-btn-danger">로그아웃</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>13. 하단 액션 시트 (v2.3 신규, 2026-09-07)</h2>
+  <p class="note">기록 카드를 길게 누르거나 "⋯" 더보기를 탭했을 때처럼, <b>여러 선택지 중 하나를 고르는 상황</b>에 쓰는 컴포넌트입니다. 확인 다이얼로그(위 12번)와 마찬가지로 <b>화면 표면을 따르는</b> 라이트/다크 컴포넌트입니다.</p>
+  <div class="mock-row">
+    <div class="card" style="width:280px;">
+      <h4>기록 카드 옵션</h4>
+      <p>서재 탭 책 카드를 길게 누르면 표시</p>
+      <div class="sheet-stage">
+        <div class="sheet-overlay">
+          <div class="sheet-card">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">아몬드 (손원평)</div>
+            <div class="sheet-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 21h8"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>기록 수정하기</div>
+            <div class="sheet-row sheet-row-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>기록 삭제하기</div>
+            <div class="sheet-divider"></div>
+            <div class="sheet-row sheet-row-cancel">취소</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">💡 규칙: 카드는 화면 하단에서 올라오는 형태, 상단 <b>핸들바</b>(잡아서 닫을 수 있음을 암시) + 대상 제목(선택) + 옵션 행(각 46px 터치 영역, 아이콘+라벨) + 구분선 + <b>취소</b> 행 순서. 삭제처럼 되돌릴 수 없는 옵션은 <code>--error</code> 색으로 구분합니다(다이얼로그의 위험 액션 버튼과 같은 색상 규칙). 아이콘은 기존 24종 핵심 세트에 없던 <code>trash-2</code>를 이번에 신규로 가져왔습니다(<code>pen-line</code>은 기존 세트에 이미 있음) — 다른 신규 아이콘들과 같은 확장 허용 범위입니다. 옵션이 1개뿐이거나 4개를 넘는 경우, 파괴적 액션에 재확인 다이얼로그를 이중으로 띄울지 여부는 이 문서에서 다루지 않았습니다.</p>
+
+  <div class="dark-section">
+    <h3>다크모드</h3>
+    <div class="mock-row">
+      <div class="dark-card" style="width:280px;">
+        <h4>기록 카드 옵션</h4>
+        <p>다크 카드 서피스 + 다크 구분선</p>
+        <div class="sheet-stage dark-sheet-stage">
+          <div class="sheet-overlay dark-sheet-overlay">
+            <div class="sheet-card dark-sheet-card">
+              <div class="sheet-handle dark-sheet-handle"></div>
+              <div class="sheet-title dark-sheet-title">아몬드 (손원평)</div>
+              <div class="sheet-row dark-sheet-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 21h8"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>기록 수정하기</div>
+              <div class="sheet-row dark-sheet-row dark-sheet-row-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>기록 삭제하기</div>
+              <div class="sheet-divider dark-sheet-divider"></div>
+              <div class="sheet-row dark-sheet-row-cancel">취소</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer>
-    콩닥책닥 디자인 시스템 v2.1 · culori(OKLCH)로 색공간 변환 및 램프 생성 · WCAG 대비는 자체 구현 공식으로 검증 · 색맹 안전성은 명도(L) 분산 확인으로 약식 대체(정식 <code>validate_palette.js</code> 재검증 권장) · 브랜드 컨셉: 책거리 × 송편 (2026-08-09) · 로딩 스피너 컴포넌트 추가 (2026-08-31)
+    콩닥책닥 디자인 시스템 v2.3 · culori(OKLCH)로 색공간 변환 및 램프 생성 · WCAG 대비는 자체 구현 공식으로 검증 · 색맹 안전성은 명도(L) 분산 확인으로 약식 대체(정식 <code>validate_palette.js</code> 재검증 권장) · 브랜드 컨셉: 책거리 × 송편 (2026-08-09) · 로딩 스피너 컴포넌트 추가 (2026-08-31) · 토스트/스낵바 메시지 추가 (2026-09-07) · 확인 다이얼로그/액션 시트 추가 (2026-09-07)
   </footer>
 </div>
 
