@@ -6,12 +6,13 @@
 --   (DashboardService): completedBookCount / totalPagesRead / 장르비율 도넛 /
 --   최다 장르 · 최장 · 최단 완독 하이라이트 / 직전 6개월 완독 추이.
 --
--- 데이터: 전용 유저 id=9001 (social_provider='seed') + 완독 22권 + 진행중 3권.
+-- 데이터: 전용 유저 id=9001 (social_provider='seed') + 완독 25권 + 진행중 3권.
+--   (완독 22권 + 백엔드 요청 엣지 케이스 3권 = 동률 완독 2권 + total_pages NULL 1권)
 --   - 날짜는 전부 CURRENT_DATE 상대값 -> 언제 실행해도 "최근 12개월"이 됨.
 --     맨 위 DELETE 3줄이 먼저 지우므로 재실행 가능 (idempotent).
---   - 장르 6종 전부 포함, '소설' 최다. 이번 달에는 3권(소설·에세이·자기계발)이 걸림.
---   - 완독 기간 2일 ~ 30일 -> 최장/최단 하이라이트 확인 가능.
---   - 페이지수 132 ~ 690.
+--   - 장르 6종 전부 포함, '소설' 최다.
+--   - 완독 기간 2일 ~ 41일 -> 최장/최단 하이라이트 확인 가능. 최장은 동률 2권(41일)이라 tie-break 확인 가능.
+--   - 페이지수 132 ~ 690, 그리고 total_pages NULL 1권 (합산 null-safe 확인용).
 --   ※ 제목-장르가 항상 실제와 맞지는 않음 (분포/집계 테스트용 더미).
 --
 -- 날짜 구문: INTERVAL '3' MONTH  (숫자에 반드시 따옴표) — H2(MySQL 모드) + MySQL 8 둘 다 호환.
@@ -34,11 +35,12 @@
 --   GET /api/dashboard?period=year     (올해)
 --   GET /api/dashboard?period=month&date=2026-07   (특정 달 고정 조회)
 --
--- 검증됨 (로컬 H2, 2026-09-01 실행):
---   month(9월)   완독 3 / 소설·에세이·자기계발 도넛
---   quarter(3분기) 완독 ~9 / 소설·에세이·인문·과학
---   year(2026)   완독 22 / 6개 장르 전부 (소설 최다) / 추이 그래프 6개월
---   하이라이트   최장 '당신 인생의 이야기'(30일) / 최단 '파친코'(2일)
+-- 검증됨 (로컬 H2 bootRun + 실제 GET /api/dashboard 호출, 2026-09-08 실행):
+--   month(2026-09)   completedBookCount 6 / totalPagesRead 1552 / 도넛 소설3·에세이2·자기계발1 / trend …09:6
+--   quarter(3분기)   completedBookCount 10 / totalPagesRead 2912 / 도넛 소설6·에세이2·인문1·자기계발1
+--   year(2026)       completedBookCount 23 / totalPagesRead 6528 / 6개 장르 전부 / trend 07~12: 2·2·6·0·0·0
+--   하이라이트   최장 = '오래 물고 있던 책 A'(41일) ← 동률 2권 중 id 작은 쪽이 이김(tie-break OK) / 최단 '마인드셋'(2일)
+--   엣지 케이스   total_pages NULL 책이 totalPagesRead 합산에서 0으로 처리됨(null-safe OK)
 --   ※ 정확한 수치는 실행일에 따라 달라짐 (상대날짜라 매번 재계산).
 -- ============================================================================
 
@@ -73,6 +75,16 @@ INSERT INTO books (user_id, title, author, genre, total_pages, status, start_dat
   (9001, '반짝이는 것들', '김혜진', '에세이', 204, 'done', CURRENT_DATE - INTERVAL '8' MONTH - INTERVAL '17' DAY, CURRENT_DATE - INTERVAL '8' MONTH, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (9001, '시선', '은유', '소설', 356, 'done', CURRENT_DATE - INTERVAL '10' MONTH - INTERVAL '6' DAY, CURRENT_DATE - INTERVAL '10' MONTH, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (9001, '고양이는 잘 있어요', '최유안', '에세이', 452, 'done', CURRENT_DATE - INTERVAL '11' MONTH - INTERVAL '3' DAY, CURRENT_DATE - INTERVAL '11' MONTH, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- ── 엣지 케이스 3권 (백엔드 요청: 회신 docs/test/requests/대시보드_테스트데이터_확인_v1.md §3) ──
+--   · 완독 기간 동률 2권 → '최장 완독' 하이라이트 tie-break 확인 (둘 다 41일).
+--     먼저 INSERT 되는 A가 id가 작음 → id 작은 쪽이 이기는지 API 응답으로 실측.
+--   · total_pages NULL 1권 → totalPagesRead 합산이 null-safe 한지(0으로 처리) 실측.
+--   3권 모두 end_date = 오늘 → month / quarter / year 조회에 전부 걸림.
+INSERT INTO books (user_id, title, author, genre, total_pages, status, start_date, end_date, created_at, updated_at) VALUES
+  (9001, '오래 물고 있던 책 A (동률·먼저)', '동률갑', '소설', 300, 'done', CURRENT_DATE - INTERVAL '40' DAY, CURRENT_DATE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (9001, '오래 물고 있던 책 B (동률·나중)', '동률을', '소설', 320, 'done', CURRENT_DATE - INTERVAL '40' DAY, CURRENT_DATE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (9001, '페이지수 미상 에세이 (total_pages NULL)', '무명', '에세이', NULL, 'done', CURRENT_DATE - INTERVAL '3' DAY, CURRENT_DATE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 진행중 3권
 INSERT INTO books (user_id, title, author, genre, total_pages, status, start_date, end_date, created_at, updated_at) VALUES
