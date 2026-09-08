@@ -20,8 +20,10 @@ import {useTheme} from '../theme';
  * Frame 05 · 프로필 탭 — design/hifi_mockup_v1.html 기준
  * (claude/독서기록앱_프론트요청_디자인시스템v2동기화_v1.md 답변의 실제 마크업 반영).
  *
- * 닉네임/한줄소개는 ProfileContext(mock-first, PATCH /api/users/{id} 연동 전)에서 가져온다 —
- * "프로필 편집" 화면(Frame 05.2)에서 저장하면 여기 바로 반영된다.
+ * 닉네임/한줄소개는 ProfileContext(GET /api/auth/me)에서 가져온다 — "프로필 편집" 화면
+ * (Frame 05.2)에서 PATCH /api/users/{id}로 저장하면 여기 바로 반영된다.
+ * "읽은 책 / 공유한 기록" 카운트는 백엔드에 집계 필드가 없어 FE가 계산한다(연동매트릭스 §2.2 ②) —
+ * 아직 못 불러왔을 땐 0이 아니라 '–'로 둔다.
  * "로그아웃"/"독서 대시보드" 진입은 기존 AuthContext/DashboardScreen과 실제로 연결한다.
  *
  * 주요 인터랙션 요소에 testID를 달아뒀다 — __tests__/ProfileScreen.test.tsx 참고.
@@ -31,7 +33,7 @@ export function ProfileScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const {logout} = useAuth();
-  const {profile} = useProfile();
+  const {profile, isStatsLoading} = useProfile();
 
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: colors.surface}]}>
@@ -66,10 +68,13 @@ export function ProfileScreen() {
         </TouchableOpacity>
 
         <View style={styles.statRow}>
-          <ProfileStatCard label="읽은 책" value={profile.booksReadCount} />
+          <ProfileStatCard
+            label="읽은 책"
+            value={isStatsLoading ? '–' : profile.booksReadCount}
+          />
           <ProfileStatCard
             label="공유한 기록"
-            value={profile.sharedRecordsCount}
+            value={isStatsLoading ? '–' : profile.sharedRecordsCount}
           />
         </View>
 
@@ -101,7 +106,9 @@ export function ProfileScreen() {
           ]}
           onPress={logout}>
           <LogOut size={15} color={colors.n700} />
-          <Text style={[typography.button, {color: colors.n700}]}>로그아웃</Text>
+          <Text style={[typography.button, {color: colors.n700}]}>
+            로그아웃
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

@@ -5,7 +5,7 @@ import {ProfileEditScreen} from '../src/screens/ProfileEditScreen';
 import {AuthProvider} from '../src/navigation/AuthContext';
 import {ProfileProvider, useProfile} from '../src/navigation/ProfileContext';
 import {ToastProvider} from '../src/components/Toast';
-import {MOCK_PROFILE} from '../src/mocks/profile';
+import type {ProfileSummary} from '../src/types/profile';
 import {MIN_NICKNAME_LENGTH} from '../src/constants/profileOptions';
 
 type UseProfileResult = ReturnType<typeof useProfile>;
@@ -15,15 +15,42 @@ const mockGoBack = jest.fn();
 
 jest.mock('@react-navigation/native', () => {
   // 테스터 리포트 BUG-20260827-02 참고 (ProfileScreen.test.tsx와 동일한 원인/수정).
-  const actual =
-    jest.requireActual<typeof import('@react-navigation/native')>(
-      '@react-navigation/native',
-    );
+  const actual = jest.requireActual<typeof import('@react-navigation/native')>(
+    '@react-navigation/native',
+  );
   return {
     ...actual,
     useNavigation: () => ({navigate: mockNavigate, goBack: mockGoBack}),
   };
 });
+
+/**
+ * 프로필 시드 — 예전엔 ProfileContext 초기값이 `mocks/profile.ts`의 MOCK_PROFILE이라 화면이
+ * 곧바로 값을 갖고 렌더됐지만, 이제 초기값이 빈 프로필이고 실제 값은 GET /api/auth/me로 온다.
+ * 테스트에서 네트워크를 태울 이유는 없으므로, 게스트 경로(userId === null이면 로컬 state만
+ * 갱신하고 API는 부르지 않는다)를 이용해 값을 심어두고 그 뒤에 화면을 마운트한다.
+ * 화면들이 `useState(profile.nickname)`으로 초기값을 잡기 때문에 심는 순서가 중요하다.
+ */
+const TEST_PROFILE: Pick<
+  ProfileSummary,
+  'nickname' | 'bio' | 'gender' | 'interests'
+> = {
+  nickname: '책읽는콩이',
+  bio: '한 달에 3권 읽기가 목표예요 📚',
+  gender: null,
+  interests: ['소설', '자기계발', '과학'],
+};
+
+function ProfileSeeder({children}: {children: React.ReactNode}) {
+  const {updateProfile} = useProfile();
+  const [seeded, setSeeded] = React.useState(false);
+  React.useEffect(() => {
+    updateProfile(TEST_PROFILE).then(() => setSeeded(true));
+    // 마운트 시 1회만 심는다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return <>{seeded ? children : null}</>;
+}
 
 /** 저장 후 ProfileContext에 실제로 반영됐는지 화면 밖에서 관찰하기 위한 테스트 전용 하네스 */
 function ProfileHarness({onReady}: {onReady: (api: UseProfileResult) => void}) {
@@ -36,8 +63,9 @@ function ProfileHarness({onReady}: {onReady: (api: UseProfileResult) => void}) {
  * 2026-09-08 업데이트: `ProfileEditScreen`이 `useToast()`를 쓰므로(2026-09-07 토스트 도입)
  * `ToastProvider`로도 감싸야 한다 — 이전엔 빠져 있던 게 그동안 우연히 안 걸렸을 뿐인 기존 갭.
  * `ProfileProvider`가 `useAuth()`에 의존하게 된 것과 별개로 이번에 같이 바로잡는다. 또한
- * `AuthProvider`가 마운트 시 AsyncStorage 복원 비동기 effect를 가지게 되면서 `renderScreen`도
- * `await act(async () => {...})`로 감싸야 "not wrapped in act" 경고 없이 안정적으로 렌더된다.
+ * `AuthProvider`가 마운트 시 세션 복원 비동기 effect를 가지고 있고 프로필 시드도 비동기라
+ * `renderScreen`을 `await act(async () => {...})`로 감싸야 "not wrapped in act" 경고 없이
+ * 안정적으로 렌더된다.
  */
 describe('ProfileEditScreen', () => {
   let activeRoot: renderer.ReactTestRenderer | undefined;
@@ -59,7 +87,9 @@ describe('ProfileEditScreen', () => {
           <ProfileProvider>
             <ToastProvider>
               <ProfileHarness onReady={value => (profileApi = value)} />
-              <ProfileEditScreen />
+              <ProfileSeeder>
+                <ProfileEditScreen />
+              </ProfileSeeder>
             </ToastProvider>
           </ProfileProvider>
         </AuthProvider>,
@@ -72,10 +102,10 @@ describe('ProfileEditScreen', () => {
     const {root} = await renderScreen();
 
     expect(root.root.findByProps({testID: 'nickname-input'}).props.value).toBe(
-      MOCK_PROFILE.nickname,
+      TEST_PROFILE.nickname,
     );
     expect(root.root.findByProps({testID: 'bio-input'}).props.value).toBe(
-      MOCK_PROFILE.bio,
+      TEST_PROFILE.bio,
     );
   });
 
@@ -97,7 +127,7 @@ describe('ProfileEditScreen', () => {
     });
 
     expect(mockGoBack).not.toHaveBeenCalled();
-    expect(getProfileApi().profile.nickname).toBe(MOCK_PROFILE.nickname);
+    expect(getProfileApi().profile.nickname).toBe(TEST_PROFILE.nickname);
   });
 
   it('닉네임/한줄소개/성별/관심분야를 바꿔 저장하면 ProfileContext에 반영되고 뒤로 이동한다', async () => {
@@ -112,9 +142,11 @@ describe('ProfileEditScreen', () => {
       root.root
         .findByProps({testID: 'nickname-input'})
         .props.onChangeText('새닉네임');
-      root.root.findByProps({testID: 'bio-input'}).props.onChangeText('새 소개');
+      root.root
+        .findByProps({testID: 'bio-input'})
+        .props.onChangeText('새 소개');
       root.root.findByProps({testID: 'gender-chip-female'}).props.onPress();
-      // MOCK_PROFILE.interests는 ['소설', '자기계발', '과학'] — '과학'은 해제, '인문'은 추가
+      // TEST_PROFILE.interests는 ['소설', '자기계발', '과학'] — '과학'은 해제, '인문'은 추가
       root.root.findByProps({testID: 'interest-chip-과학'}).props.onPress();
       root.root.findByProps({testID: 'interest-chip-인문'}).props.onPress();
     });

@@ -4,7 +4,7 @@ import renderer, {act} from 'react-test-renderer';
 import {describe, expect, it, jest} from '@jest/globals';
 import {AuthProvider} from '../src/navigation/AuthContext';
 import {ProfileProvider, useProfile} from '../src/navigation/ProfileContext';
-import {MOCK_PROFILE} from '../src/mocks/profile';
+import {EMPTY_PROFILE} from '../src/types/profile';
 
 type UseProfileResult = ReturnType<typeof useProfile>;
 
@@ -24,14 +24,17 @@ function BareConsumer() {
  * ProfileEditScreen에서 저장한 값이 ProfileScreen에 바로 반영되는 것은 전적으로
  * 이 Context의 state 관리에 달려 있어서, AuthContext.tsx와 마찬가지로 별도로 검증한다.
  *
- * 2026-09-08 업데이트: `ProfileProvider`가 `useAuth()`에 의존하게 돼서 `AuthProvider`로 감싸야
- * 하고, `AuthProvider`가 마운트 시 AsyncStorage에서 세션을 복원하는 비동기 effect를 갖게 되면서
- * (`isRestoring` → false로 바뀌는 상태 업데이트) 렌더링을 `await act(async () => {...})`로 감싸야
- * "not wrapped in act" 경고 없이 그 업데이트까지 안정적으로 흘려보낼 수 있다.
+ * `ProfileProvider`는 `useAuth()`에 의존하므로 `AuthProvider`로 감싸야 하고, `AuthProvider`가
+ * 마운트 시 저장소에서 세션을 복원하는 비동기 effect를 갖고 있어(`isRestoring` → false) 렌더링을
+ * `await act(async () => {...})`로 감싸야 "not wrapped in act" 경고 없이 그 업데이트까지
+ * 안정적으로 흘려보낼 수 있다. 테스트 환경엔 저장된 토큰이 없어 로그인 상태로 넘어가지 않고,
+ * 따라서 /api/auth/me 요청도 나가지 않는다 — 이 테스트는 순수하게 Context state만 본다.
  */
 describe('ProfileContext', () => {
   it('Provider 밖에서 useProfile을 쓰면 에러를 던진다', () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     expect(() => {
       act(() => {
@@ -42,7 +45,7 @@ describe('ProfileContext', () => {
     consoleSpy.mockRestore();
   });
 
-  it('초기값은 mocks/profile.ts의 MOCK_PROFILE이다', async () => {
+  it('로그인 전 초기값은 빈 프로필(EMPTY_PROFILE)이다 — mock 예시값을 쓰지 않는다', async () => {
     let api: UseProfileResult | undefined;
     let root: renderer.ReactTestRenderer | undefined;
     await act(async () => {
@@ -55,7 +58,7 @@ describe('ProfileContext', () => {
       );
     });
 
-    expect(api?.profile).toEqual(MOCK_PROFILE);
+    expect(api?.profile).toEqual(EMPTY_PROFILE);
     root?.unmount();
   });
 
@@ -86,8 +89,10 @@ describe('ProfileContext', () => {
     expect(api?.profile.gender).toBe('female');
     expect(api?.profile.interests).toEqual(['과학']);
     // updateProfile이 받지 않는 필드는 이전 값 그대로 유지되어야 한다
-    expect(api?.profile.booksReadCount).toBe(MOCK_PROFILE.booksReadCount);
-    expect(api?.profile.sharedRecordsCount).toBe(MOCK_PROFILE.sharedRecordsCount);
+    expect(api?.profile.booksReadCount).toBe(EMPTY_PROFILE.booksReadCount);
+    expect(api?.profile.sharedRecordsCount).toBe(
+      EMPTY_PROFILE.sharedRecordsCount,
+    );
     root?.unmount();
   });
 });

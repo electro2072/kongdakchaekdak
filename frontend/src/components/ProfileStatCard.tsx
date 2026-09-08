@@ -4,7 +4,8 @@ import {useTheme} from '../theme';
 
 interface ProfileStatCardProps {
   label: string;
-  value: number;
+  /** 아직 못 불러온 값은 '–' 같은 문자열을 넘겨 0으로 오해되지 않게 한다. */
+  value: number | string;
 }
 
 /** Frame 05/05.1 공용 통계 카드 — design/hifi_mockup_v1.html `.card`, 숫자는 typography.stat + p700 */
