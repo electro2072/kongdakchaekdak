@@ -12,5 +12,9 @@ module.exports = {
     // 인메모리 jest mock으로 강제 매핑한다(AuthContext.tsx 세션 영속화, 2026-09-08 추가).
     '^@react-native-async-storage/async-storage$':
       '@react-native-async-storage/async-storage/jest/async-storage-mock',
+    // EncryptedStorage도 같은 이유(네이티브 모듈)로 인메모리 목으로 매핑한다 — 이쪽은 패키지가
+    // 공식 mock을 제공하지 않아 __mocks__/에 직접 뒀다(services/secureStorage.ts 참고).
+    '^react-native-encrypted-storage$':
+      '<rootDir>/__mocks__/react-native-encrypted-storage.js',
   },
 };

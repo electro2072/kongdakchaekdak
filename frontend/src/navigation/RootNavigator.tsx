@@ -16,9 +16,9 @@ export function RootNavigator() {
   const {isLoggedIn, isRestoring} = useAuth();
   const {colors, isDark} = useTheme();
 
-  // 2026-09-08 업데이트: 세션 영속화(AsyncStorage) 복원 중에는 로그인/메인 어느 쪽도 아닌
-  // 최소 로딩 화면을 보여준다 — 안 그러면 복원 전 잠깐 로그인 화면이 깜빡였다 메인으로
-  // 넘어가는 게 보일 수 있다(claude/독서기록앱_프론트_전체API연동_설계_v1.md 3장).
+  // 세션 복원·검증(secureStorage + GET /api/auth/me) 중에는 로그인/메인 어느 쪽도 아닌 최소
+  // 로딩 화면을 보여준다 — 안 그러면 복원 전 잠깐 로그인 화면이 깜빡였다 메인으로 넘어가는 게
+  // 보인다. 검증까지 기다리므로 "메인에 들어갔다 401로 튕겨나가는" 흐름도 같이 막힌다.
   if (isRestoring) {
     return (
       <SafeAreaProvider>
