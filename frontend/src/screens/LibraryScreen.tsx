@@ -16,6 +16,8 @@ import type {MainStackParamList} from '../navigation/types';
 import {type BookStatus} from '../mocks/libraryBooks';
 import {useLibrary} from '../navigation/LibraryContext';
 import {EmptyState} from '../components/EmptyState';
+import {LoadingSkeleton} from '../components/LoadingSkeleton';
+import {NetworkError} from '../components/NetworkError';
 import {GENRE_BADGE_COLORS} from '../constants/genreColors';
 import {useTheme} from '../theme';
 
@@ -24,7 +26,7 @@ export function LibraryScreen() {
   const {colors, typography, radii, isDark} = useTheme();
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const {books: libraryBooks} = useLibrary();
+  const {books: libraryBooks, isLoading, error, refresh} = useLibrary();
 
   const [statusFilter, setStatusFilter] = useState<BookStatus>('reading');
   const [query, setQuery] = useState('');
@@ -115,7 +117,11 @@ export function LibraryScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.list}>
-          {books.length === 0 ? (
+          {isLoading ? (
+            <LoadingSkeleton />
+          ) : error ? (
+            <NetworkError message={error} onRetry={refresh} />
+          ) : books.length === 0 ? (
             <EmptyState
               icon={Search}
               title="해당하는 책이 없어요"
@@ -129,7 +135,8 @@ export function LibraryScreen() {
               const hasNote = book.notes.length > 0;
               // 6개 장르 고정색 전환(claude/독서기록앱_프론트요청_디자인_6개장르고정색전환_v1.md) —
               // 서재 목록 책 태그: 옅은 틴트 배경 + 진한 텍스트(다크모드 반전)
-              const genreBadge = GENRE_BADGE_COLORS[book.genre][isDark ? 'dark' : 'light'];
+              const genreBadge =
+                GENRE_BADGE_COLORS[book.genre][isDark ? 'dark' : 'light'];
               return (
                 <TouchableOpacity
                   key={book.id}
@@ -166,12 +173,19 @@ export function LibraryScreen() {
                     <View
                       style={[
                         styles.genreBadge,
-                        {backgroundColor: genreBadge.bg, borderRadius: radii.pill},
+                        {
+                          backgroundColor: genreBadge.bg,
+                          borderRadius: radii.pill,
+                        },
                       ]}>
                       <Text
                         style={[
                           typography.caption,
-                          {color: genreBadge.text, fontSize: 9, fontWeight: '600'},
+                          {
+                            color: genreBadge.text,
+                            fontSize: 9,
+                            fontWeight: '600',
+                          },
                         ]}>
                         {book.genre}
                       </Text>

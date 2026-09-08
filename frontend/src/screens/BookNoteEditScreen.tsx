@@ -46,23 +46,38 @@ export function BookNoteEditScreen() {
     : undefined;
 
   const [content, setContent] = useState(existingNote?.content ?? '');
+  const [isSaving, setIsSaving] = useState(false);
   const trimmed = content.trim();
   const canSave = trimmed.length > 0;
   const counterColor =
     content.length >= WARNING_THRESHOLD ? colors.error : colors.n500;
 
-  const handleSave = () => {
-    if (!canSave) {
+  const handleSave = async () => {
+    if (!canSave || isSaving) {
       return;
     }
-    if (existingNote && noteId) {
-      updateNote(bookId, noteId, trimmed);
-      showToast({type: 'success', message: '소감을 수정했어요'});
-    } else {
-      addNote(bookId, trimmed);
-      showToast({type: 'success', message: '소감을 저장했어요'});
+    setIsSaving(true);
+    try {
+      if (existingNote && noteId) {
+        await updateNote(bookId, noteId, trimmed);
+        showToast({type: 'success', message: '소감을 수정했어요'});
+      } else {
+        await addNote(bookId, trimmed);
+        showToast({type: 'success', message: '소감을 저장했어요'});
+      }
+      navigation.goBack();
+    } catch (e) {
+      // 저장에 실패하면 화면을 닫지 않는다 — 작성한 내용을 잃지 않도록.
+      showToast({
+        type: 'error',
+        message:
+          e instanceof Error
+            ? e.message
+            : '저장에 실패했어요. 다시 시도해주세요.',
+      });
+    } finally {
+      setIsSaving(false);
     }
-    navigation.goBack();
   };
 
   return (
@@ -94,7 +109,12 @@ export function BookNoteEditScreen() {
         <Text
           style={[
             typography.caption,
-            {color: counterColor, fontSize: 11, textAlign: 'right', marginTop: 6},
+            {
+              color: counterColor,
+              fontSize: 11,
+              textAlign: 'right',
+              marginTop: 6,
+            },
           ]}>
           {content.length}/{MAX_NOTE_LENGTH}
         </Text>
@@ -115,12 +135,12 @@ export function BookNoteEditScreen() {
           style={[
             styles.primaryButton,
             {backgroundColor: colors.accentSolidBg, borderRadius: radii.pill},
-            !canSave && {opacity: 0.5},
+            (!canSave || isSaving) && {opacity: 0.5},
           ]}
           onPress={handleSave}
-          disabled={!canSave}>
+          disabled={!canSave || isSaving}>
           <Text style={[typography.button, {color: colors.onAccentSolid}]}>
-            저장하기
+            {isSaving ? '저장하는 중…' : '저장하기'}
           </Text>
         </TouchableOpacity>
       </View>

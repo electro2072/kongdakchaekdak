@@ -84,26 +84,62 @@ export function BookDetailScreen() {
   const route = useRoute<RouteProp<MainStackParamList, 'BookDetail'>>();
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const {books, addPhoto, deletePhoto, deleteNote} = useLibrary();
+  const {
+    books,
+    addPhoto,
+    deletePhoto,
+    deleteNote,
+    loadBookDetail,
+    completeBook,
+  } = useLibrary();
   const {showToast} = useToast();
-  const book = books.find(b => b.id === route.params.bookId);
+  const bookId = route.params.bookId;
+  const book = books.find(b => b.id === bookId);
 
-  // TODO: PATCH /api/books/{id}/complete 연동 전이라 로컬 state로만 완독 처리 여부를 표시한다.
-  const [isDone, setIsDone] = useState(book?.status === 'done');
+  const isDone = book?.status === 'done';
+  const [isCompleting, setIsCompleting] = useState(false);
+
+  // 목록 조회(GET /api/books)는 소감·장소사진을 주지 않으므로 상세 진입 시 따로 받아온다.
+  // 실패해도 책 본문은 이미 목록에서 받아둔 값으로 보이므로 토스트만 띄우고 화면은 유지한다.
+  useEffect(() => {
+    loadBookDetail(bookId).catch(() => {
+      showToast({type: 'error', message: '소감과 사진을 불러오지 못했어요'});
+    });
+    // 화면을 다시 열 때마다 최신 상태로 맞춘다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookId]);
+
+  const handleComplete = async () => {
+    if (isCompleting) {
+      return;
+    }
+    setIsCompleting(true);
+    try {
+      await completeBook(bookId);
+      showToast({type: 'success', message: '완독 처리했어요'});
+    } catch (e) {
+      showToast({
+        type: 'error',
+        message:
+          e instanceof Error
+            ? e.message
+            : '완독 처리에 실패했어요. 다시 시도해주세요.',
+      });
+    } finally {
+      setIsCompleting(false);
+    }
+  };
 
   // 장소 사진 추가 흐름 — claude/독서기록앱_프론트요청_디자인_소감작성화면_장소사진추가화면_v1.md
   // 디자인 회신(2026-09-07) 기준: "+" 타일 → 액션시트(카메라/앨범) → 선택 직후 입력형
   // 다이얼로그로 장소 라벨(선택) 입력 → 백그라운드 업로드.
-  const [photoSourceSheetVisible, setPhotoSourceSheetVisible] =
-    useState(false);
+  const [photoSourceSheetVisible, setPhotoSourceSheetVisible] = useState(false);
   const [pendingPhotoUri, setPendingPhotoUri] = useState<string | null>(null);
   const [photoLabelInput, setPhotoLabelInput] = useState('');
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [photoActionTarget, setPhotoActionTarget] =
     useState<LibraryPhoto | null>(null);
-  const [photoToDelete, setPhotoToDelete] = useState<LibraryPhoto | null>(
-    null,
-  );
+  const [photoToDelete, setPhotoToDelete] = useState<LibraryPhoto | null>(null);
 
   // 소감 목록 액션(수정/삭제) — 2026-09-08, BookNote가 목록 구조로 확정된 것 반영
   const [noteActionTarget, setNoteActionTarget] = useState<LibraryNote | null>(
@@ -146,7 +182,7 @@ export function BookDetailScreen() {
     });
   };
 
-  const finishAddPhoto = (label?: string) => {
+  const finishAddPhoto = async (label?: string) => {
     const uri = pendingPhotoUri;
     setPendingPhotoUri(null);
     setPhotoLabelInput('');
@@ -154,12 +190,21 @@ export function BookDetailScreen() {
       return;
     }
     setIsUploadingPhoto(true);
-    // TODO: 실제 연동 시 여기서 presigned-url 2단계 업로드(POST .../photos/presigned-url →
-    // S3 PUT → POST .../photos)를 거친 뒤 addPhoto를 호출한다. 지금은 mock이라 동기로 즉시
-    // 끝나 스켈레톤이 실제로는 안 보이지만, 실제 네트워크 지연이 생기면 이 자리 그대로 쓰인다.
-    addPhoto(book.id, {uri, label: label?.trim() || undefined});
-    setIsUploadingPhoto(false);
-    showToast({type: 'success', message: '사진을 추가했어요'});
+    try {
+      // addPhoto 내부가 presigned-url 발급 → S3 PUT → POST .../photos 3단계를 처리한다.
+      await addPhoto(book.id, {uri, label: label?.trim() || undefined});
+      showToast({type: 'success', message: '사진을 추가했어요'});
+    } catch (e) {
+      showToast({
+        type: 'error',
+        message:
+          e instanceof Error
+            ? e.message
+            : '사진 업로드에 실패했어요. 다시 시도해주세요.',
+      });
+    } finally {
+      setIsUploadingPhoto(false);
+    }
   };
 
   return (
@@ -291,10 +336,7 @@ export function BookDetailScreen() {
 
           {book.notes.length === 0 ? (
             <Text
-              style={[
-                typography.caption,
-                {color: colors.n500, marginTop: 8},
-              ]}>
+              style={[typography.caption, {color: colors.n500, marginTop: 8}]}>
               아직 작성한 소감이 없어요
             </Text>
           ) : (
@@ -349,10 +391,11 @@ export function BookDetailScreen() {
               styles.outlineButton,
               {borderColor: colors.p700, borderRadius: radii.md},
             ]}
-            onPress={() => setIsDone(true)}>
+            onPress={handleComplete}
+            disabled={isCompleting}>
             <CheckCircle size={15} color={colors.p700} />
             <Text style={[typography.button, {color: colors.p700}]}>
-              다 읽었어요 (완독 처리)
+              {isCompleting ? '처리하는 중…' : '다 읽었어요 (완독 처리)'}
             </Text>
           </TouchableOpacity>
         )}
@@ -434,11 +477,17 @@ export function BookDetailScreen() {
         danger
         onCancel={() => setPhotoToDelete(null)}
         onConfirm={() => {
-          if (photoToDelete) {
-            deletePhoto(book.id, photoToDelete.id);
-            showToast({type: 'success', message: '사진을 삭제했어요'});
-          }
+          const target = photoToDelete;
           setPhotoToDelete(null);
+          if (target) {
+            deletePhoto(book.id, target.id)
+              .then(() =>
+                showToast({type: 'success', message: '사진을 삭제했어요'}),
+              )
+              .catch(() =>
+                showToast({type: 'error', message: '사진 삭제에 실패했어요'}),
+              );
+          }
         }}
       />
 
@@ -486,11 +535,17 @@ export function BookDetailScreen() {
         danger
         onCancel={() => setNoteToDelete(null)}
         onConfirm={() => {
-          if (noteToDelete) {
-            deleteNote(book.id, noteToDelete.id);
-            showToast({type: 'success', message: '소감을 삭제했어요'});
-          }
+          const target = noteToDelete;
           setNoteToDelete(null);
+          if (target) {
+            deleteNote(book.id, target.id)
+              .then(() =>
+                showToast({type: 'success', message: '소감을 삭제했어요'}),
+              )
+              .catch(() =>
+                showToast({type: 'error', message: '소감 삭제에 실패했어요'}),
+              );
+          }
         }}
       />
     </SafeAreaView>

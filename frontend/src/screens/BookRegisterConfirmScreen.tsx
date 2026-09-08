@@ -22,14 +22,6 @@ import {GENRE_CHIP_COLORS} from '../constants/genreColors';
 import {useTheme} from '../theme';
 import {useToast} from '../components/Toast';
 
-/** 오늘 날짜를 "YYYY.MM.DD" 형식으로 — 서재 목록/상세의 기존 dateRangeLabel 표기와 동일한 포맷 */
-function formatDateDot(date: Date): string {
-  const y = date.getFullYear();
-  const m = `${date.getMonth() + 1}`.padStart(2, '0');
-  const d = `${date.getDate()}`.padStart(2, '0');
-  return `${y}.${m}.${d}`;
-}
-
 /**
  * Frame 08.2 · 책 등록 확인 — 설계 문서(claude/독서기록앱_프론트_책등록확인화면_프로필편집연결_설계_v1.md)
  * 2장 기준. BookSearchScreen(Frame 03)에서 검색 결과를 선택하면 이 화면으로 진입해서, 장르를
@@ -52,28 +44,39 @@ export function BookRegisterConfirmScreen() {
   const {book} = route.params;
 
   const [genre, setGenre] = useState<Genre | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleConfirm = () => {
-    if (!genre) {
+  const handleConfirm = async () => {
+    if (!genre || isSubmitting) {
       return;
     }
-    addBook({
-      id: book.id,
-      title: book.title,
-      author: book.author,
-      status: 'reading',
-      dateRangeLabel: `${formatDateDot(new Date())} ~ 진행중`,
-      // 2026-09-08 수정: 백엔드 확인 결과(coverImage 필드) 검색 결과 표지를 그대로 저장 —
-      // 이전엔 이 필드가 없어서 등록 직후 표지가 사라지고 서재/상세에 항상 placeholder만 보였음.
-      coverImage: book.coverImageUrl ?? undefined,
-      photos: [],
-      notes: [],
-      genre,
-    });
-    showToast({type: 'success', message: '서재에 등록했어요'});
-    // 뒤로가기 시 검색 화면이 아니라 서재 탭으로 돌아가도록 스택 맨 아래(Tabs)까지 걷어낸 뒤 push
-    navigation.popToTop();
-    navigation.navigate('BookDetail', {bookId: book.id});
+    setIsSubmitting(true);
+    try {
+      // 검색 결과의 id는 알라딘/카카오가 매긴 provider id라 서재 식별자로 쓸 수 없다.
+      // POST /api/books 응답에 담긴 서버 id로 상세 화면에 이동해야 한다.
+      const created = await addBook({
+        title: book.title,
+        author: book.author,
+        genre,
+        // 2026-09-08 수정: 백엔드 확인 결과(coverImage 필드) 검색 결과 표지를 그대로 저장 —
+        // 이전엔 이 필드가 없어서 등록 직후 표지가 사라지고 서재/상세에 항상 placeholder만 보였음.
+        coverImage: book.coverImageUrl ?? undefined,
+      });
+      showToast({type: 'success', message: '서재에 등록했어요'});
+      // 뒤로가기 시 검색 화면이 아니라 서재 탭으로 돌아가도록 스택 맨 아래(Tabs)까지 걷어낸 뒤 push
+      navigation.popToTop();
+      navigation.navigate('BookDetail', {bookId: created.id});
+    } catch (e) {
+      showToast({
+        type: 'error',
+        message:
+          e instanceof Error
+            ? e.message
+            : '등록에 실패했어요. 다시 시도해주세요.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -103,10 +106,7 @@ export function BookRegisterConfirmScreen() {
               {book.title}
             </Text>
             <Text
-              style={[
-                typography.caption,
-                {color: colors.n600, marginTop: 3},
-              ]}>
+              style={[typography.caption, {color: colors.n600, marginTop: 3}]}>
               {book.author}
             </Text>
             <Text
@@ -126,7 +126,8 @@ export function BookRegisterConfirmScreen() {
         <View style={[styles.row, styles.wrap]}>
           {INTEREST_OPTIONS.map(item => {
             const selected = genre === item;
-            const chipColor = GENRE_CHIP_COLORS[item][isDark ? 'dark' : 'light'];
+            const chipColor =
+              GENRE_CHIP_COLORS[item][isDark ? 'dark' : 'light'];
             return (
               <TouchableOpacity
                 key={item}
@@ -172,12 +173,12 @@ export function BookRegisterConfirmScreen() {
           style={[
             styles.primaryButton,
             {backgroundColor: colors.accentSolidBg, borderRadius: radii.pill},
-            !genre && {opacity: 0.5},
+            (!genre || isSubmitting) && {opacity: 0.5},
           ]}
           onPress={handleConfirm}
-          disabled={!genre}>
+          disabled={!genre || isSubmitting}>
           <Text style={[typography.button, {color: colors.onAccentSolid}]}>
-            서재에 등록하기
+            {isSubmitting ? '등록하는 중…' : '서재에 등록하기'}
           </Text>
         </TouchableOpacity>
       </View>

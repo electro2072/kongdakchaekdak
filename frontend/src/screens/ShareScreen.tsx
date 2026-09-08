@@ -7,7 +7,11 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
+import {
+  useNavigation,
+  useRoute,
+  type RouteProp,
+} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {
   BookOpen,
@@ -20,7 +24,7 @@ import {
 } from 'lucide-react-native';
 import type {MainStackParamList, MainTabParamList} from '../navigation/types';
 import type {ShareScope} from '../types/share';
-import {MOCK_LIBRARY_BOOKS} from '../mocks/libraryBooks';
+import {useLibrary} from '../navigation/LibraryContext';
 import {MOCK_SHARE_GROUPS} from '../mocks/shareGroups';
 import {useTheme} from '../theme';
 
@@ -41,9 +45,10 @@ export function ShareScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const bookId = route.params?.bookId;
-  const book = bookId
-    ? MOCK_LIBRARY_BOOKS.find(b => b.id === bookId)
-    : undefined;
+  // 정적 목업 대신 실제 서재 상태에서 찾는다 — 책 id가 서버에서 발급되는 값이라
+  // MOCK_LIBRARY_BOOKS로는 상세 화면에서 넘어온 책을 절대 못 찾는다.
+  const {books} = useLibrary();
+  const book = bookId ? books.find(b => b.id === bookId) : undefined;
 
   const [scope, setScope] = useState<ShareScope>('group');
 

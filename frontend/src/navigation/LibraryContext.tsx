@@ -1,113 +1,327 @@
-import React, {createContext, useContext, useMemo, useState} from 'react';
-import {MOCK_LIBRARY_BOOKS, type LibraryBook} from '../mocks/libraryBooks';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import type {
+  LibraryBook,
+  LibraryNote,
+  LibraryPhoto,
+} from '../mocks/libraryBooks';
+import type {Genre} from '../constants/profileOptions';
+import {logger} from '../utils/logger';
+import {useAuth} from './AuthContext';
+import {useProfile} from './ProfileContext';
+import * as libraryApi from '../services/libraryApi';
+import type {
+  BookNoteResponse,
+  BookPhotoResponse,
+  BookResponse,
+} from '../services/libraryApi';
 
-function generateLocalId(prefix: string): string {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
+/**
+ * 서재 상태 — GET/POST /api/books 및 소감·장소사진 API 실연동.
+ *
+ * 이전 버전은 MOCK_LIBRARY_BOOKS로 시작하는 로컬 state뿐이라 등록한 책이 앱을 끄면 사라졌다.
+ * 이제 로그인(userId 확보) 시점에 서버 목록을 받아오고, 모든 변경은 API를 먼저 호출한 뒤
+ * 그 응답으로 state를 갱신한다(낙관적 갱신을 쓰지 않으므로 실패하면 화면이 어긋나지 않는다).
+ *
+ * 목록 조회(GET /api/books)는 소감·장소사진을 함께 주지 않는다. 그래서 책 상세를 열 때
+ * loadBookDetail(bookId)로 notes/photos를 따로 채운다 — 서재 목록에서 N권만큼 추가 요청을
+ * 보내지 않기 위한 절충이다.
+ *
+ * 게스트(비회원 둘러보기)는 accessToken도 userId도 없어서 서버 호출을 하지 않고 빈 서재를 본다.
+ */
 
 interface LibraryContextValue {
   books: LibraryBook[];
-  addBook: (book: LibraryBook) => void;
-  /** 소감 작성 — 책 하나에 여러 개 가능(백엔드 회신 기준), 최신 항목이 배열 맨 앞에 온다 */
-  addNote: (bookId: string, content: string) => void;
-  updateNote: (bookId: string, noteId: string, content: string) => void;
-  deleteNote: (bookId: string, noteId: string) => void;
-  /** 장소 사진 추가 — 로컬 이미지 피커가 돌려준 uri를 그대로 저장 */
-  addPhoto: (bookId: string, photo: {uri: string; label?: string}) => void;
-  deletePhoto: (bookId: string, photoId: string) => void;
+  /** 최초 목록 로딩 중. 서재 화면이 스켈레톤을 띄우는 데 쓴다. */
+  isLoading: boolean;
+  /** 목록 조회 실패 메시지. null이면 정상. */
+  error: string | null;
+  refresh: () => Promise<void>;
+  /** 등록 성공 시 서버가 매긴 id가 담긴 책을 돌려준다 — 호출부는 이 id로 상세 화면에 이동해야 한다. */
+  addBook: (input: NewBookInput) => Promise<LibraryBook>;
+  /** 책 상세 진입 시 호출 — 소감·장소사진을 채운다. 이미 채워져 있으면 조용히 다시 받아 갱신한다. */
+  loadBookDetail: (bookId: string) => Promise<void>;
+  completeBook: (bookId: string) => Promise<void>;
+  addNote: (bookId: string, content: string) => Promise<void>;
+  updateNote: (
+    bookId: string,
+    noteId: string,
+    content: string,
+  ) => Promise<void>;
+  deleteNote: (bookId: string, noteId: string) => Promise<void>;
+  addPhoto: (
+    bookId: string,
+    photo: {uri: string; label?: string},
+  ) => Promise<void>;
+  deletePhoto: (bookId: string, photoId: string) => Promise<void>;
+}
+
+export interface NewBookInput {
+  title: string;
+  author: string;
+  genre: Genre;
+  coverImage?: string;
+  isbn?: string;
+  totalPages?: number;
 }
 
 const LibraryContext = createContext<LibraryContextValue | null>(null);
 
+function formatDot(iso: string): string {
+  const [y, m, d] = iso.split('-');
+  return `${y}.${m}.${d}`;
+}
+
+/** 서재 카드/상세에 쓰는 "읽은 기간" 라벨. 완독이면 일수까지, 진행 중이면 "~ 진행중". */
+function buildDateRangeLabel(book: BookResponse): string {
+  if (!book.startDate) {
+    return book.status === 'DONE' ? '완독' : '진행중';
+  }
+  const start = formatDot(book.startDate);
+  if (book.status !== 'DONE' || !book.endDate) {
+    return `${start} ~ 진행중`;
+  }
+  const days =
+    Math.round(
+      (new Date(book.endDate).getTime() - new Date(book.startDate).getTime()) /
+        86_400_000,
+    ) + 1;
+  return `${start} ~ ${formatDot(book.endDate)} (${days}일)`;
+}
+
+function mapNote(note: BookNoteResponse): LibraryNote {
+  return {
+    id: String(note.id),
+    content: note.content,
+    createdAt: note.createdAt,
+  };
+}
+
+function mapPhoto(photo: BookPhotoResponse): LibraryPhoto {
+  return {
+    id: String(photo.id),
+    uri: photo.imageUrl,
+    label: photo.locationText ?? undefined,
+  };
+}
+
 /**
- * 임시 mock 서재 상태. POST /api/books 연동 전이라(Frame 08.2 책 등록 확인 화면 신규 구현과
- * 함께 추가 — 개발현황_v2.md 참고) AuthContext/ProfileContext와 동일한 패턴으로 로컬 state만
- * 관리한다. BookRegisterConfirmScreen에서 등록하면 이 state에 새 책이 추가되고
- * LibraryScreen/BookDetailScreen이 바로 반영해서 보여준다. 앱을 재시작하면 초기화된다(영속화 없음).
- *
- * TODO: 실제 연동 시 초기값을 GET /api/books 응답으로, addBook 내부를 POST /api/books 호출로 교체한다.
- *
- * 2026-09-08 업데이트: 소감(BookNote)·장소사진(BookPhoto) CRUD 추가 — 백엔드 회신
- * (claude/독서기록앱_백엔드요청_프론트_책상세API확인_표지소감사진_v1.md) 기준으로 소감은 책 하나에
- * 여러 개 작성 가능한 목록 구조로 확정됨. addBook과 동일하게 지금은 로컬 state만 바꾸고,
- * TODO: 실제 연동 시 addNote/updateNote/deleteNote 내부를 POST/PATCH/DELETE
- * /api/books/{id}/notes(/{noteId}) 호출로, addPhoto/deletePhoto 내부를 presigned-url 2단계
- * 업로드 + POST/DELETE /api/books/{id}/photos(/{photoId}) 호출로 교체한다.
+ * BookResponse → LibraryBook. notes/photos는 목록 응답에 없으므로 기존에 들고 있던 값을
+ * 넘겨받아 유지한다(상세를 한 번 연 책이 목록 새로고침으로 소감을 잃지 않도록).
  */
+function mapBook(
+  book: BookResponse,
+  previous?: Pick<LibraryBook, 'notes' | 'photos'>,
+): LibraryBook {
+  return {
+    id: String(book.id),
+    title: book.title,
+    author: book.author,
+    status: book.status === 'DONE' ? 'done' : 'reading',
+    dateRangeLabel: buildDateRangeLabel(book),
+    coverImage: book.coverImage ?? undefined,
+    genre: (book.genre ?? '소설') as Genre,
+    notes: previous?.notes ?? [],
+    photos: previous?.photos ?? [],
+  };
+}
+
 export function LibraryProvider({children}: {children: React.ReactNode}) {
-  const [books, setBooks] = useState<LibraryBook[]>(MOCK_LIBRARY_BOOKS);
+  const {isLoggedIn} = useAuth();
+  const {userId} = useProfile();
+  const [books, setBooks] = useState<LibraryBook[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const patchBook = useCallback(
+    (bookId: string, patch: (book: LibraryBook) => LibraryBook) => {
+      setBooks(prev => prev.map(b => (b.id === bookId ? patch(b) : b)));
+    },
+    [],
+  );
+
+  const refresh = useCallback(async () => {
+    if (userId === null) {
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await libraryApi.fetchBooks(userId);
+      setBooks(prev =>
+        response.map(book =>
+          mapBook(
+            book,
+            prev.find(p => p.id === String(book.id)),
+          ),
+        ),
+      );
+    } catch (e) {
+      logger.error('LibraryContext', '서재 목록 조회 실패', {error: e});
+      setError('서재를 불러오지 못했어요. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId]);
+
+  // userId가 잡히면(= 실제 계정으로 /api/auth/me를 받아본 뒤) 목록을 채운다.
+  // 로그아웃하면 다음 계정의 서재가 잠깐 보이지 않도록 즉시 비운다.
+  useEffect(() => {
+    if (isLoggedIn && userId !== null) {
+      refresh();
+    } else if (!isLoggedIn) {
+      setBooks([]);
+      setError(null);
+    }
+  }, [isLoggedIn, userId, refresh]);
+
+  const addBook = useCallback(
+    async (input: NewBookInput): Promise<LibraryBook> => {
+      if (userId === null) {
+        throw new Error('로그인 후에 책을 등록할 수 있어요.');
+      }
+      const created = await libraryApi.createBook({
+        userId,
+        title: input.title,
+        author: input.author,
+        genre: input.genre,
+        coverImage: input.coverImage,
+        isbn: input.isbn,
+        totalPages: input.totalPages,
+        startDate: libraryApi.toIsoDate(new Date()),
+      });
+      const mapped = mapBook(created);
+      setBooks(prev => [mapped, ...prev]);
+      return mapped;
+    },
+    [userId],
+  );
+
+  const loadBookDetail = useCallback(
+    async (bookId: string) => {
+      const numericId = Number(bookId);
+      const [notes, photos] = await Promise.all([
+        libraryApi.fetchNotes(numericId),
+        libraryApi.fetchPhotos(numericId),
+      ]);
+      patchBook(bookId, book => ({
+        ...book,
+        // 최신 소감이 위에 오도록 뒤집는다(목록 UI 규칙).
+        notes: notes.map(mapNote).reverse(),
+        photos: photos.map(mapPhoto),
+      }));
+    },
+    [patchBook],
+  );
+
+  const completeBook = useCallback(
+    async (bookId: string) => {
+      const updated = await libraryApi.completeBook(Number(bookId));
+      patchBook(bookId, book => ({
+        ...mapBook(updated, book),
+      }));
+    },
+    [patchBook],
+  );
+
+  const addNote = useCallback(
+    async (bookId: string, content: string) => {
+      const created = await libraryApi.createNote(Number(bookId), content);
+      patchBook(bookId, book => ({
+        ...book,
+        notes: [mapNote(created), ...book.notes],
+      }));
+    },
+    [patchBook],
+  );
+
+  const updateNote = useCallback(
+    async (bookId: string, noteId: string, content: string) => {
+      const updated = await libraryApi.updateNote(
+        Number(bookId),
+        Number(noteId),
+        content,
+      );
+      patchBook(bookId, book => ({
+        ...book,
+        notes: book.notes.map(n => (n.id === noteId ? mapNote(updated) : n)),
+      }));
+    },
+    [patchBook],
+  );
+
+  const deleteNote = useCallback(
+    async (bookId: string, noteId: string) => {
+      await libraryApi.deleteNote(Number(bookId), Number(noteId));
+      patchBook(bookId, book => ({
+        ...book,
+        notes: book.notes.filter(n => n.id !== noteId),
+      }));
+    },
+    [patchBook],
+  );
+
+  const addPhoto = useCallback(
+    async (bookId: string, photo: {uri: string; label?: string}) => {
+      const created = await libraryApi.uploadPhoto(
+        Number(bookId),
+        photo.uri,
+        photo.label,
+      );
+      patchBook(bookId, book => ({
+        ...book,
+        photos: [...book.photos, mapPhoto(created)],
+      }));
+    },
+    [patchBook],
+  );
+
+  const deletePhoto = useCallback(
+    async (bookId: string, photoId: string) => {
+      await libraryApi.deletePhoto(Number(bookId), Number(photoId));
+      patchBook(bookId, book => ({
+        ...book,
+        photos: book.photos.filter(p => p.id !== photoId),
+      }));
+    },
+    [patchBook],
+  );
 
   const value = useMemo<LibraryContextValue>(
     () => ({
       books,
-      addBook: book => setBooks(prev => [book, ...prev]),
-      addNote: (bookId, content) =>
-        setBooks(prev =>
-          prev.map(b =>
-            b.id === bookId
-              ? {
-                  ...b,
-                  notes: [
-                    {
-                      id: generateLocalId('note'),
-                      content,
-                      createdAt: new Date().toISOString(),
-                    },
-                    ...b.notes,
-                  ],
-                }
-              : b,
-          ),
-        ),
-      updateNote: (bookId, noteId, content) =>
-        setBooks(prev =>
-          prev.map(b =>
-            b.id === bookId
-              ? {
-                  ...b,
-                  notes: b.notes.map(n =>
-                    n.id === noteId ? {...n, content} : n,
-                  ),
-                }
-              : b,
-          ),
-        ),
-      deleteNote: (bookId, noteId) =>
-        setBooks(prev =>
-          prev.map(b =>
-            b.id === bookId
-              ? {...b, notes: b.notes.filter(n => n.id !== noteId)}
-              : b,
-          ),
-        ),
-      addPhoto: (bookId, photo) =>
-        setBooks(prev =>
-          prev.map(b =>
-            b.id === bookId
-              ? {
-                  ...b,
-                  photos: [
-                    ...b.photos,
-                    {
-                      id: generateLocalId('photo'),
-                      uri: photo.uri,
-                      label: photo.label,
-                    },
-                  ],
-                }
-              : b,
-          ),
-        ),
-      deletePhoto: (bookId, photoId) =>
-        setBooks(prev =>
-          prev.map(b =>
-            b.id === bookId
-              ? {...b, photos: b.photos.filter(p => p.id !== photoId)}
-              : b,
-          ),
-        ),
+      isLoading,
+      error,
+      refresh,
+      addBook,
+      loadBookDetail,
+      completeBook,
+      addNote,
+      updateNote,
+      deleteNote,
+      addPhoto,
+      deletePhoto,
     }),
-    [books],
+    [
+      books,
+      isLoading,
+      error,
+      refresh,
+      addBook,
+      loadBookDetail,
+      completeBook,
+      addNote,
+      updateNote,
+      deleteNote,
+      addPhoto,
+      deletePhoto,
+    ],
   );
 
   return (
@@ -118,7 +332,9 @@ export function LibraryProvider({children}: {children: React.ReactNode}) {
 export function useLibrary(): LibraryContextValue {
   const context = useContext(LibraryContext);
   if (!context) {
-    throw new Error('useLibrary는 LibraryProvider 안에서만 사용할 수 있습니다.');
+    throw new Error(
+      'useLibrary는 LibraryProvider 안에서만 사용할 수 있습니다.',
+    );
   }
   return context;
 }

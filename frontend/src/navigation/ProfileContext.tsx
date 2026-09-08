@@ -23,6 +23,11 @@ type ProfileEditableFields = Pick<
 
 interface ProfileContextValue {
   profile: ProfileSummary;
+  /**
+   * GET /api/auth/me로 확인한 로그인 사용자 id. 게스트이거나 아직 확인 전이면 null.
+   * LibraryContext가 GET /api/books?userId= · POST /api/books 바디에 쓴다.
+   */
+  userId: number | null;
   isLoading: boolean;
   error: string | null;
   /** /api/auth/me 응답의 daysSinceLastLogin 그대로 — null이면 배너를 띄우지 않는다(백엔드 계약). */
@@ -165,6 +170,7 @@ export function ProfileProvider({children}: {children: React.ReactNode}) {
   const value = useMemo<ProfileContextValue>(
     () => ({
       profile,
+      userId,
       isLoading,
       isStatsLoading,
       error,
