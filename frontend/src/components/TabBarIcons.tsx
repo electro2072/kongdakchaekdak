@@ -27,7 +27,15 @@ export interface TabIconProps {
 export function CalendarDaysFill({size = 22, color}: TabIconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-      <Rect x="3" y="4" width="18" height="17" rx="3" fill={color} opacity={DIM} />
+      <Rect
+        x="3"
+        y="4"
+        width="18"
+        height="17"
+        rx="3"
+        fill={color}
+        opacity={DIM}
+      />
       <Rect x="3" y="4" width="18" height="6" rx="3" fill={color} />
       <Rect x="7" y="2" width="2" height="4" rx="1" fill={color} />
       <Rect x="15" y="2" width="2" height="4" rx="1" fill={color} />
@@ -39,9 +47,25 @@ export function LibraryFill({size = 22, color}: TabIconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Rect x="3" y="4" width="4" height="16" rx="1.3" fill={color} />
-      <Rect x="8.6" y="7" width="4" height="13" rx="1.3" fill={color} opacity={DIM} />
+      <Rect
+        x="8.6"
+        y="7"
+        width="4"
+        height="13"
+        rx="1.3"
+        fill={color}
+        opacity={DIM}
+      />
       <Rect x="14.2" y="6" width="4" height="14" rx="1.3" fill={color} />
-      <Rect x="19.8" y="9" width="2.2" height="11" rx="1.1" fill={color} opacity={DIM} />
+      <Rect
+        x="19.8"
+        y="9"
+        width="2.2"
+        height="11"
+        rx="1.1"
+        fill={color}
+        opacity={DIM}
+      />
     </Svg>
   );
 }
@@ -78,7 +102,10 @@ export function UserFill({size = 22, color}: TabIconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Circle cx="12" cy="8" r="4.2" fill={color} />
-      <Path d="M4 20.2c0-4.6 3.7-7.4 8-7.4s8 2.8 8 7.4v0.8H4v-0.8z" fill={color} />
+      <Path
+        d="M4 20.2c0-4.6 3.7-7.4 8-7.4s8 2.8 8 7.4v0.8H4v-0.8z"
+        fill={color}
+      />
     </Svg>
   );
 }
