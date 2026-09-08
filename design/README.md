@@ -40,6 +40,8 @@
 
 > **📌 입력형 다이얼로그 컴포넌트 신규 추가 (2026-09-08): `color_chips.html` v2.4** — 프론트가 책 상세 화면의 "장소사진 라벨 입력"(예: "홍대 카페") UI를 만들다가, 기존 확인/경고 다이얼로그(v2.3, "12.")가 "텍스트 입력 필드가 들어가는 경우는 범위 밖"이라고 명시해둔 케이스에 부딪혀 신규 요청했습니다. `color_chips.html`에 "14. 입력형 다이얼로그" 섹션을 추가 — 카드·스크림·버튼 규칙은 기존 확인 다이얼로그와 동일하고, 본문 자리에 한 줄 입력 필드만 들어갑니다(입력 필드 자체는 새 토큰 없이 기존 폼 화면의 입력 필드 토큰 재사용). 버튼 라벨은 "취소/확인" 대신 상황에 맞게 "건너뛰기/저장"처럼 바꿔 쓰도록 안내했습니다. 답변은 프론트 요청 문서(`독서기록앱_프론트요청_디자인_소감작성화면_장소사진추가화면_v1.md`)에 함께 남겼습니다 — 소감(BookNote) 목록형 UI(카드 리스트, 500자 제한, 전체화면 push)와 장소사진 추가 흐름("+" 타일, 길게 누르기 삭제) 답변도 같은 문서에 있습니다.
 
+> **📌 스토어 마케팅 스크린샷 추가 (2026-09-08, 사용자 직접 반영)** — App Store 6.9"용 6장(`assets/store/screenshots/app_store_6.9/`), Google Play용 6장(`assets/store/screenshots/google_play/`)이 로컬에 커밋됨. 온보딩 화면(Frame 01) 위에 "오늘 읽은 한 페이지를 자랑해보세요" 캡션을 얹은 형태 — 이 라운드는 디자인 에이전트 세션 밖(사용자가 직접)에서 진행되어 자세한 제작 경위·나머지 5장 각각의 캡션 문구는 이 문서에 기록되어 있지 않습니다. `store_assets.html`(디자인 소스)에도 아직 이 스크린샷 관련 changelog가 없어, 필요하면 정리해드릴 수 있습니다.
+
 이 폴더는 앱의 비주얼 디자인 산출물(컬러 팔레트, 타이포그래피/아이콘, Hi-Fi 목업)의 실제 소스 파일을 담습니다. 각 산출물의 결정 사항 요약은 claude.ai 프로젝트 문서함에도 마크다운으로 정리되어 있습니다:
 
 - `콩닥책닥_디자인시스템_컬러팔레트.md`
@@ -69,7 +71,7 @@
 | `assets/icon/notification/notification_xxhdpi_72.png` | v1 | Android 알림 아이콘, xxhdpi 밀도, 72×72, 투명 배경 |
 | `assets/icon/notification/notification_xxxhdpi_96.png` | v1 | Android 알림 아이콘, xxxhdpi 밀도, 96×96, 투명 배경 |
 | `deprecated/assets/icon/*.png` | v1 (보관용) | 이전 쑥송편 아이콘의 최종 PNG 3종을 그대로 보관(내용 동일, 위치만 이동). (2026-08-27) `assets/icon/archive_songpyeon_v1/`에서 `design/deprecated/assets/icon/`으로 재이동 |
-| `store_assets.html` | v1 | **스토어 등록용 그래픽** — Google Play 피처 그래픽(1024×500), 고해상도 아이콘(512×512). 사양은 Google Play/Apple 공식 문서 확인 후 정확한 픽셀 크기로 제작. 실제 앱 화면이 필요한 마케팅 스크린샷(App Store 6.5"/6.9" 등)은 어떤 화면을 보여줄지·캡션 문구를 먼저 정한 뒤 별도 라운드에서 진행 예정 — 아직 미착수 |
+| `store_assets.html` | v1 | **스토어 등록용 그래픽** — Google Play 피처 그래픽(1024×500), 고해상도 아이콘(512×512). 사양은 Google Play/Apple 공식 문서 확인 후 정확한 픽셀 크기로 제작. **(2026-09-08) 마케팅 스크린샷 완료** — `assets/store/screenshots/app_store_6.9/`(6장)·`assets/store/screenshots/google_play/`(6장)에 실제 온보딩 화면 기반 캡션형 스크린샷이 추가됨. 이 라운드는 디자인 에이전트 세션 밖에서(사용자가 직접) 반영됨 — `store_assets.html` 자체(디자인 소스 문서)에는 아직 이 스크린샷들에 대한 changelog/미리보기가 반영되지 않았으니 필요하면 별도로 정리 요청 |
 | `assets/store/play_feature_graphic_1024x500.png` | v1 | Google Play 피처 그래픽, 1024×500, 알파 없음 |
 | `assets/store/play_store_icon_512x512.png` | v1 | Google Play 고해상도 아이콘, 512×512 |
 | `splash_screen.html` | v1 (확정) | **스플래시 화면 최종 디자인 소스** — 쑥송편 그린(`#7D8F5D`) 풀블리드 배경 + "콩닥"/"책닥" 크림색(`#f7f1e4`) 워드마크. 앱 아이콘과 동일한 색 재사용. 다크모드 짝 없음(스플래시는 iOS/Android 관례상 시스템 테마와 무관한 단일 버전) · 로딩 인디케이터 없음(정적 화면). 워드마크 로고를 투명 배경 960×960 PNG로 내보내는 실제 export 엘리먼트 포함 |
