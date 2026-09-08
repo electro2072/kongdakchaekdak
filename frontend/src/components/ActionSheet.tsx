@@ -1,11 +1,20 @@
 import React from 'react';
 import {Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import type {LucideIcon} from 'lucide-react-native';
 import {useTheme} from '../theme';
 
 export interface ActionSheetOption {
   key: string;
   label: string;
-  icon: React.ComponentType<{size?: number; color?: string}>;
+  /**
+   * lucide-react-native가 내보내는 아이콘 컴포넌트 타입.
+   *
+   * 예전엔 `React.ComponentType<{size?: number; color?: string}>`로 직접 적어뒀는데,
+   * lucide의 `LucideProps.size`는 `string | number`라 `propTypes`가 반공변 위치에서
+   * 충돌해 BookDetailScreen에서 TS2322가 났다(`npm run typecheck` 5건 — Frontend Tests
+   * CI가 이것 때문에 계속 실패). 라이브러리가 내보내는 타입을 그대로 쓰는 게 맞다.
+   */
+  icon: LucideIcon;
   /** 삭제 등 파괴적 액션 — error 색으로 구분 */
   danger?: boolean;
   onPress: () => void;
