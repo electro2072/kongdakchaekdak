@@ -10,6 +10,7 @@ import com.kongdakchaekdak.domain.bookphoto.dto.BookPhotoCreateRequest;
 import com.kongdakchaekdak.domain.bookphoto.dto.BookPhotoResponse;
 import com.kongdakchaekdak.domain.bookphoto.dto.PresignedUrlRequest;
 import com.kongdakchaekdak.domain.bookphoto.dto.PresignedUrlResponse;
+import org.springframework.beans.BeansException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,10 +87,17 @@ public class BookPhotoService {
         PresignedPutObjectRequest presignedRequest;
         try {
             // 이 호출이 처음 실행될 때 지연됐던 S3Presigner 빈이 실제로 생성된다(클래스 상단 Javadoc
-            // "조각2" 참고) — 자격증명이 비어 있으면 여기서 IllegalArgumentException, 그 외 AWS SDK
-            // 설정 문제는 SdkException 계열로 터진다. 둘 다 잡아서 503으로 감싼다.
+            // "조각2" 참고).
+            //
+            // (2026-09-09, "조각3") 자격증명이 비어 있으면 AwsBasicCredentials.create가
+            // IllegalArgumentException을 던지는 건 맞지만, 그건 @Lazy 프록시가 빈을 만드는 도중에
+            // 일어난다 — Spring이 그 예외를 BeanCreationException으로 감싸서 던지기 때문에
+            // IllegalArgumentException catch에 걸리지 않고 그대로 빠져나가 GlobalExceptionHandler의
+            // 마지막 핸들러가 잡는 500("서버 오류가 발생했습니다")이 됐다. 실제 증상: 앨범에서 사진을
+            // 고르고 저장하면 원인을 알 수 없는 서버 오류 토스트. BeansException까지 함께 잡아
+            // 의도한 503으로 돌려준다.
             presignedRequest = s3Presigner.presignPutObject(presignRequest);
-        } catch (IllegalArgumentException | SdkException e) {
+        } catch (IllegalArgumentException | SdkException | BeansException e) {
             throw new ImageStorageUnavailableException(
                     "이미지 업로드용 presigned URL 발급에 실패했습니다 — 서버의 AWS S3 자격증명 설정을 확인해야 합니다.", e);
         }
