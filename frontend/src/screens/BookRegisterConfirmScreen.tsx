@@ -63,7 +63,11 @@ export function BookRegisterConfirmScreen() {
       author: book.author,
       status: 'reading',
       dateRangeLabel: `${formatDateDot(new Date())} ~ 진행중`,
+      // 2026-09-08 수정: 백엔드 확인 결과(coverImage 필드) 검색 결과 표지를 그대로 저장 —
+      // 이전엔 이 필드가 없어서 등록 직후 표지가 사라지고 서재/상세에 항상 placeholder만 보였음.
+      coverImage: book.coverImageUrl ?? undefined,
       photos: [],
+      notes: [],
       genre,
     });
     showToast({type: 'success', message: '서재에 등록했어요'});

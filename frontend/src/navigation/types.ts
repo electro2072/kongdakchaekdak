@@ -37,6 +37,12 @@ export type MainStackParamList = {
    * 단일선택한 뒤 서재에 등록한다. 테스터 리포트 FINDING-20260828-08 반영.
    */
   BookRegisterConfirm: {book: Book};
+  /**
+   * 소감 작성/수정 — 책 상세(Frame 03.1)의 "소감 작성하기" 버튼 또는 각 소감 카드의 "수정하기"
+   * 액션시트 옵션에서 진입. `noteId`가 없으면 신규 작성, 있으면 해당 소감 수정.
+   * 2026-09-08 신규(소감이 여러 개 작성 가능한 목록 구조로 확정된 것 반영).
+   */
+  BookNoteEdit: {bookId: string; noteId?: string};
   /** Frame 05.1 독서 대시보드(Recap) — 프로필 탭 "이번 분기 리캡 보기" 카드에서 진입, 탭바 없이 전체화면 */
   Dashboard: undefined;
   /** Frame 05.2 프로필 편집 — 프로필 탭 "프로필 편집" 버튼에서 진입, 탭바 없이 전체화면 */

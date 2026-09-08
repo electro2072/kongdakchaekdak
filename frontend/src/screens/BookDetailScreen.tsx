@@ -1,9 +1,11 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   SafeAreaView,
   ScrollView,
   View,
   Text,
+  Image,
+  Animated,
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
@@ -13,17 +15,68 @@ import {
   type RouteProp,
 } from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {
   BookOpen,
   Camera,
   Image as ImageIcon,
   PenLine,
+  MoreHorizontal,
+  Plus,
+  Trash2,
   CheckCircle,
   Share2,
 } from 'lucide-react-native';
 import type {MainStackParamList} from '../navigation/types';
 import {useLibrary} from '../navigation/LibraryContext';
+import type {LibraryNote, LibraryPhoto} from '../mocks/libraryBooks';
 import {useTheme} from '../theme';
+import {useToast} from '../components/Toast';
+import {ActionSheet} from '../components/ActionSheet';
+import {ConfirmDialog} from '../components/ConfirmDialog';
+import {PromptDialog} from '../components/PromptDialog';
+
+/** 오늘/기록 날짜를 "YYYY.MM.DD" 형식으로 — BookRegisterConfirmScreen과 동일한 표기 */
+function formatDateDot(date: Date): string {
+  const y = date.getFullYear();
+  const m = `${date.getMonth() + 1}`.padStart(2, '0');
+  const d = `${date.getDate()}`.padStart(2, '0');
+  return `${y}.${m}.${d}`;
+}
+
+/**
+ * 사진 업로드 중 자리 표시 — LoadingSkeleton과 동일한 pulse 방식이지만 66x66 정사각형
+ * 썸네일 한 칸용으로 별도 구현(재사용 시 리스트 카드 레이아웃 전제라 맞지 않았음).
+ */
+function PhotoSkeletonTile() {
+  const {colors} = useTheme();
+  const opacity = useRef(new Animated.Value(0.4)).current;
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 650,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0.4,
+          duration: 650,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [opacity]);
+
+  return (
+    <Animated.View
+      style={[styles.photoBox, {opacity, backgroundColor: colors.n200}]}
+    />
+  );
+}
 
 /** Frame 03.1 · 서재 탭(책 상세) — design/hifi_mockup_v1.html 기준. 탭바 없이 전체화면으로 push된다 */
 export function BookDetailScreen() {
@@ -31,11 +84,32 @@ export function BookDetailScreen() {
   const route = useRoute<RouteProp<MainStackParamList, 'BookDetail'>>();
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const {books} = useLibrary();
+  const {books, addPhoto, deletePhoto, deleteNote} = useLibrary();
+  const {showToast} = useToast();
   const book = books.find(b => b.id === route.params.bookId);
 
   // TODO: PATCH /api/books/{id}/complete 연동 전이라 로컬 state로만 완독 처리 여부를 표시한다.
   const [isDone, setIsDone] = useState(book?.status === 'done');
+
+  // 장소 사진 추가 흐름 — claude/독서기록앱_프론트요청_디자인_소감작성화면_장소사진추가화면_v1.md
+  // 디자인 회신(2026-09-07) 기준: "+" 타일 → 액션시트(카메라/앨범) → 선택 직후 입력형
+  // 다이얼로그로 장소 라벨(선택) 입력 → 백그라운드 업로드.
+  const [photoSourceSheetVisible, setPhotoSourceSheetVisible] =
+    useState(false);
+  const [pendingPhotoUri, setPendingPhotoUri] = useState<string | null>(null);
+  const [photoLabelInput, setPhotoLabelInput] = useState('');
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [photoActionTarget, setPhotoActionTarget] =
+    useState<LibraryPhoto | null>(null);
+  const [photoToDelete, setPhotoToDelete] = useState<LibraryPhoto | null>(
+    null,
+  );
+
+  // 소감 목록 액션(수정/삭제) — 2026-09-08, BookNote가 목록 구조로 확정된 것 반영
+  const [noteActionTarget, setNoteActionTarget] = useState<LibraryNote | null>(
+    null,
+  );
+  const [noteToDelete, setNoteToDelete] = useState<LibraryNote | null>(null);
 
   if (!book) {
     return (
@@ -52,6 +126,42 @@ export function BookDetailScreen() {
     );
   }
 
+  const handlePickFromCamera = () => {
+    setPhotoSourceSheetVisible(false);
+    launchCamera({mediaType: 'photo', quality: 0.8}, response => {
+      const uri = response.assets?.[0]?.uri;
+      if (uri) {
+        setPendingPhotoUri(uri);
+      }
+    });
+  };
+
+  const handlePickFromLibrary = () => {
+    setPhotoSourceSheetVisible(false);
+    launchImageLibrary({mediaType: 'photo', quality: 0.8}, response => {
+      const uri = response.assets?.[0]?.uri;
+      if (uri) {
+        setPendingPhotoUri(uri);
+      }
+    });
+  };
+
+  const finishAddPhoto = (label?: string) => {
+    const uri = pendingPhotoUri;
+    setPendingPhotoUri(null);
+    setPhotoLabelInput('');
+    if (!uri) {
+      return;
+    }
+    setIsUploadingPhoto(true);
+    // TODO: 실제 연동 시 여기서 presigned-url 2단계 업로드(POST .../photos/presigned-url →
+    // S3 PUT → POST .../photos)를 거친 뒤 addPhoto를 호출한다. 지금은 mock이라 동기로 즉시
+    // 끝나 스켈레톤이 실제로는 안 보이지만, 실제 네트워크 지연이 생기면 이 자리 그대로 쓰인다.
+    addPhoto(book.id, {uri, label: label?.trim() || undefined});
+    setIsUploadingPhoto(false);
+    showToast({type: 'success', message: '사진을 추가했어요'});
+  };
+
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: colors.surface}]}>
       <ScrollView
@@ -59,7 +169,14 @@ export function BookDetailScreen() {
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={[styles.coverBox, {backgroundColor: colors.p50}]}>
-            <BookOpen size={26} color={colors.p400} />
+            {book.coverImage ? (
+              <Image
+                source={{uri: book.coverImage}}
+                style={styles.coverImage}
+              />
+            ) : (
+              <BookOpen size={26} color={colors.p400} />
+            )}
           </View>
           <View style={styles.headerText}>
             <Text
@@ -94,29 +211,58 @@ export function BookDetailScreen() {
               장소 사진
             </Text>
           </View>
-          {book.photos.length === 0 ? (
-            <Text style={[typography.caption, {color: colors.n500}]}>
-              아직 등록된 사진이 없어요
+          {book.photos.length > 0 ? (
+            <Text
+              style={[
+                typography.caption,
+                {color: colors.n500, fontSize: 10.5, marginBottom: 6},
+              ]}>
+              사진을 길게 누르면 삭제할 수 있어요
             </Text>
-          ) : (
-            <View style={styles.photoRow}>
-              {book.photos.map((photo, index) => (
-                <View key={index} style={styles.photoItem}>
-                  <View
-                    style={[styles.photoBox, {backgroundColor: colors.p50}]}>
+          ) : null}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.photoRow}>
+            <TouchableOpacity
+              testID="add-photo-tile"
+              style={[
+                styles.photoBox,
+                styles.addPhotoTile,
+                {borderColor: colors.n300, backgroundColor: colors.n50},
+              ]}
+              onPress={() => setPhotoSourceSheetVisible(true)}>
+              <Plus size={24} color={colors.n500} />
+            </TouchableOpacity>
+            {book.photos.map(photo => (
+              <View key={photo.id} style={styles.photoItem}>
+                <TouchableOpacity
+                  testID={`photo-thumb-${photo.id}`}
+                  style={[styles.photoBox, {backgroundColor: colors.p50}]}
+                  onLongPress={() => setPhotoActionTarget(photo)}>
+                  {photo.uri ? (
+                    <Image
+                      source={{uri: photo.uri}}
+                      style={styles.photoImage}
+                    />
+                  ) : (
                     <ImageIcon size={22} color={colors.p400} />
-                  </View>
+                  )}
+                </TouchableOpacity>
+                {photo.label ? (
                   <Text
+                    numberOfLines={1}
                     style={[
                       typography.caption,
                       {color: colors.n500, marginTop: 3, fontSize: 9},
                     ]}>
                     {photo.label}
                   </Text>
-                </View>
-              ))}
-            </View>
-          )}
+                ) : null}
+              </View>
+            ))}
+            {isUploadingPhoto ? <PhotoSkeletonTile /> : null}
+          </ScrollView>
         </View>
 
         <View style={styles.section}>
@@ -124,28 +270,76 @@ export function BookDetailScreen() {
             <PenLine size={13} color={colors.n600} />
             <Text style={[typography.caption, {color: colors.n600}]}>소감</Text>
           </View>
-          {book.noteText ? (
-            <View
+          <TouchableOpacity
+            testID="add-note-button"
+            style={[
+              styles.noteAddButton,
+              {borderColor: colors.n300, borderRadius: radii.pill},
+            ]}
+            onPress={() =>
+              navigation.navigate('BookNoteEdit', {bookId: book.id})
+            }>
+            <PenLine size={13} color={colors.n700} />
+            <Text
               style={[
-                styles.noteCard,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: colors.hairline,
-                  borderRadius: radii.card,
-                },
+                typography.button,
+                {color: colors.n700, fontSize: 11.5, marginLeft: 4},
               ]}>
-              <Text
-                style={[
-                  typography.caption,
-                  {color: colors.n700, fontSize: 10.5, lineHeight: 17},
-                ]}>
-                {book.noteText}
-              </Text>
-            </View>
-          ) : (
-            <Text style={[typography.caption, {color: colors.n500}]}>
+              소감 작성하기
+            </Text>
+          </TouchableOpacity>
+
+          {book.notes.length === 0 ? (
+            <Text
+              style={[
+                typography.caption,
+                {color: colors.n500, marginTop: 8},
+              ]}>
               아직 작성한 소감이 없어요
             </Text>
+          ) : (
+            <View style={styles.noteList}>
+              {book.notes.map(note => (
+                <View
+                  key={note.id}
+                  style={[
+                    styles.noteCard,
+                    {
+                      backgroundColor: colors.surface,
+                      borderColor: colors.hairline,
+                      borderRadius: radii.card,
+                    },
+                  ]}>
+                  <View style={styles.noteCardHeader}>
+                    <Text
+                      style={[
+                        typography.caption,
+                        {
+                          color: colors.n700,
+                          fontSize: 10.5,
+                          lineHeight: 17,
+                          flex: 1,
+                        },
+                      ]}>
+                      {note.content}
+                    </Text>
+                    <TouchableOpacity
+                      testID={`note-more-${note.id}`}
+                      style={styles.noteMoreButton}
+                      onPress={() => setNoteActionTarget(note)}>
+                      <MoreHorizontal size={17} color={colors.n600} />
+                    </TouchableOpacity>
+                  </View>
+                  <Text
+                    style={[
+                      typography.caption,
+                      {color: colors.n500, fontSize: 10.5, marginTop: 6},
+                    ]}>
+                    {formatDateDot(new Date(note.createdAt))}
+                  </Text>
+                </View>
+              ))}
+            </View>
           )}
         </View>
 
@@ -180,6 +374,125 @@ export function BookDetailScreen() {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <ActionSheet
+        visible={photoSourceSheetVisible}
+        options={[
+          {
+            key: 'camera',
+            label: '카메라로 촬영',
+            icon: Camera,
+            onPress: handlePickFromCamera,
+          },
+          {
+            key: 'library',
+            label: '앨범에서 선택',
+            icon: ImageIcon,
+            onPress: handlePickFromLibrary,
+          },
+        ]}
+        onCancel={() => setPhotoSourceSheetVisible(false)}
+      />
+
+      <PromptDialog
+        visible={pendingPhotoUri !== null}
+        title="촬영 장소를 입력해주세요"
+        message="입력하지 않아도 사진은 등록돼요"
+        placeholder="예: 홍대 카페"
+        value={photoLabelInput}
+        onChangeText={setPhotoLabelInput}
+        onSkip={() => finishAddPhoto(undefined)}
+        onSave={() => finishAddPhoto(photoLabelInput)}
+      />
+
+      <ActionSheet
+        visible={photoActionTarget !== null}
+        options={[
+          {
+            key: 'delete',
+            label: '삭제하기',
+            icon: Trash2,
+            danger: true,
+            onPress: () => {
+              const target = photoActionTarget;
+              setPhotoActionTarget(null);
+              if (target) {
+                setPhotoToDelete(target);
+              }
+            },
+          },
+        ]}
+        onCancel={() => setPhotoActionTarget(null)}
+      />
+
+      <ConfirmDialog
+        visible={photoToDelete !== null}
+        title="사진을 삭제할까요?"
+        message="삭제한 사진은 되돌릴 수 없어요"
+        cancelLabel="취소"
+        confirmLabel="삭제하기"
+        danger
+        onCancel={() => setPhotoToDelete(null)}
+        onConfirm={() => {
+          if (photoToDelete) {
+            deletePhoto(book.id, photoToDelete.id);
+            showToast({type: 'success', message: '사진을 삭제했어요'});
+          }
+          setPhotoToDelete(null);
+        }}
+      />
+
+      <ActionSheet
+        visible={noteActionTarget !== null}
+        options={[
+          {
+            key: 'edit',
+            label: '수정하기',
+            icon: PenLine,
+            onPress: () => {
+              const target = noteActionTarget;
+              setNoteActionTarget(null);
+              if (target) {
+                navigation.navigate('BookNoteEdit', {
+                  bookId: book.id,
+                  noteId: target.id,
+                });
+              }
+            },
+          },
+          {
+            key: 'delete',
+            label: '삭제하기',
+            icon: Trash2,
+            danger: true,
+            onPress: () => {
+              const target = noteActionTarget;
+              setNoteActionTarget(null);
+              if (target) {
+                setNoteToDelete(target);
+              }
+            },
+          },
+        ]}
+        onCancel={() => setNoteActionTarget(null)}
+      />
+
+      <ConfirmDialog
+        visible={noteToDelete !== null}
+        title="소감을 삭제할까요?"
+        message="삭제한 소감은 되돌릴 수 없어요"
+        cancelLabel="취소"
+        confirmLabel="삭제하기"
+        danger
+        onCancel={() => setNoteToDelete(null)}
+        onConfirm={() => {
+          if (noteToDelete) {
+            deleteNote(book.id, noteToDelete.id);
+            showToast({type: 'success', message: '소감을 삭제했어요'});
+          }
+          setNoteToDelete(null);
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -202,9 +515,14 @@ const styles = StyleSheet.create({
     width: 66,
     height: 90,
     borderRadius: 8,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+  },
+  coverImage: {
+    width: '100%',
+    height: '100%',
   },
   headerText: {
     flex: 1,
@@ -230,12 +548,44 @@ const styles = StyleSheet.create({
     width: 66,
     height: 66,
     borderRadius: 8,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  photoImage: {
+    width: '100%',
+    height: '100%',
+  },
+  addPhotoTile: {
+    borderWidth: 1,
+    borderStyle: 'dashed',
+  },
+  noteAddButton: {
+    flexDirection: 'row',
+    alignSelf: 'flex-start',
+    alignItems: 'center',
+    height: 32,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+  },
+  noteList: {
+    marginTop: 10,
+    gap: 8,
   },
   noteCard: {
     borderWidth: 1,
     padding: 12,
+  },
+  noteCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  noteMoreButton: {
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 6,
   },
   outlineButton: {
     height: 38,

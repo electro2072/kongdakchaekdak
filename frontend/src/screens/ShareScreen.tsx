@@ -195,8 +195,10 @@ export function ShareScreen() {
               typography.caption,
               {color: colors.n700, fontSize: 10.5, textAlign: 'center'},
             ]}>
-            {book.noteText ? `${book.noteText.slice(0, 12)}...` : '소감 없음'} ·{' '}
-            {book.dateRangeLabel} 완독
+            {book.notes.length > 0
+              ? `${book.notes[0].content.slice(0, 12)}...`
+              : '소감 없음'}{' '}
+            · {book.dateRangeLabel} 완독
           </Text>
         </View>
 

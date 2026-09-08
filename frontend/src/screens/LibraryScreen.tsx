@@ -6,6 +6,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Image,
   StyleSheet,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -125,7 +126,7 @@ export function LibraryScreen() {
           ) : (
             books.map(book => {
               const photoCount = book.photos.length;
-              const hasNote = Boolean(book.noteText);
+              const hasNote = book.notes.length > 0;
               // 6개 장르 고정색 전환(claude/독서기록앱_프론트요청_디자인_6개장르고정색전환_v1.md) —
               // 서재 목록 책 태그: 옅은 틴트 배경 + 진한 텍스트(다크모드 반전)
               const genreBadge = GENRE_BADGE_COLORS[book.genre][isDark ? 'dark' : 'light'];
@@ -145,7 +146,14 @@ export function LibraryScreen() {
                   }>
                   <View
                     style={[styles.coverBox, {backgroundColor: colors.p50}]}>
-                    <BookOpen size={20} color={colors.p400} />
+                    {book.coverImage ? (
+                      <Image
+                        source={{uri: book.coverImage}}
+                        style={styles.coverImage}
+                      />
+                    ) : (
+                      <BookOpen size={20} color={colors.p400} />
+                    )}
                   </View>
                   <View style={{flex: 1}}>
                     <Text
@@ -276,9 +284,14 @@ const styles = StyleSheet.create({
     width: 42,
     height: 58,
     borderRadius: 8,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+  },
+  coverImage: {
+    width: '100%',
+    height: '100%',
   },
   genreBadge: {
     alignSelf: 'flex-start',

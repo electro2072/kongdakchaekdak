@@ -7,6 +7,7 @@ import {MainTabs} from './MainTabs';
 import {BookDetailScreen} from '../screens/BookDetailScreen';
 import {BookSearchScreen} from '../screens/BookSearchScreen';
 import {BookRegisterConfirmScreen} from '../screens/BookRegisterConfirmScreen';
+import {BookNoteEditScreen} from '../screens/BookNoteEditScreen';
 import {DashboardScreen} from '../screens/DashboardScreen';
 import {ProfileEditScreen} from '../screens/ProfileEditScreen';
 import {useLibrary} from './LibraryContext';
@@ -63,6 +64,13 @@ export function MainStack() {
         name="BookRegisterConfirm"
         component={BookRegisterConfirmScreen}
         options={{title: '책 등록 확인', presentation: 'modal'}}
+      />
+      <Stack.Screen
+        name="BookNoteEdit"
+        component={BookNoteEditScreen}
+        options={({route}) => ({
+          title: route.params.noteId ? '소감 수정' : '소감 작성',
+        })}
       />
       <Stack.Screen
         name="Dashboard"

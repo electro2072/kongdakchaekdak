@@ -2,6 +2,14 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- 장소 사진 등록(react-native-image-picker) — 카메라 촬영 + 앨범 선택 둘 다 지원.
+         READ_MEDIA_IMAGES는 안드로이드 13(API 33) 이상, READ_EXTERNAL_STORAGE는 그 이하 대상. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission
+      android:name="android.permission.READ_EXTERNAL_STORAGE"
+      android:maxSdkVersion="32" />
+
     <application
       android:name=".MainApplication"
       android:label="@string/app_name"
