@@ -32,6 +32,11 @@ function AuthHarness({onReady}: {onReady: (api: UseAuthResult) => void}) {
   return null;
 }
 
+/**
+ * 2026-09-08 업데이트: `AuthProvider`가 마운트 시 AsyncStorage에서 세션을 복원하는 비동기
+ * effect를 갖게 되면서(`isRestoring` → false), 렌더링을 `await act(async () => {...})`로 감싸야
+ * "not wrapped in act" 경고 없이 그 상태 업데이트까지 안정적으로 흘려보낼 수 있다.
+ */
 describe('ProfileScreen', () => {
   let activeRoot: renderer.ReactTestRenderer | undefined;
 
@@ -43,9 +48,9 @@ describe('ProfileScreen', () => {
     mockNavigate.mockClear();
   });
 
-  function renderScreen() {
+  async function renderScreen() {
     let authApi: UseAuthResult | undefined;
-    act(() => {
+    await act(async () => {
       activeRoot = renderer.create(
         <AuthProvider>
           <ProfileProvider>
@@ -58,8 +63,8 @@ describe('ProfileScreen', () => {
     return {root: activeRoot!, getAuthApi: () => authApi!};
   }
 
-  it('ProfileContext의 닉네임/한줄소개를 보여준다', () => {
-    const {root} = renderScreen();
+  it('ProfileContext의 닉네임/한줄소개를 보여준다', async () => {
+    const {root} = await renderScreen();
     const texts = root.root
       .findAllByType(Text)
       .map(node => node.props.children);
@@ -68,8 +73,8 @@ describe('ProfileScreen', () => {
     expect(texts).toContain(MOCK_PROFILE.bio);
   });
 
-  it('"프로필 편집"을 누르면 ProfileEdit으로 이동한다', () => {
-    const {root} = renderScreen();
+  it('"프로필 편집"을 누르면 ProfileEdit으로 이동한다', async () => {
+    const {root} = await renderScreen();
     const editButton = root.root.findByProps({testID: 'edit-profile-button'});
 
     act(() => {
@@ -79,8 +84,8 @@ describe('ProfileScreen', () => {
     expect(mockNavigate).toHaveBeenCalledWith('ProfileEdit');
   });
 
-  it('"이번 분기 리캡 보기" 카드를 누르면 Dashboard로 이동한다', () => {
-    const {root} = renderScreen();
+  it('"이번 분기 리캡 보기" 카드를 누르면 Dashboard로 이동한다', async () => {
+    const {root} = await renderScreen();
     const dashboardCard = root.root.findByProps({testID: 'dashboard-card'});
 
     act(() => {
@@ -90,8 +95,8 @@ describe('ProfileScreen', () => {
     expect(mockNavigate).toHaveBeenCalledWith('Dashboard');
   });
 
-  it('"로그아웃"을 누르면 AuthContext의 isLoggedIn이 false가 된다', () => {
-    const {root, getAuthApi} = renderScreen();
+  it('"로그아웃"을 누르면 AuthContext의 isLoggedIn이 false가 된다', async () => {
+    const {root, getAuthApi} = await renderScreen();
 
     act(() => {
       getAuthApi().login();

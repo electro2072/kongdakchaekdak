@@ -8,5 +8,9 @@ module.exports = {
     // 가리키는데, jest-preset의 transform 설정은 .mjs를 다루지 않아 파싱에 실패한다.
     // require() 조건이 가리키는 CJS 빌드로 강제 매핑해서 우회한다.
     '^lucide-react-native$': '<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js',
+    // AsyncStorage 네이티브 모듈은 테스트 환경에서 링크되지 않으므로, 패키지가 공식 제공하는
+    // 인메모리 jest mock으로 강제 매핑한다(AuthContext.tsx 세션 영속화, 2026-09-08 추가).
+    '^@react-native-async-storage/async-storage$':
+      '@react-native-async-storage/async-storage/jest/async-storage-mock',
   },
 };

@@ -31,9 +31,10 @@ import {useToast} from '../components/Toast';
  * 원형 아바타 placeholder + "사진 변경", 닉네임, 한줄소개(선택), 성별 칩(단일선택),
  * 관심분야 칩(중복선택), "저장하기" 버튼.
  *
- * PATCH /api/users/{id}는 있지만 관심분야(interests)를 채우는 DTO 연동은 백엔드가 아직
- * 안 붙여놔서(개발현황.md 28번 항목) 이번에도 mock-first로 간다 — 저장하면 ProfileContext의
- * 로컬 state만 갱신하고 화면을 뒤로 돌아간다. 사진 변경은 이미지 피커 라이브러리 선정이
+ * 2026-09-08 업데이트: PATCH /api/users/{id} 실제 연동(claude/독서기록앱_프론트_전체API연동_설계_v1.md
+ * 4장) — 저장하면 ProfileContext.updateProfile이 낙관적으로 로컬 state를 먼저 갱신한 뒤 실제
+ * API를 호출하고, 실패하면 이전 값으로 롤백한다. 이 화면은 그 결과를 기다렸다가 성공하면 뒤로
+ * 이동, 실패하면 에러 토스트만 띄우고 화면에 남긴다. 사진 변경은 이미지 피커 라이브러리 선정이
  * 필요한 별도 작업이라 이번 범위에서 제외(버튼만 배치, onPress 없음).
  *
  * 주요 인터랙션 요소에 testID를 달아뒀다 — 이 저장소 테스트가 @testing-library/react-native 없이
@@ -65,18 +66,29 @@ export function ProfileEditScreen() {
     );
   };
 
-  const handleSave = () => {
-    if (!canSubmit) {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!canSubmit || isSaving) {
       return;
     }
-    updateProfile({
-      nickname: trimmedNickname,
-      bio: bio.trim(),
-      gender,
-      interests,
-    });
-    showToast({type: 'success', message: '수정한 내역을 저장했어요'});
-    navigation.goBack();
+    setIsSaving(true);
+    try {
+      await updateProfile({
+        nickname: trimmedNickname,
+        bio: bio.trim(),
+        gender,
+        interests,
+      });
+      showToast({type: 'success', message: '수정한 내역을 저장했어요'});
+      navigation.goBack();
+    } catch {
+      // 2026-09-08 업데이트: PATCH /api/users/{id} 실제 연동 — 실패 시 ProfileContext가
+      // 이전 값으로 롤백해두므로, 여기서는 에러 토스트만 띄우고 화면에 남아 재시도할 수 있게 한다.
+      showToast({type: 'error', message: '저장하지 못했어요. 다시 시도해주세요.'});
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -231,10 +243,10 @@ export function ProfileEditScreen() {
         style={[
           styles.primaryButton,
           {backgroundColor: colors.accentSolidBg, borderRadius: radii.pill},
-          !canSubmit && {opacity: 0.5},
+          (!canSubmit || isSaving) && {opacity: 0.5},
         ]}
         onPress={handleSave}
-        disabled={!canSubmit}>
+        disabled={!canSubmit || isSaving}>
         <Text style={[typography.button, {color: colors.onAccentSolid}]}>
           저장하기
         </Text>

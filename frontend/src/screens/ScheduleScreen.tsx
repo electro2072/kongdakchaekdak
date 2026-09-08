@@ -11,7 +11,11 @@ import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Bell, BookOpen, CalendarDays, Plus} from 'lucide-react-native';
 import type {MainStackParamList} from '../navigation/types';
+import {useProfile} from '../navigation/ProfileContext';
 import {useTheme} from '../theme';
+
+/** 이 값(일) 이상 미접속이면 "오랜만이에요" 배너를 보여준다. */
+const INACTIVE_BANNER_THRESHOLD_DAYS = 30;
 
 type DayState = 'normal' | 'today' | 'meeting';
 
@@ -41,11 +45,20 @@ const READING_NOW_COUNT = 2;
  *
  * 종 아이콘(Frame 10 알림 목록)과 "이번주 일정 카드"(Frame 02.1 일정 상세)는 테스터 리포트
  * FINDING-20260828-10 반영 — 이전엔 두 곳 다 진입점(onPress)이 없었다.
+ *
+ * 2026-09-08 업데이트: "한 달 이상 미접속" 배너 추가 — 알림 API 자체는 아직 없지만(Tier2,
+ * 백엔드 요청 대기 중) /api/auth/me의 daysSinceLastLogin만으로 이 배너 하나는 지금도 띄울 수
+ * 있다고 백엔드가 확인해줬다(claude/독서기록앱_프론트_전체API연동_설계_v1.md 8장). null이면
+ * 배너를 띄우지 않는 게 백엔드와의 계약.
  */
 export function ScheduleScreen() {
   const {colors, typography, radii} = useTheme();
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const {daysSinceLastLogin} = useProfile();
+  const showInactiveBanner =
+    daysSinceLastLogin !== null &&
+    daysSinceLastLogin >= INACTIVE_BANNER_THRESHOLD_DAYS;
 
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: colors.surface}]}>
@@ -72,6 +85,22 @@ export function ScheduleScreen() {
             <Bell size={20} color={colors.n600} />
           </TouchableOpacity>
         </View>
+
+        {showInactiveBanner && (
+          <View
+            testID="inactive-banner"
+            style={[styles.inactiveBanner, {backgroundColor: colors.warnBg}]}>
+            <Bell size={13} color={colors.warning} />
+            <Text
+              style={[
+                typography.caption,
+                {color: colors.warnText, fontSize: 11, flex: 1},
+              ]}>
+              {daysSinceLastLogin}일 동안 방문하지 않으셨어요. 오늘 한 페이지
+              읽어볼까요?
+            </Text>
+          </View>
+        )}
 
         <View style={styles.weekRow}>
           {WEEK_DAYS.map(day => (
@@ -245,6 +274,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 16,
+  },
+  inactiveBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    borderRadius: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 11,
+    marginBottom: 12,
   },
   weekRow: {
     flexDirection: 'row',

@@ -1,4 +1,11 @@
-import React, {createContext, useCallback, useContext, useRef, useState} from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {Animated, StyleSheet, Text} from 'react-native';
 import {AlertCircle, AlertTriangle, CheckCircle, Info} from 'lucide-react-native';
 
@@ -53,6 +60,17 @@ export function ToastProvider({children}: {children: React.ReactNode}) {
   const [current, setCurrent] = useState<ShowToastOptions | null>(null);
   const opacity = useRef(new Animated.Value(0)).current;
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 2026-09-08 업데이트: 언마운트 시(화면 전환, 테스트 unmount 등) 대기 중이던 hideTimer를
+  // 정리하지 않으면 토스트가 뜬 직후 화면이 사라져도 최대 2.5초짜리 타이머가 그대로 살아있게
+  // 된다 — jest에서 "A worker process has failed to exit gracefully" 경고로 드러났음.
+  useEffect(() => {
+    return () => {
+      if (hideTimer.current) {
+        clearTimeout(hideTimer.current);
+      }
+    };
+  }, []);
 
   const hide = useCallback(() => {
     Animated.timing(opacity, {

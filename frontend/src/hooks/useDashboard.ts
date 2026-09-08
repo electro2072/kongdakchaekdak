@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import type {DashboardPeriod, DashboardResponse} from '../types/dashboard';
-import {getMockDashboard} from '../mocks/dashboard';
+import {apiFetch} from '../services/apiClient';
 
 interface UseDashboardResult {
   period: DashboardPeriod;
@@ -11,14 +11,18 @@ interface UseDashboardResult {
   retry: () => void;
 }
 
-// TODO: GET /api/dashboard 연동 전이라 mock 데이터를 짧은 지연 후 반환한다(로딩 스켈레톤이 실제로
-// 보이는지 확인하기 위한 용도도 겸함). 백엔드 계약은 확정돼 있으니(claude/독서기록앱_프론트요청_대시보드API필드확인_v1.md
-// 답변 참고) 실제 연동 시 이 함수 내부만 `fetch('/api/dashboard?period=...&date=...')`로 교체하면
-// useDashboard를 쓰는 화면 코드는 변경할 필요가 없다.
+/** "yyyy-MM" — GET /api/dashboard의 date 쿼리 파라미터(현재 달 기준, 백엔드가 이 달이 속한 기간을 계산) */
+function currentYearMonth(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// 2026-09-08 업데이트: GET /api/dashboard 실제 연동(claude/독서기록앱_프론트_전체API연동_설계_v1.md
+// 5장) — 백엔드 계약이 이미 확정·실측 검증까지 끝나 있어서(claude/독서기록앱_프론트요청_대시보드API필드확인_v1.md
+// 답변) 이 함수 내부만 교체하면 됐고, useDashboard를 쓰는 화면 코드는 그대로다.
 function fetchDashboard(period: DashboardPeriod): Promise<DashboardResponse> {
-  return new Promise(resolve => {
-    setTimeout(() => resolve(getMockDashboard(period)), 400);
-  });
+  const query = `period=${period.toUpperCase()}&date=${currentYearMonth()}`;
+  return apiFetch<DashboardResponse>(`/api/dashboard?${query}`);
 }
 
 /** Frame 05.1 대시보드 화면의 기간 상태 + 데이터 로딩(로딩/에러/재시도)을 관리하는 훅 */
