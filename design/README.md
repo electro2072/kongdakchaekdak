@@ -40,7 +40,9 @@
 
 > **📌 입력형 다이얼로그 컴포넌트 신규 추가 (2026-09-08): `color_chips.html` v2.4** — 프론트가 책 상세 화면의 "장소사진 라벨 입력"(예: "홍대 카페") UI를 만들다가, 기존 확인/경고 다이얼로그(v2.3, "12.")가 "텍스트 입력 필드가 들어가는 경우는 범위 밖"이라고 명시해둔 케이스에 부딪혀 신규 요청했습니다. `color_chips.html`에 "14. 입력형 다이얼로그" 섹션을 추가 — 카드·스크림·버튼 규칙은 기존 확인 다이얼로그와 동일하고, 본문 자리에 한 줄 입력 필드만 들어갑니다(입력 필드 자체는 새 토큰 없이 기존 폼 화면의 입력 필드 토큰 재사용). 버튼 라벨은 "취소/확인" 대신 상황에 맞게 "건너뛰기/저장"처럼 바꿔 쓰도록 안내했습니다. 답변은 프론트 요청 문서(`독서기록앱_프론트요청_디자인_소감작성화면_장소사진추가화면_v1.md`)에 함께 남겼습니다 — 소감(BookNote) 목록형 UI(카드 리스트, 500자 제한, 전체화면 push)와 장소사진 추가 흐름("+" 타일, 길게 누르기 삭제) 답변도 같은 문서에 있습니다.
 
-> **📌 스토어 마케팅 스크린샷 추가 (2026-09-08, 사용자 직접 반영)** — App Store 6.9"용 6장(`assets/store/screenshots/app_store_6.9/`), Google Play용 6장(`assets/store/screenshots/google_play/`)이 로컬에 커밋됨. 온보딩 화면(Frame 01) 위에 "오늘 읽은 한 페이지를 자랑해보세요" 캡션을 얹은 형태 — 이 라운드는 디자인 에이전트 세션 밖(사용자가 직접)에서 진행되어 자세한 제작 경위·나머지 5장 각각의 캡션 문구는 이 문서에 기록되어 있지 않습니다. `store_assets.html`(디자인 소스)에도 아직 이 스크린샷 관련 changelog가 없어, 필요하면 정리해드릴 수 있습니다.
+> **📌 스토어 마케팅 스크린샷 추가 (2026-09-08, 사용자 직접 반영)** — App Store 6.9"용 6장(`assets/store/screenshots/app_store_6.9/`), Google Play용 6장(`assets/store/screenshots/google_play/`)이 로컬에 커밋됨. 온보딩 화면(Frame 01) 위에 "오늘 읽은 한 페이지를 자랑해보세요" 캡션을 얹은 형태. `store_assets.html`(디자인 소스)에도 v1.1(2026-09-08)에서 이 changelog를 반영했습니다.
+>
+> **📌 스토어 등록 텍스트 v2 작성 (2026-09-08, 사용자 직접 반영): `store/listing_text_v2.md` 신규** — 위 스크린샷 6장 각각의 캡션 문구(로그인/서재/일정/리캡 대시보드/공유/서재 다크)가 이 문서에 표로 정리되어, 위 콜아웃에서 언급했던 "캡션 문구 미기록" 갭이 해소되었습니다. 그 외에도 앱 이름(`콩닥책닥 - 나만의 독서 기록`, 확정), 카테고리(Google Play 도서/참고자료, App Store 도서+라이프스타일), 지원 URL(GitHub 저장소, 임시), Google Play 짧은/전체 설명, App Store 부제·프로모션 텍스트·키워드(13개, 앱 이름과 중복되는 단어 제외)까지 스토어 등록에 필요한 텍스트 전량을 확정했습니다. 문의처는 `electro2072@gmail.com`, 최소 이용 연령은 "만 14세 이상"으로 명시됨 — 이 두 항목은 개인정보처리방침/이용약관(TODO 리스트 2번 섹션, 아직 미작성) 작성 시 그대로 반영하면 됩니다.
 
 이 폴더는 앱의 비주얼 디자인 산출물(컬러 팔레트, 타이포그래피/아이콘, Hi-Fi 목업)의 실제 소스 파일을 담습니다. 각 산출물의 결정 사항 요약은 claude.ai 프로젝트 문서함에도 마크다운으로 정리되어 있습니다:
 
@@ -71,9 +73,10 @@
 | `assets/icon/notification/notification_xxhdpi_72.png` | v1 | Android 알림 아이콘, xxhdpi 밀도, 72×72, 투명 배경 |
 | `assets/icon/notification/notification_xxxhdpi_96.png` | v1 | Android 알림 아이콘, xxxhdpi 밀도, 96×96, 투명 배경 |
 | `deprecated/assets/icon/*.png` | v1 (보관용) | 이전 쑥송편 아이콘의 최종 PNG 3종을 그대로 보관(내용 동일, 위치만 이동). (2026-08-27) `assets/icon/archive_songpyeon_v1/`에서 `design/deprecated/assets/icon/`으로 재이동 |
-| `store_assets.html` | v1 | **스토어 등록용 그래픽** — Google Play 피처 그래픽(1024×500), 고해상도 아이콘(512×512). 사양은 Google Play/Apple 공식 문서 확인 후 정확한 픽셀 크기로 제작. **(2026-09-08) 마케팅 스크린샷 완료** — `assets/store/screenshots/app_store_6.9/`(6장)·`assets/store/screenshots/google_play/`(6장)에 실제 온보딩 화면 기반 캡션형 스크린샷이 추가됨. 이 라운드는 디자인 에이전트 세션 밖에서(사용자가 직접) 반영됨 — `store_assets.html` 자체(디자인 소스 문서)에는 아직 이 스크린샷들에 대한 changelog/미리보기가 반영되지 않았으니 필요하면 별도로 정리 요청 |
+| `store_assets.html` | v1.1 | **스토어 등록용 그래픽** — Google Play 피처 그래픽(1024×500), 고해상도 아이콘(512×512). 사양은 Google Play/Apple 공식 문서 확인 후 정확한 픽셀 크기로 제작. **v1.1(2026-09-08)**에서 changelog 추가 — `assets/store/screenshots/`의 마케팅 스크린샷 12장(app_store_6.9·google_play 각 6장)과 `store/listing_text_v2.md`(스토어 등록 텍스트 전량)가 사용자 직접 반영으로 완료됐음을 문서 내 `doc-note`에 기록. 이 파일 자체가 다루는 그래픽(피처 그래픽·512 아이콘)에는 변경 없음, 위치 안내용 changelog 성격 |
 | `assets/store/play_feature_graphic_1024x500.png` | v1 | Google Play 피처 그래픽, 1024×500, 알파 없음 |
 | `assets/store/play_store_icon_512x512.png` | v1 | Google Play 고해상도 아이콘, 512×512 |
+| `store/listing_text_v2.md` | v2 (신규, 사용자 직접 작성) | **스토어 등록 텍스트 모음** — Google Play Console·App Store Connect에 그대로 입력할 텍스트 전량(앱 이름·카테고리·지원 URL 공통, Google Play 짧은/전체 설명, App Store 부제·프로모션 텍스트·키워드) + 스크린샷 6장의 캡션 문구 표 + 결정 이력. 글자 수 전부 스토어 제한 이내로 검증됨. 디자인 소스 파일(`.html`)이 아니라 등록용 콘텐츠 문서라 `design/store/`에 별도 위치 — 위 `store_assets.html`(그래픽 소스)과는 역할이 다름 |
 | `splash_screen.html` | v1 (확정) | **스플래시 화면 최종 디자인 소스** — 쑥송편 그린(`#7D8F5D`) 풀블리드 배경 + "콩닥"/"책닥" 크림색(`#f7f1e4`) 워드마크. 앱 아이콘과 동일한 색 재사용. 다크모드 짝 없음(스플래시는 iOS/Android 관례상 시스템 테마와 무관한 단일 버전) · 로딩 인디케이터 없음(정적 화면). 워드마크 로고를 투명 배경 960×960 PNG로 내보내는 실제 export 엘리먼트 포함 |
 | `splash_screen_concept.html` | — (탐색용) | 스플래시 방향을 정하기 전 비교한 2가지 시안 — ① 심플 아이콘 중앙형(크림 배경+작은 아이콘), ② 풀블리드 워드마크형(그린 배경 전체+큰 워드마크). ②번이 채택되어 `splash_screen.html`로 확정됨 |
 | `assets/splash/splash_logo.png` | v1 | 스플래시용 워드마크 로고, 960×960, **투명 배경**(RGBA 알파 확인 완료). 배경색(`#7D8F5D`)은 이미지가 아니라 앱 실행 설정에 직접 지정하고, 이 로고 파일만 그 위에 얹는 구성 |
