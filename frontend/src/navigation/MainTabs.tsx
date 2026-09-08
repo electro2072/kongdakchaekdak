@@ -2,7 +2,13 @@ import React, {useEffect} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {CalendarDays, Library, Share2, User} from 'lucide-react-native';
+import {
+  CalendarDaysFill,
+  LibraryFill,
+  Share2Fill,
+  UserFill,
+} from '../components/TabBarIcons';
+import type {TabIconProps} from '../components/TabBarIcons';
 import type {MainStackParamList, MainTabParamList} from './types';
 import {ScheduleScreen} from '../screens/ScheduleScreen';
 import {LibraryScreen} from '../screens/LibraryScreen';
@@ -13,14 +19,21 @@ import {useTheme} from '../theme';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-const TAB_ICON: Record<keyof MainTabParamList, typeof CalendarDays> = {
-  Schedule: CalendarDays,
-  Library: Library,
-  Share: Share2,
-  Profile: User,
+const TAB_ICON: Record<
+  keyof MainTabParamList,
+  React.ComponentType<TabIconProps>
+> = {
+  Schedule: CalendarDaysFill,
+  Library: LibraryFill,
+  Share: Share2Fill,
+  Profile: UserFill,
 };
 
-/** 로그인 후 하단 탭: 일정 / 서재 / 공유 / 프로필 (기획서 3장 IA 기준, 아이콘: Lucide) */
+/**
+ * 로그인 후 하단 탭: 일정 / 서재 / 공유 / 프로필 (기획서 3장 IA 기준)
+ * 아이콘: 콩닥책닥 자체 제작 filled 4종(TabBarIcons) — 디자인 v1.16 기준으로
+ * 활성/비활성 모두 filled를 쓰고, 선택 상태는 색상과 라벨 굵기로만 구분한다.
+ */
 export function MainTabs() {
   const {colors} = useTheme();
   const {pendingBookSearchOnEntry, setPendingBookSearchOnEntry} = useAuth();
@@ -41,12 +54,13 @@ export function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
-        tabBarIcon: ({focused, color}) => {
+        tabBarIcon: ({color}) => {
           const Icon = TAB_ICON[route.name];
-          return (
-            <Icon size={22} color={color} strokeWidth={focused ? 2.4 : 2} />
-          );
+          // filled 아이콘은 굵기 개념이 없으므로 focused에 따른 strokeWidth 분기 없음 —
+          // 선택 상태는 tabBarActiveTintColor(색상)와 라벨 굵기가 담당한다.
+          return <Icon size={22} color={color} />;
         },
+        tabBarLabelStyle: {fontWeight: '600'},
         tabBarActiveTintColor: colors.p700,
         tabBarInactiveTintColor: colors.n500,
         tabBarStyle: {
