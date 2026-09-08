@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>콩닥책닥 — 컬러 칩 (쑥송편 테마) v2.3</title>
+<title>콩닥책닥 — 컬러 칩 (쑥송편 테마) v2.4</title>
 <style>
   :root {
     --p50:#f4f9eb; --p100:#ebf5db; --p200:#d6e5bd; --p300:#b9cd98; --p400:#99ae73;
@@ -174,6 +174,12 @@
   .dark-dialog-btn-primary { background: var(--d-p500); color: var(--d-dark-on-btn); }
   .dark-dialog-btn-danger { background: #eb596e; color: #2a070d; }
 
+  /* 입력형 다이얼로그 (v2.4 신규, 2026-09-07) — 위 확인 다이얼로그와 같은 카드/스크림, 본문 대신 입력 필드 */
+  .dialog-input { width: 100%; height: 36px; border-radius: 8px; background: var(--n50); border: 1px solid var(--n300); padding: 0 10px; font-size: 12px; color: var(--n900); margin-bottom: 14px; box-sizing: border-box; text-align: left; }
+  .dialog-input.placeholder { color: var(--n400); }
+  .dark-dialog-input { background: var(--d-surface-app); border-color: var(--d-border); color: var(--d-text-primary); }
+  .dark-dialog-input.placeholder { color: var(--d-text-secondary); }
+
   /* 하단 액션 시트 (v2.3 신규, 2026-09-07) */
   .sheet-stage { position: relative; background: var(--n100); border-radius: 8px; height: 232px; overflow: hidden; }
   .sheet-overlay { position: absolute; inset: 0; background: rgba(10,11,8,0.58); display: flex; align-items: flex-end; }
@@ -209,8 +215,8 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>🥮 콩닥책닥 — 컬러 팔레트 v2.3 (책거리 · 송편)</h1>
-  <p class="sub">메인 테마: 쑥송편 초록(Mugwort Green) · OKLCH 기반 설계 · 대비 검증 완료 · v2.3 개정 2026-09-07</p>
+  <h1>🥮 콩닥책닥 — 컬러 팔레트 v2.4 (책거리 · 송편)</h1>
+  <p class="sub">메인 테마: 쑥송편 초록(Mugwort Green) · OKLCH 기반 설계 · 대비 검증 완료 · v2.4 개정 2026-09-07</p>
   <div class="doc-note">
     <b>v1 (2026-07-21)</b> — 프라이머리 그린(hue 128°) 라이트/다크 램프, Neutral, Status(success/warning/error/info) 확정.<br>
     <b>v1.1 (2026-07-21)</b> — 카테고리 구분용 포인트 멀티컬러(코랄·시안·라벤더) 추가.<br>
@@ -220,6 +226,7 @@
     <b>v2.1 (2026-08-31)</b> — 범용 <b>로딩 스피너</b> 컴포넌트 신규 추가(맨 아래 "10. 로딩 스피너" 참고). 버튼 내부(16px)·섹션/카드(28px)·전체 화면 오버레이(40px) 3가지 크기, 라이트/다크 각각. 기존 팔레트 색상 값은 변경 없음 — 새 컴포넌트 하나 추가된 것뿐.<br>
     <b>v2.2 (2026-09-07)</b> — "저장했습니다" 같은 확인 메시지를 위한 <b>토스트/스낵바</b> 컴포넌트 신규 추가(맨 아래 "11. 토스트/스낵바 메시지" 참고). 화면 하단에 뜨는 스낵바 스타일, 성공/오류/경고/정보 4가지 상태. 로딩 오버레이와 같은 원칙으로 라이트/다크 화면 구분 없이 고정된 어두운 서피스 사용. 기존 팔레트 색상 값은 변경 없음.<br>
     <b>v2.3 (2026-09-07)</b> — "그런 메세지창"(정말 로그아웃하시겠어요? 식의 확인/경고 팝업) 관련 문의로 두 컴포넌트를 신규 추가: <b>확인/경고 다이얼로그</b>(맨 아래 "12." 참고)와 <b>하단 액션 시트</b>("13." 참고). 토스트·로딩 오버레이와 달리 이 둘은 화면 콘텐츠와 같은 표면이라 라이트/다크 테마를 그대로 따릅니다. 기존 팔레트 색상 값은 변경 없음.
+    <b>v2.4 (2026-09-07)</b> — 프론트가 "책 상세 화면 장소사진 라벨 입력"을 만들다가, 12번 확인 다이얼로그가 명시적으로 범위 밖이라고 밝힌 "텍스트 입력 필드가 들어가는 경우"에 부딪혀 신규 요청. <b>입력형 다이얼로그</b>("14." 참고)를 추가 — 12번과 카드·스크림·버튼 규칙은 동일, 본문 자리에 한 줄 입력 필드만 추가. 입력 필드 자체는 새 토큰을 만들지 않고 기존 폼 화면(프로필 편집 닉네임/한줄소개)의 입력 필드 토큰(<code>--n50</code>/<code>--n300</code>)을 재사용. 기존 팔레트 색상 값은 변경 없음.
   </div>
 
   <h2>0. 브랜드 스토리 — 송편 5색</h2>
@@ -637,8 +644,52 @@
     </div>
   </div>
 
+  <h2>14. 입력형 다이얼로그 (v2.4 신규, 2026-09-07)</h2>
+  <p class="note">12번 확인 다이얼로그가 명시적으로 범위 밖이라고 밝혔던 "텍스트 입력 필드가 들어가는 경우"에 대한 신규 변형입니다. 프론트에서 "사진 찍은 장소를 짧은 텍스트로 입력받고 싶은데, 확인 다이얼로그로는 안 되냐"고 물어와 만들었습니다 — 스크림·카드·모서리·타이틀 스타일은 12번과 완전히 동일하고, 본문 문구 자리에 <b>한 줄 입력 필드</b>가 들어가는 것만 다릅니다. 버튼 2개 규칙도 동일하되, 라벨은 상황에 맞게 바꿔 씁니다(예: 취소/저장 대신 건너뛰기/저장).</p>
+  <div class="mock-row">
+    <div class="card">
+      <h4>장소 라벨 입력 (선택)</h4>
+      <p>사진 등록 직후 표시 — 입력 없이 건너뛰기 가능</p>
+      <div class="dialog-stage">
+        <div class="dialog-overlay">
+          <div class="dialog-card">
+            <div class="dialog-title">이 사진을 찍은 장소는?</div>
+            <div class="dialog-input placeholder" style="text-align:left; display:flex; align-items:center;">예: 홍대 카페</div>
+            <div class="dialog-actions">
+              <div class="dialog-btn dialog-btn-cancel">건너뛰기</div>
+              <div class="dialog-btn dialog-btn-primary">저장</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">💡 규칙: 입력 필드는 기존 폼 화면(프로필 편집의 닉네임/한줄소개 필드)과 동일한 토큰(<code>--n50</code> 배경, <code>--n300</code> 테두리, 라운드 8px)을 재사용해 다이얼로그 안에서도 "이 앱의 입력 필드"로 바로 인식되도록 했습니다. 입력값이 없어도(선택 입력) 진행할 수 있는 상황이면 왼쪽 버튼을 "취소"가 아니라 "건너뛰기"처럼 실제 동작을 설명하는 라벨로 바꿔 쓰는 걸 권장합니다 — 취소는 "다이얼로그 자체를 닫고 아무 것도 안 함", 건너뛰기는 "이 입력만 생략하고 계속 진행함"이라 사용자에게 다른 의미를 전달하기 때문입니다. 필수 입력이라 빈 값으로 진행하면 안 되는 경우, 오른쪽 버튼을 기존 <code>.btn-disabled</code>(회원가입 폼과 동일 규칙)로 비활성화하세요. 입력 필드가 2개 이상 필요하거나 멀티라인 입력이 필요한 경우는 이 컴포넌트 범위 밖입니다 — 전체화면 폼(프로필 편집 패턴)으로 가는 걸 권장합니다.</p>
+
+  <div class="dark-section">
+    <h3>다크모드</h3>
+    <div class="mock-row">
+      <div class="dark-card">
+        <h4>장소 라벨 입력 (선택)</h4>
+        <p>다크 카드 서피스 + 다크 입력 필드 토큰</p>
+        <div class="dialog-stage dark-dialog-stage">
+          <div class="dialog-overlay dark-dialog-overlay">
+            <div class="dialog-card dark-dialog-card">
+              <div class="dialog-title dark-dialog-title">이 사진을 찍은 장소는?</div>
+              <div class="dialog-input dark-dialog-input placeholder" style="text-align:left; display:flex; align-items:center;">예: 홍대 카페</div>
+              <div class="dialog-actions">
+                <div class="dialog-btn dark-dialog-btn-cancel">건너뛰기</div>
+                <div class="dialog-btn dark-dialog-btn-primary">저장</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer>
-    콩닥책닥 디자인 시스템 v2.3 · culori(OKLCH)로 색공간 변환 및 램프 생성 · WCAG 대비는 자체 구현 공식으로 검증 · 색맹 안전성은 명도(L) 분산 확인으로 약식 대체(정식 <code>validate_palette.js</code> 재검증 권장) · 브랜드 컨셉: 책거리 × 송편 (2026-08-09) · 로딩 스피너 컴포넌트 추가 (2026-08-31) · 토스트/스낵바 메시지 추가 (2026-09-07) · 확인 다이얼로그/액션 시트 추가 (2026-09-07)
+    콩닥책닥 디자인 시스템 v2.4 · culori(OKLCH)로 색공간 변환 및 램프 생성 · WCAG 대비는 자체 구현 공식으로 검증 · 색맹 안전성은 명도(L) 분산 확인으로 약식 대체(정식 <code>validate_palette.js</code> 재검증 권장) · 브랜드 컨셉: 책거리 × 송편 (2026-08-09) · 로딩 스피너 컴포넌트 추가 (2026-08-31) · 토스트/스낵바 메시지 추가 (2026-09-07) · 확인 다이얼로그/액션 시트 추가 (2026-09-07) · 입력형 다이얼로그 추가 (2026-09-07)
   </footer>
 </div>
 
