@@ -14,3 +14,18 @@ backend/build/
 # IDE
 .idea/
 .vscode/
+
+# 릴리스 서명 (절대 커밋 금지 — debug.keystore만 예외)
+*.jks
+*.keystore
+!frontend/android/app/debug.keystore
+*.p8
+release.keystore
+
+# 소셜/파이어베이스 설정 파일 (실제 키 포함)
+google-services.json
+GoogleService-Info.plist
+
+# 로컬 Xcode 오버라이드
+*.xcode.env.local
+
