@@ -16,6 +16,7 @@ import {
 } from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import type {ImagePickerResponse} from 'react-native-image-picker';
 import {
   BookOpen,
   Camera,
@@ -162,24 +163,44 @@ export function BookDetailScreen() {
     );
   }
 
+  /**
+   * 이미지 피커 응답 공통 처리. 예전엔 uri가 있을 때만 보고 나머지는 전부 무시해서, 권한 거부나
+   * 카메라 사용 불가 같은 실패가 "시트만 닫히고 아무 일도 안 일어남"으로 보였다. 사용자가 직접
+   * 취소한 경우(didCancel)만 조용히 넘기고, 나머지 실패는 반드시 토스트로 알린다.
+   */
+  const handlePickerResponse = (response: ImagePickerResponse) => {
+    if (response.didCancel) {
+      return;
+    }
+    if (response.errorCode) {
+      const message =
+        response.errorCode === 'camera_unavailable'
+          ? '이 기기에서는 카메라를 쓸 수 없어요'
+          : response.errorCode === 'permission'
+          ? '사진 권한이 필요해요. 설정에서 허용해주세요'
+          : response.errorMessage ?? '사진을 가져오지 못했어요';
+      showToast({type: 'error', message});
+      return;
+    }
+    const uri = response.assets?.[0]?.uri;
+    if (uri) {
+      setPendingPhotoUri(uri);
+    } else {
+      showToast({type: 'error', message: '사진을 가져오지 못했어요'});
+    }
+  };
+
   const handlePickFromCamera = () => {
     setPhotoSourceSheetVisible(false);
-    launchCamera({mediaType: 'photo', quality: 0.8}, response => {
-      const uri = response.assets?.[0]?.uri;
-      if (uri) {
-        setPendingPhotoUri(uri);
-      }
-    });
+    launchCamera({mediaType: 'photo', quality: 0.8}, handlePickerResponse);
   };
 
   const handlePickFromLibrary = () => {
     setPhotoSourceSheetVisible(false);
-    launchImageLibrary({mediaType: 'photo', quality: 0.8}, response => {
-      const uri = response.assets?.[0]?.uri;
-      if (uri) {
-        setPendingPhotoUri(uri);
-      }
-    });
+    launchImageLibrary(
+      {mediaType: 'photo', quality: 0.8},
+      handlePickerResponse,
+    );
   };
 
   const finishAddPhoto = async (label?: string) => {

@@ -3,8 +3,14 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- 장소 사진 등록(react-native-image-picker) — 카메라 촬영 + 앨범 선택 둘 다 지원.
-         READ_MEDIA_IMAGES는 안드로이드 13(API 33) 이상, READ_EXTERNAL_STORAGE는 그 이하 대상. -->
-    <uses-permission android:name="android.permission.CAMERA" />
+         READ_MEDIA_IMAGES는 안드로이드 13(API 33) 이상, READ_EXTERNAL_STORAGE는 그 이하 대상.
+
+         CAMERA 권한은 일부러 선언하지 않는다. launchCamera는 시스템 카메라 앱을 인텐트로 띄우는
+         방식이라 권한이 필요 없고, 오히려 이 권한을 선언하면 라이브러리가 "직접 카메라를 쓰는 앱"으로
+         보고 런타임 승인을 요구한다(react-native-image-picker README: 선언했다면 호출 전에 앱이
+         직접 권한을 받아야 함). 예전엔 선언만 하고 요청은 하지 않아서 "촬영" 선택 시 아무 일도
+         일어나지 않고 시트만 닫혔다. 덤으로 CAMERA 선언은 uses-feature camera를 암시적으로
+         required=true로 만들어 카메라 없는 기기를 스토어에서 걸러낸다. -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission
       android:name="android.permission.READ_EXTERNAL_STORAGE"
