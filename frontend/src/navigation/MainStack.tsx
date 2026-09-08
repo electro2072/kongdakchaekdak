@@ -10,6 +10,9 @@ import {BookRegisterConfirmScreen} from '../screens/BookRegisterConfirmScreen';
 import {BookNoteEditScreen} from '../screens/BookNoteEditScreen';
 import {DashboardScreen} from '../screens/DashboardScreen';
 import {ProfileEditScreen} from '../screens/ProfileEditScreen';
+import {GroupManagementScreen} from '../screens/GroupManagementScreen';
+import {ScheduleDetailScreen} from '../screens/ScheduleDetailScreen';
+import {NotificationScreen} from '../screens/NotificationScreen';
 import {useLibrary} from './LibraryContext';
 import {useTheme} from '../theme';
 
@@ -81,6 +84,27 @@ export function MainStack() {
         name="ProfileEdit"
         component={ProfileEditScreen}
         options={{title: '프로필 편집'}}
+      />
+      {/*
+        아래 3개는 화면 파일과 types.ts 라우트 타입은 있었는데 라우터 등록만 빠져 있어서,
+        tsc는 통과하는데 실제로 누르면 크래시했다(릴리스 게이트 G4 / FINDING-20260828-10).
+        일정·알림의 v1 포함 여부는 아직 미결이라 여기서는 "눌러도 안 죽는" 등록까지만 하고,
+        실데이터 연동이나 진입점 숨김은 범위 결정 후 별도 슬라이스에서 처리한다.
+      */}
+      <Stack.Screen
+        name="GroupManagement"
+        component={GroupManagementScreen}
+        options={{title: '그룹 관리 · 공유 이력'}}
+      />
+      <Stack.Screen
+        name="ScheduleDetail"
+        component={ScheduleDetailScreen}
+        options={{title: '일정 상세'}}
+      />
+      <Stack.Screen
+        name="Notifications"
+        component={NotificationScreen}
+        options={{title: '알림'}}
       />
     </Stack.Navigator>
   );
