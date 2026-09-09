@@ -19,6 +19,7 @@ import {
   MIN_NICKNAME_LENGTH,
   MAX_NICKNAME_LENGTH,
   sanitizeNickname,
+  sanitizeNicknameWhileTyping,
   type GenderKey,
   type Genre,
 } from '../constants/profileOptions';
@@ -53,7 +54,9 @@ export function ProfileEditScreen() {
   const [gender, setGender] = useState<GenderKey | null>(profile.gender);
   const [interests, setInterests] = useState<string[]>(profile.interests);
 
-  const trimmedNickname = nickname.trim();
+  // 2026-09-08 업데이트: 저장 시점에는 sanitizeNicknameWhileTyping이 아직 조합 중인 낱자를
+  // 남겨뒀을 가능성까지 고려해 sanitizeNickname()으로 한 번 더 엄격히 정리한다.
+  const trimmedNickname = sanitizeNickname(nickname).trim();
   const nicknameError =
     nickname.length > 0 && trimmedNickname.length < MIN_NICKNAME_LENGTH
       ? `닉네임은 ${MIN_NICKNAME_LENGTH}자 이상 입력해주세요`
@@ -114,7 +117,7 @@ export function ProfileEditScreen() {
           <TextInput
             testID="nickname-input"
             value={nickname}
-            onChangeText={text => setNickname(sanitizeNickname(text))}
+            onChangeText={text => setNickname(sanitizeNicknameWhileTyping(text))}
             maxLength={MAX_NICKNAME_LENGTH}
             placeholder="닉네임을 입력해주세요"
             placeholderTextColor={colors.n400}

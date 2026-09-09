@@ -88,7 +88,12 @@ export function BookNoteEditScreen() {
         <TextInput
           testID="note-input"
           value={content}
-          onChangeText={text => setContent(text.slice(0, MAX_NOTE_LENGTH))}
+          // 2026-09-08 업데이트: onChangeText에서 매 keystroke마다 .slice()로 텍스트를 다시
+          // 잘라 state에 반영하면(길이 제한은 아래 maxLength로 이미 네이티브에서 처리됨에도
+          // 중복으로) 글자 수가 제한에 가까워질 때 한글 조합 중인 낱자가 함께 잘려나가 조합이
+          // 끊길 수 있다(ProfileEditScreen 닉네임 칸과 같은 종류의 IME 조합 버그) — 그냥
+          // setContent(text)로 통과시키고 길이 제한은 maxLength에만 맡긴다.
+          onChangeText={setContent}
           placeholder="이 책을 읽으며 든 생각을 자유롭게 남겨보세요"
           placeholderTextColor={colors.n400}
           multiline
@@ -96,6 +101,7 @@ export function BookNoteEditScreen() {
           textAlignVertical="top"
           autoCorrect={false}
           spellCheck={false}
+          textBreakStrategy="simple"
           style={[
             styles.input,
             {

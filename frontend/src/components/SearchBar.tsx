@@ -19,6 +19,9 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
         onChangeText={setQuery}
         onSubmitEditing={() => onSearch(query)}
         returnKeyType="search"
+        autoCorrect={false}
+        spellCheck={false}
+        textBreakStrategy="simple"
       />
       <Button title="검색" onPress={() => onSearch(query)} disabled={isLoading} />
     </View>

@@ -16,6 +16,7 @@ import {
   MIN_NICKNAME_LENGTH,
   MAX_NICKNAME_LENGTH,
   sanitizeNickname,
+  sanitizeNicknameWhileTyping,
   type GenderKey,
   type Genre,
 } from '../constants/profileOptions';
@@ -50,7 +51,10 @@ export function SignupScreen() {
   // 다이얼로그는 반드시 login() 호출 "전에" 이 화면 위에서 떠 있어야 한다.
   const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
 
-  const trimmedNickname = nickname.trim();
+  // 2026-09-08 업데이트: 저장 시점에는 sanitizeNicknameWhileTyping이 아직 조합 중인 낱자를
+  // 남겨뒀을 가능성까지 고려해 sanitizeNickname()으로 한 번 더 엄격히 정리한다
+  // (프로필 편집(ProfileEditScreen)과 동일한 이유/패턴).
+  const trimmedNickname = sanitizeNickname(nickname).trim();
   const nicknameError =
     nickname.length > 0 && trimmedNickname.length < MIN_NICKNAME_LENGTH
       ? `닉네임은 ${MIN_NICKNAME_LENGTH}자 이상 입력해주세요`
@@ -94,7 +98,7 @@ export function SignupScreen() {
           hint={`${MIN_NICKNAME_LENGTH}~${MAX_NICKNAME_LENGTH}자, 한글/영문/숫자만`}>
           <TextInput
             value={nickname}
-            onChangeText={text => setNickname(sanitizeNickname(text))}
+            onChangeText={text => setNickname(sanitizeNicknameWhileTyping(text))}
             maxLength={MAX_NICKNAME_LENGTH}
             placeholder="닉네임을 입력해주세요"
             placeholderTextColor={colors.n400}
