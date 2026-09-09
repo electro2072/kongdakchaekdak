@@ -243,7 +243,9 @@ class BookControllerTest {
                         .content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("MALFORMED_REQUEST"))
-                .andExpect(jsonPath("$.message").exists());
+                // (2026-09-09) message는 더 이상 응답에 실리지 않는다 — 사용자 문구는 프론트가
+                // error 코드로 매핑한다. 예외 상세는 서버 로그까지만 간다.
+                .andExpect(jsonPath("$.message").doesNotExist());
     }
 
     @Test

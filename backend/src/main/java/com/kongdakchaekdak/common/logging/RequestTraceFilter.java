@@ -34,7 +34,8 @@ public class RequestTraceFilter extends OncePerRequestFilter {
     /** 인증 성공 시 JwtAuthenticationFilter가 채워 넣는 request attribute 키. */
     public static final String USER_ID_ATTRIBUTE = "kongdakchaekdak.currentUserId";
 
-    private static final String TRACE_ID_MDC_KEY = "traceId";
+    /** MDC 및 로그 패턴에서 쓰는 traceId 키. GlobalExceptionHandler가 500 응답에 실을 때 참조한다. */
+    public static final String TRACE_ID_MDC_KEY = "traceId";
     private static final String LOG_TYPE_MDC_KEY = "logType";
     private static final String TRACE_ID_RESPONSE_HEADER = "X-Trace-Id";
 

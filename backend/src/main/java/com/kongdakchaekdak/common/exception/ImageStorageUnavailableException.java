@@ -18,8 +18,13 @@ package com.kongdakchaekdak.common.exception;
  * 변환한다 — "서버 오류"가 아니라 "이 기능이 아직 설정 안 됨"이라는 의미를 정확히 전달하기 위해
  * 500이 아니라 503을 쓴다.</p>
  */
-public class ImageStorageUnavailableException extends RuntimeException {
+public class ImageStorageUnavailableException extends RuntimeException implements CodedException {
     public ImageStorageUnavailableException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    @Override
+    public ErrorCode getErrorCode() {
+        return ErrorCode.IMAGE_STORAGE_UNAVAILABLE;
     }
 }

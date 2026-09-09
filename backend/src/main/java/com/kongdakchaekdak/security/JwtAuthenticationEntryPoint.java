@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.security;
 
+import com.kongdakchaekdak.common.exception.ErrorCode;
 import com.kongdakchaekdak.common.exception.ErrorResponse;
 import com.kongdakchaekdak.common.logging.SecurityEventLogger;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,11 +35,9 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
 
-        ErrorResponse body = ErrorResponse.of(
-                HttpStatus.UNAUTHORIZED.value(),
-                "UNAUTHENTICATED",
-                "인증이 필요합니다. Authorization: Bearer {token} 헤더를 확인해주세요."
-        );
+        // (2026-09-09) 기존에는 "Authorization: Bearer {token} 헤더를 확인해주세요" 라는 개발자 안내가
+        // message로 내려갔고, 프론트가 그걸 그대로 화면에 띄우고 있었다. 이제 코드만 내려보낸다.
+        ErrorResponse body = ErrorResponse.of(ErrorCode.UNAUTHENTICATED);
         response.getWriter().write(objectMapper.writeValueAsString(body));
     }
 }
