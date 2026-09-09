@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.auth;
 
+import com.kongdakchaekdak.domain.auth.dto.AppleIdTokenRequest;
 import com.kongdakchaekdak.domain.auth.dto.GoogleIdTokenRequest;
 import com.kongdakchaekdak.domain.auth.dto.SocialAccessTokenRequest;
 import com.kongdakchaekdak.domain.auth.dto.TokenResponse;
@@ -16,10 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 인증 API. 카카오/구글/네이버 소셜 로그인만 지원한다 — 서버가 비밀번호 등 인증 정보를 직접
- * 보관하지 않는다는 제품 결정(2026-07-22)에 따라 이메일/PW 회원가입/로그인 엔드포인트는 제거됨.
- * 소셜 로그인은 모바일 앱이 각 제공자 SDK로 이미 받아온 토큰을 그대로 넘겨받는 방식이라
- * (SocialAuthService 참고), 프론트에서 카카오/구글/네이버 SDK 연동이 끝나야 실제로 끝까지 테스트할 수 있다.
+ * 인증 API. 카카오/구글/네이버/애플 소셜 로그인만 지원한다 — 서버가 비밀번호 등 인증 정보를
+ * 직접 보관하지 않는다는 제품 결정(2026-07-22)에 따라 이메일/PW 회원가입/로그인 엔드포인트는
+ * 제거됨. 소셜 로그인은 모바일 앱이 각 제공자 SDK로 이미 받아온 토큰을 그대로 넘겨받는
+ * 방식이라(SocialAuthService 참고), 프론트에서 각 SDK 연동이 끝나야 실제로 끝까지 테스트할
+ * 수 있다. 애플은 iOS 빌드에서만 버튼이 노출된다(플랫폼 판단은 프론트 담당 — 서버는 관여하지
+ * 않음, 상세: claude/독서기록앱_백엔드_애플로그인_설계_v1.md).
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -46,6 +49,12 @@ public class AuthController {
     @Operation(summary = "네이버 로그인 (모바일 앱이 네이버 SDK로 받은 access token 전달) 후 토큰 발급")
     public TokenResponse naverLogin(@Valid @RequestBody SocialAccessTokenRequest request) {
         return socialAuthService.loginWithNaver(request.accessToken());
+    }
+
+    @PostMapping("/apple")
+    @Operation(summary = "애플 로그인 (모바일 앱이 Sign in with Apple로 받은 identity token 전달) 후 토큰 발급")
+    public TokenResponse appleLogin(@Valid @RequestBody AppleIdTokenRequest request) {
+        return socialAuthService.loginWithApple(request.idToken());
     }
 
     @GetMapping("/me")

@@ -3,6 +3,7 @@ package com.kongdakchaekdak.domain.auth;
 import com.kongdakchaekdak.common.logging.AuditLogger;
 import com.kongdakchaekdak.common.logging.SecurityEventLogger;
 import com.kongdakchaekdak.domain.auth.dto.TokenResponse;
+import com.kongdakchaekdak.domain.auth.oauth2.AppleOAuthClient;
 import com.kongdakchaekdak.domain.auth.oauth2.GoogleOAuthClient;
 import com.kongdakchaekdak.domain.auth.oauth2.KakaoOAuthClient;
 import com.kongdakchaekdak.domain.auth.oauth2.NaverOAuthClient;
@@ -38,6 +39,12 @@ import java.util.Optional;
  * 신규 가입자는 {@link User}의 생성자에서 이미 한 번 세팅되지만, 여기서 다시 명시적으로
  * 세팅해 "로그인 성공 = lastLoginAt 갱신"이라는 계약을 두 분기 모두에서 코드로도 분명히
  * 드러낸다(생성자 타이밍에 암묵적으로 의존하지 않음).</p>
+ *
+ * <p>2026-09-09: 4번째 제공자로 애플({@link #loginWithApple})을 추가했다 — iOS 전용 버튼
+ * (플랫폼 판단은 프론트 담당). {@link AppleOAuthClient}가 이미 identity token 검증까지 끝낸
+ * {@link SocialUserInfo}를 돌려주므로, {@link #loginWithProvider} 공통 로직은 전혀 바뀌지
+ * 않는다 — 애초에 4번째 제공자를 염두에 두고 설계돼 있었다(상세: 설계 문서
+ * {@code claude/독서기록앱_백엔드_애플로그인_설계_v1.md}).</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -47,6 +54,7 @@ public class SocialAuthService {
     private static final String KAKAO_PROVIDER = "kakao";
     private static final String GOOGLE_PROVIDER = "google";
     private static final String NAVER_PROVIDER = "naver";
+    private static final String APPLE_PROVIDER = "apple";
 
     private final UserRepository userRepository;
     private final RandomNicknameGenerator randomNicknameGenerator;
@@ -54,6 +62,7 @@ public class SocialAuthService {
     private final KakaoOAuthClient kakaoOAuthClient;
     private final GoogleOAuthClient googleOAuthClient;
     private final NaverOAuthClient naverOAuthClient;
+    private final AppleOAuthClient appleOAuthClient;
     private final AuditLogger auditLogger;
     private final SecurityEventLogger securityEventLogger;
 
@@ -70,6 +79,11 @@ public class SocialAuthService {
     @Transactional
     public TokenResponse loginWithNaver(String accessToken) {
         return loginWithProvider(NAVER_PROVIDER, naverOAuthClient.fetchUserInfo(accessToken));
+    }
+
+    @Transactional
+    public TokenResponse loginWithApple(String identityToken) {
+        return loginWithProvider(APPLE_PROVIDER, appleOAuthClient.fetchUserInfo(identityToken));
     }
 
     private TokenResponse loginWithProvider(String provider, SocialUserInfo socialUserInfo) {

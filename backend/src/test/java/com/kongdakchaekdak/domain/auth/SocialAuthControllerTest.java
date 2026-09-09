@@ -1,6 +1,7 @@
 package com.kongdakchaekdak.domain.auth;
 
 import com.kongdakchaekdak.common.exception.InvalidCredentialsException;
+import com.kongdakchaekdak.domain.auth.oauth2.AppleOAuthClient;
 import com.kongdakchaekdak.domain.auth.oauth2.GoogleOAuthClient;
 import com.kongdakchaekdak.domain.auth.oauth2.KakaoOAuthClient;
 import com.kongdakchaekdak.domain.auth.oauth2.NaverOAuthClient;
@@ -36,6 +37,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * <p>2026-08-29: {@code TokenResponse.isNewUser} 계약(신규 가입이면 true, 기존 회원 재로그인이면
  * false) 검증을 추가했다 — 프론트요청 문서(신규회원판별_v1) 반영.</p>
+ *
+ * <p>2026-09-09: 애플 로그인 성공 케이스를 추가했다 — {@link AppleOAuthClient}도 다른 3개
+ * 제공자와 동일하게 {@code @MockBean}으로 대체해서 "identity token 검증까지 끝나고 이런
+ * SocialUserInfo를 돌려줬다"는 상황만 가정한다(실제 애플 JWKS 서명 검증 로직 자체는
+ * AppleOAuthClientTest에서 별도로 검증). 애플은 nicknameHint를 항상 null로 반환하므로
+ * (설계 문서 5번 참고), 이 테스트에서도 그 계약을 그대로 반영한다.</p>
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -56,6 +63,9 @@ class SocialAuthControllerTest {
 
     @MockBean
     private NaverOAuthClient naverOAuthClient;
+
+    @MockBean
+    private AppleOAuthClient appleOAuthClient;
 
     @Test
     void 카카오_로그인_성공시_신규_회원가입_후_토큰이_발급된다() throws Exception {
@@ -141,6 +151,34 @@ class SocialAuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tokenType").value("Bearer"))
                 .andExpect(jsonPath("$.isNewUser").value(true));
+    }
+
+    @Test
+    void 애플_로그인_성공시_신규_회원가입_후_토큰이_발급되고_isNewUser가_true다() throws Exception {
+        // 애플은 identity token에 이름이 없어 AppleOAuthClient가 nicknameHint로 항상 null을
+        // 돌려준다(설계 문서 5번 참고) — 여기서도 그 계약대로 null을 넘겨서, 신규 가입 시
+        // RandomNicknameGenerator가 임시 닉네임을 채워주는 기존 경로를 그대로 타는지 확인한다.
+        when(appleOAuthClient.fetchUserInfo("apple-identity-token"))
+                .thenReturn(new SocialUserInfo("apple-sub-99999", null));
+
+        String body = objectMapper.writeValueAsString(Map.of("idToken", "apple-identity-token"));
+
+        mockMvc.perform(post("/api/auth/apple").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.isNewUser").value(true));
+    }
+
+    @Test
+    void 애플_identity_token이_유효하지_않으면_401() throws Exception {
+        when(appleOAuthClient.fetchUserInfo(anyString()))
+                .thenThrow(new InvalidCredentialsException("애플 인증에 실패했습니다. identity token을 확인해주세요."));
+
+        String body = objectMapper.writeValueAsString(Map.of("idToken", "invalid-token"));
+
+        mockMvc.perform(post("/api/auth/apple").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("INVALID_CREDENTIALS"));
     }
 
     @Test

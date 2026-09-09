@@ -33,6 +33,7 @@ public class SecurityConfig {
             "/api/auth/kakao",
             "/api/auth/google",
             "/api/auth/naver",
+            "/api/auth/apple",
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",

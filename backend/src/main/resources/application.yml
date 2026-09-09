@@ -47,6 +47,10 @@ app:
     naver:
       client-id: ${NAVER_CLIENT_ID:}
       client-secret: ${NAVER_CLIENT_SECRET:}
+    # 애플은 client-secret이 없다 — clientId도 실제로는 iOS 앱의 Bundle ID다(다른 3사의
+    # Client ID와 발급 방식/용도가 다름). 상세: AppleOAuthProperties, .env.example 주석.
+    apple:
+      client-id: ${APPLE_CLIENT_ID:}
   # 책 사진(BookPhoto) 업로드용 S3 설정. 실제 값은 절대 여기에 직접 쓰지 말고 backend/.env에
   # AWS_S3_BUCKET=... 형태로 넣을 것 (.env.example 참고). accessKey/secretKey가 비어 있어도
   # 서버 기동 자체는 되지만, 실제 presigned URL 발급(사진 업로드) 시점에 실패한다.

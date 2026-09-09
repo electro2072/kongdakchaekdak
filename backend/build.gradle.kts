@@ -27,6 +27,12 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:0.12.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
+    // 애플 로그인 — identity token(RS256으로 서명된 JWT)을 애플의 공개키(JWKS)로 직접 검증하는 데
+    // 사용. 카카오/구글/네이버처럼 access token으로 "내 정보" API를 부르거나(카카오/네이버) 간편
+    // 검증 엔드포인트에 던지는 방식(구글)이 애플엔 없어서 별도 라이브러리가 필요하다
+    // (claude/독서기록앱_백엔드_애플로그인_설계_v1.md 2번 참고). RemoteJWKSet이 JWKS 응답을
+    // 자동 캐싱해서 애플이 키를 교체하지 않는 한 매 로그인마다 애플 서버를 호출하지 않는다.
+    implementation("com.nimbusds:nimbus-jose-jwt:9.37.3")
     runtimeOnly("com.mysql:mysql-connector-j")
     runtimeOnly("com.h2database:h2")
     // S3Presigner(software.amazon.awssdk:s3 모듈 안에 포함)만 사용 — presigned URL은 순수
