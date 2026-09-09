@@ -16,5 +16,9 @@ module.exports = {
     // 공식 mock을 제공하지 않아 __mocks__/에 직접 뒀다(services/secureStorage.ts 참고).
     '^react-native-encrypted-storage$':
       '<rootDir>/__mocks__/react-native-encrypted-storage.js',
+    // @invertase/react-native-apple-authentication도 네이티브 모듈 + 실제 배포본이 ESM이라
+    // (2026-09-09 Apple 로그인 추가) __mocks__/의 수동 mock으로 강제 매핑한다.
+    '^@invertase/react-native-apple-authentication$':
+      '<rootDir>/__mocks__/@invertase/react-native-apple-authentication.js',
   },
 };
