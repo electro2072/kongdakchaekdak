@@ -1,6 +1,22 @@
-import type {Genre} from '../constants/profileOptions';
 import {apiFetch} from './apiClient';
 import {logger} from '../utils/logger';
+import type {
+  BookCreatePayload,
+  BookNoteResponse,
+  BookPhotoResponse,
+  BookResponse,
+  BookStatusResponse,
+  PresignedUrlResponse,
+} from '../types/api/library';
+
+export type {
+  BookCreatePayload,
+  BookNoteResponse,
+  BookPhotoResponse,
+  BookResponse,
+  BookStatusResponse,
+  PresignedUrlResponse,
+};
 
 /**
  * 서재(책·소감·장소사진) 백엔드 연동.
@@ -17,62 +33,12 @@ import {logger} from '../utils/logger';
  *  2. Genre는 @JsonValue로 한글 라벨("소설", "경제·경영")을 그대로 주고받는다. 프론트 Genre 타입과
  *     문자열이 동일해서 변환이 필요 없다. 반면 BookStatus는 대문자 enum("READING"/"DONE")으로
  *     내려오고, GET 쿼리 파라미터는 소문자를 받는다.
+ *
+ * 2026-09-09: 위 요청/응답 타입 정의는 src/types/api/library.ts로 옮겼다("인터페이스 한 폴더에
+ * 모아놓기" 리팩터링). 이 파일은 그 타입을 가져다 실제 fetch 호출만 담당한다 — 다른 파일들이
+ * 기존처럼 `from '../services/libraryApi'`로 타입을 계속 가져올 수 있도록 위에서 re-export도
+ * 해 둔다.
  */
-
-export type BookStatusResponse = 'READING' | 'DONE';
-
-export interface BookResponse {
-  id: number;
-  userId: number;
-  title: string;
-  author: string;
-  coverImage: string | null;
-  isbn: string | null;
-  genre: Genre | null;
-  totalPages: number | null;
-  status: BookStatusResponse;
-  startDate: string | null;
-  endDate: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface BookCreatePayload {
-  userId: number;
-  title: string;
-  author: string;
-  coverImage?: string;
-  isbn?: string;
-  genre?: Genre;
-  totalPages?: number;
-  /** yyyy-MM-dd. 생략하면 서버가 null로 저장한다. */
-  startDate?: string;
-}
-
-export interface BookNoteResponse {
-  id: number;
-  bookId: number;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface BookPhotoResponse {
-  id: number;
-  bookId: number;
-  imageUrl: string;
-  locationText: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  createdAt: string;
-}
-
-interface PresignedUrlResponse {
-  uploadUrl: string;
-  imageUrl: string;
-  key: string;
-  expiresInSeconds: number;
-}
 
 /** yyyy-MM-dd — 백엔드 LocalDate가 받는 형식. 로컬 타임존 기준으로 만든다(UTC 변환 금지). */
 export function toIsoDate(date: Date): string {

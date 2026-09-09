@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
-import type {DashboardHighlights} from '../../types/dashboard';
+import type {DashboardHighlights} from '../../types/api/dashboard';
 import {useTheme} from '../../theme';
 
 interface HighlightCardProps {

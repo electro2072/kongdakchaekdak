@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
-import type {MonthlyTrendDto} from '../../types/dashboard';
+import type {MonthlyTrendDto} from '../../types/api/dashboard';
 import {useTheme} from '../../theme';
 
 interface MonthlyTrendChartProps {

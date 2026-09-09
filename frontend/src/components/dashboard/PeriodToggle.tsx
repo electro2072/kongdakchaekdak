@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import type {DashboardPeriod} from '../../types/dashboard';
+import type {DashboardPeriod} from '../../types/api/dashboard';
 import {useTheme} from '../../theme';
 
 interface PeriodToggleProps {

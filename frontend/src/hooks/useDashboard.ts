@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useState} from 'react';
-import type {DashboardPeriod, DashboardResponse} from '../types/dashboard';
+import type {DashboardPeriod, DashboardResponse} from '../types/api/dashboard';
 import {apiFetch} from '../services/apiClient';
 
 interface UseDashboardResult {

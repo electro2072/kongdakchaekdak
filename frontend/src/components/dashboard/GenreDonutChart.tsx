@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import Svg, {Circle} from 'react-native-svg';
-import type {GenreRatioDto} from '../../types/dashboard';
+import type {GenreRatioDto} from '../../types/api/dashboard';
 import {useTheme} from '../../theme';
 import {GENRE_CHART_COLOR_KEY} from '../../constants/genreColors';
 import type {Genre} from '../../constants/profileOptions';

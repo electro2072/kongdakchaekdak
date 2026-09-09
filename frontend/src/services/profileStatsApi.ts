@@ -1,10 +1,8 @@
 import {logger} from '../utils/logger';
 import {apiFetch} from './apiClient';
+import type {ProfileStats} from '../types/api/profileStats';
 
-export interface ProfileStats {
-  booksReadCount: number;
-  sharedRecordsCount: number;
-}
+export type {ProfileStats};
 
 /**
  * 프로필 탭의 "읽은 책 / 공유한 기록" 카운트.
@@ -23,6 +21,9 @@ export interface ProfileStats {
  * 카운트는 화면의 보조 정보라 하나가 실패해도 프로필 전체를 실패로 만들지 않는다 —
  * 실패한 쪽만 0으로 두고 로그를 남긴다. 남의 프로필 통계가 필요해지는 시점에는
  * UserResponse에 필드를 추가하는 쪽으로 갈아타야 한다(현재 /api/share-records는 내 것만).
+ *
+ * 2026-09-09: ProfileStats 타입 정의는 src/types/api/profileStats.ts로 옮겼다("인터페이스
+ * 한 폴더에 모아놓기" 리팩터링). 이 파일은 그 타입을 가져다 쓰기만 한다.
  */
 export async function fetchProfileStats(userId: number): Promise<ProfileStats> {
   const [books, shares] = await Promise.allSettled([

@@ -1,5 +1,8 @@
 import Config from "react-native-config";
 import {logger} from "../utils/logger";
+import type {SocialProvider, TokenResponse} from "../types/api/auth";
+
+export type {SocialProvider, TokenResponse};
 
 /**
  * 백엔드 API 서버 주소. .env의 API_BASE_URL을 우선 쓰고, 없으면 안드로이드 에뮬레이터 기준
@@ -9,24 +12,10 @@ import {logger} from "../utils/logger";
  */
 const API_BASE_URL = Config.API_BASE_URL ?? "http://10.0.2.2:8080";
 
-export type SocialProvider = "kakao" | "google" | "naver";
-
-/**
- * claude/독서기록앱_백엔드요청_프론트_인증API변경_v1.md 2번 항목(백엔드 확정 스펙) 기준.
- * accessToken/tokenType은 실제 코드로 확정됐고, 세 번째 필드(만료시간)는 존재는 확인됐으나
- * 정확한 필드명이 미확정이라 expiresIn으로 추정만 해둔 상태 — 값이 와도 파싱 실패하지 않도록
- * optional로 둔다.
- *
- * isNewUser는 claude/독서기록앱_프론트요청_백엔드_인증API_신규회원판별_v1.md 요청에 대한 백엔드
- * 확정 답변 기준(2026-08-29) — 방금 소셜 로그인으로 신규 계정이 생성됐으면 true, 이미 있던 계정으로
- * 로그인한 거면 false. LoginScreen이 이 값으로 회원가입 화면 이동 여부를 분기한다.
- */
-export interface TokenResponse {
-  accessToken: string;
-  tokenType: string;
-  isNewUser: boolean;
-  expiresIn?: number;
-}
+// 2026-09-09: SocialProvider/TokenResponse 타입 정의는 src/types/api/auth.ts로 옮겼다
+// ("인터페이스 한 폴더에 모아놓기" 리팩터링). 이 파일은 그 타입을 가져다 쓰기만 한다 —
+// 다른 파일들이 기존처럼 `from '../services/authApi'`로 타입을 계속 가져올 수 있도록
+// 위에서 re-export도 해 둔다.
 
 const SOCIAL_LOGIN_PATH: Record<SocialProvider, string> = {
   kakao: "/api/auth/kakao",

@@ -1,52 +1,8 @@
 /**
- * GET /api/dashboard 응답 타입.
- * 백엔드 확인 완료(claude/독서기록앱_프론트요청_대시보드API필드확인_v1.md 답변, 2026-08-27) 기준.
+ * @deprecated 2026-09-09: 이 파일에 있던 타입 정의는 src/types/api/dashboard.ts로 옮겼다
+ * ("인터페이스 한 폴더에 모아놓기" 리팩터링 — API 요청/응답 타입은 이제 src/types/api/ 한 곳에
+ * 모아둔다). 이 파일은 파일 자체를 지울 방법이 없어(원격 기기 브리지에 삭제 기능이 없음) 남겨둔
+ * 얇은 재노출(re-export) 셔틀이다 — 새 코드는 이 파일이 아니라 src/types/api/dashboard.ts를
+ * (또는 src/types/api 배럴을) 직접 import할 것.
  */
-
-/** 쿼리 파라미터 `period` — 소문자 */
-export type DashboardPeriod = 'month' | 'quarter' | 'year';
-
-/** 응답 필드 `period` — 대문자 */
-export type DashboardPeriodResponse = 'MONTH' | 'QUARTER' | 'YEAR';
-
-export interface GenreRatioDto {
-  genre: string;
-  count: number;
-  /** 0~100 */
-  ratio: number;
-}
-
-/** yearMonth: "yyyy-MM", 항상 6개 고정(직전 6개월, 과거→최신) */
-export interface MonthlyTrendDto {
-  yearMonth: string;
-  completedCount: number;
-}
-
-export interface BookHighlightDto {
-  id: number;
-  title: string;
-  days: number;
-}
-
-export interface DashboardHighlights {
-  topGenre: string | null;
-  longestReadBook: BookHighlightDto | null;
-  fastestReadBook: BookHighlightDto | null;
-}
-
-export interface DashboardResponse {
-  userId: number;
-  period: DashboardPeriodResponse;
-  periodLabel: string;
-  /** yyyy-MM-dd */
-  startDate: string;
-  /** yyyy-MM-dd */
-  endDate: string;
-  completedBookCount: number;
-  totalPagesRead: number;
-  /** count 내림차순 정렬(동률은 장르명 오름차순) */
-  genreRatios: GenreRatioDto[];
-  monthlyTrend: MonthlyTrendDto[];
-  highlights: DashboardHighlights;
-  recommendedCaption: string;
-}
+export * from './api/dashboard';

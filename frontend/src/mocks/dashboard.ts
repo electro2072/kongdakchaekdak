@@ -1,4 +1,4 @@
-import type {DashboardPeriod, DashboardResponse} from '../types/dashboard';
+import type {DashboardPeriod, DashboardResponse} from '../types/api/dashboard';
 
 // TODO: GET /api/dashboard 연동 전이라 백엔드 확인 답변(claude/독서기록앱_프론트요청_대시보드API필드확인_v1.md)의
 // 예시 응답 형태를 기준으로 기간별 mock 3세트를 둔다. 실제 연동 시 hooks/useDashboard.ts의 fetchDashboard만
