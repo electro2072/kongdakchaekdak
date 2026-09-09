@@ -163,6 +163,45 @@ class GroupControllerTest {
                 .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
     }
 
+    // (G20 확장, 2026-09-10) 회귀 방지 테스트 — 인증만 되어 있으면 자신이 속하지 않은 그룹의
+    // 존재/멤버 명단까지 그대로 조회할 수 있던 결함(BUG-20260910-25와 같은 패턴)이 다시 생기지
+    // 않는지 확인한다.
+    @Test
+    void 그룹_멤버가_아니면_단건_조회와_멤버_목록_조회_모두_403() throws Exception {
+        Long groupId = createGroup("독서모임4");
+
+        User outsider = new User("비멤버", null, null, null, "kakao", "group-test-outsider-social-id");
+        Long outsiderId = userRepository.save(outsider).getId();
+        String outsiderToken = "Bearer " + jwtProvider.generateToken(outsiderId);
+
+        mockMvc.perform(get("/api/groups/{id}", groupId).header("Authorization", outsiderToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("NOT_GROUP_MEMBER"));
+
+        mockMvc.perform(get("/api/groups/{id}/members", groupId).header("Authorization", outsiderToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("NOT_GROUP_MEMBER"));
+    }
+
+    @Test
+    void 목록_조회는_본인이_속한_그룹만_반환한다() throws Exception {
+        createGroup("내가_속한_모임");
+
+        User otherOwner = new User("다른모임장", null, null, null, "kakao", "group-test-other-owner-social-id");
+        Long otherOwnerId = userRepository.save(otherOwner).getId();
+        String otherOwnerToken = "Bearer " + jwtProvider.generateToken(otherOwnerId);
+        mockMvc.perform(post("/api/groups")
+                        .header("Authorization", otherOwnerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("name", "남의_모임"))))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/groups").header("Authorization", ownerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].name").value("내가_속한_모임"));
+    }
+
     private Long createGroup(String name) throws Exception {
         String response = mockMvc.perform(post("/api/groups")
                         .header("Authorization", ownerToken)

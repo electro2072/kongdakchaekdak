@@ -53,17 +53,13 @@ public class BookService {
         return BookResponse.from(findBookOrThrow(id));
     }
 
+    // (G20, 2026-09-10) userId는 항상 BookController가 인증된 currentUserId를 넘겨준다 —
+    // 클라이언트가 보낸 파라미터가 아니므로 null이 될 수 없다. 예전엔 userId가 없으면
+    // findAll()로 빠져 전 회원 서재가 그대로 유출됐다(BUG-20260910-25) — 그 분기를 제거한다.
     public List<BookResponse> search(Long userId, BookStatus status) {
-        List<Book> books;
-        if (userId != null && status != null) {
-            books = bookRepository.findByUserIdAndStatus(userId, status);
-        } else if (userId != null) {
-            books = bookRepository.findByUserId(userId);
-        } else if (status != null) {
-            books = bookRepository.findByStatus(status);
-        } else {
-            books = bookRepository.findAll();
-        }
+        List<Book> books = status != null
+                ? bookRepository.findByUserIdAndStatus(userId, status)
+                : bookRepository.findByUserId(userId);
         return books.stream().map(BookResponse::from).toList();
     }
 

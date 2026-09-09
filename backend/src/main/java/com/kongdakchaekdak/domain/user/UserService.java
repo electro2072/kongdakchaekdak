@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -43,14 +41,13 @@ public class UserService {
         return UserResponse.from(saved);
     }
 
-    public UserResponse getById(Long id) {
+    // (G20 확장, 2026-09-10) 본인 계정만 조회 가능하도록 requireOwner를 재사용한다.
+    // 예전엔 인증만 되어 있으면 누구든 타인 id로 조회할 수 있었다 — BookController의
+    // G20(서재 목록 소유자 검증 누락)과 같은 패턴의 결함. getAll()(전체 회원 명부 조회)은
+    // 프론트 호출부가 없어 삭제했다(추후 그룹 기능에서 타인 프로필 조회가 필요해지면 별도로 열 것).
+    public UserResponse getById(Long id, Long currentUserId) {
+        requireOwner(id, currentUserId);
         return UserResponse.from(findUserOrThrow(id));
-    }
-
-    public List<UserResponse> getAll() {
-        return userRepository.findAll().stream()
-                .map(UserResponse::from)
-                .toList();
     }
 
     @Transactional
@@ -70,11 +67,11 @@ public class UserService {
         auditLogger.event("USER_DELETED", currentUserId, "targetUserId=" + id);
     }
 
-    // 본인 계정만 수정/삭제할 수 있도록 강제한다. 다른 회원의 프로필 조회(getById/getAll)는
-    // 공유 앱 특성상 계속 열어둔다 — 여기서 막는 건 쓰기(수정/삭제) 작업뿐이다.
+    // 본인 계정만 조회/수정/삭제할 수 있도록 강제한다(G20 확장, 2026-09-10 — 원래는
+    // 조회(getById)까지는 열어뒀었다).
     private void requireOwner(Long targetUserId, Long currentUserId) {
         if (!targetUserId.equals(currentUserId)) {
-            throw new ForbiddenException(ErrorCode.NOT_OWNER, "본인 계정만 수정/삭제할 수 있습니다.");
+            throw new ForbiddenException(ErrorCode.NOT_OWNER, "본인 계정만 조회/수정/삭제할 수 있습니다.");
         }
     }
 

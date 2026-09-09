@@ -97,7 +97,6 @@ class BookControllerTest {
 
         mockMvc.perform(get("/api/books")
                         .header("Authorization", bearerToken)
-                        .param("userId", String.valueOf(userId))
                         .param("status", "reading"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(bookId));
@@ -201,6 +200,43 @@ class BookControllerTest {
         mockMvc.perform(delete("/api/books/{id}", otherBookId).header("Authorization", bearerToken))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("NOT_OWNER"));
+    }
+
+    // (G20, 2026-09-10) GET /api/books가 클라이언트가 보낸 userId를 그대로 신뢰해, 파라미터를
+    // 생략하면 전 회원 서재가 그대로 반환되던 보안 결함(BUG-20260910-25) 회귀 방지 테스트.
+    // 이제 목록 조회는 항상 토큰의 currentUserId 기준으로만 필터링된다(userId 쿼리파라미터 자체가 없음).
+    @Test
+    void 목록_조회는_userId_파라미터_없이도_본인_책만_반환한다() throws Exception {
+        User otherUser = new User("다른사람3", null, null, null, "kakao", "other-social-id-3");
+        Long otherUserId = userRepository.save(otherUser).getId();
+        String otherToken = "Bearer " + jwtProvider.generateToken(otherUserId);
+
+        String otherCreateBody = objectMapper.writeValueAsString(Map.of(
+                "userId", otherUserId,
+                "title", "다른 사람의 서재", "author", "익명",
+                "startDate", "2026-07-01"
+        ));
+        mockMvc.perform(post("/api/books")
+                        .header("Authorization", otherToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(otherCreateBody))
+                .andExpect(status().isCreated());
+
+        String myCreateBody = objectMapper.writeValueAsString(Map.of(
+                "userId", userId,
+                "title", "내 서재", "author", "익명",
+                "startDate", "2026-07-01"
+        ));
+        mockMvc.perform(post("/api/books")
+                        .header("Authorization", bearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(myCreateBody))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/books").header("Authorization", bearerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].title").value("내 서재"));
     }
 
     // 2026-08-27: Book.genre가 자유 String에서 Genre enum(6개 고정 카테고리)으로 바뀐 뒤

@@ -21,9 +21,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Step 3부터 /api/users/** 가 인증을 요구하므로, 모든 요청에 임의의 인증된 사용자(id=1) 토큰을
- * Authorization 헤더로 실어 보낸다. 조회(단건/목록)는 소유자 검증이 없어 이 id가 실제로 존재하는
- * 회원일 필요는 없지만, 수정/삭제는 본인 계정에 대해서만 가능하도록 소유자 검증이 적용되어 있어
- * (UserService 참고) 대상 id와 토큰의 주체가 같아야 하는 테스트에서는 별도로 그 id로 토큰을 발급한다.
+ * Authorization 헤더로 실어 보낸다. 회원 생성(POST)은 소유자 개념이 없어 이 id가 실제로 존재하는
+ * 회원일 필요는 없지만, 조회(단건)·수정·삭제는 전부 본인 계정에 대해서만 가능하도록 소유자 검증이
+ * 적용되어 있어(UserService 참고, G20 확장으로 조회도 포함됨, 2026-09-10) 대상 id와 토큰의 주체가
+ * 같아야 하는 테스트에서는 별도로 그 id로 토큰을 발급한다.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -77,7 +78,7 @@ class UserControllerTest {
         Long id = objectMapper.readTree(response).get("id").asLong();
         String ownerToken = bearerToken(id);
 
-        mockMvc.perform(get("/api/users/{id}", id).header("Authorization", bearerToken()))
+        mockMvc.perform(get("/api/users/{id}", id).header("Authorization", ownerToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.bio").value("안녕하세요"));
 
@@ -95,8 +96,30 @@ class UserControllerTest {
         mockMvc.perform(delete("/api/users/{id}", id).header("Authorization", ownerToken))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/users/{id}", id).header("Authorization", bearerToken()))
+        // 삭제된 본인 id로 다시 조회하면(소유자 검증은 통과) findUserOrThrow에서 404.
+        mockMvc.perform(get("/api/users/{id}", id).header("Authorization", ownerToken))
                 .andExpect(status().isNotFound());
+    }
+
+    // (G20 확장, 2026-09-10) 회귀 방지 테스트 — 인증만 되어 있으면 누구든 타인 id로 조회할 수
+    // 있던 결함(BUG-20260910-25와 같은 패턴)이 다시 생기지 않는지 확인한다.
+    @Test
+    void 다른_회원의_정보를_조회하려하면_403() throws Exception {
+        String createBody = """
+                {"nickname": "피해자3"}
+                """;
+        String response = mockMvc.perform(post("/api/users")
+                        .header("Authorization", bearerToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createBody))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        Long victimId = objectMapper.readTree(response).get("id").asLong();
+
+        String attackerToken = bearerToken(victimId + 1);
+        mockMvc.perform(get("/api/users/{id}", victimId).header("Authorization", attackerToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
     }
 
     @Test
@@ -146,7 +169,10 @@ class UserControllerTest {
 
     @Test
     void 존재하지_않는_회원_조회시_404() throws Exception {
-        mockMvc.perform(get("/api/users/{id}", 999_999L).header("Authorization", bearerToken()))
+        // (G20 확장) 조회도 이제 소유자 검증을 거치므로, 토큰 주체와 조회 대상 id를 같게 맞춰야
+        // 403이 아니라 findUserOrThrow의 404 분기를 실제로 검증할 수 있다.
+        long missingId = 999_999L;
+        mockMvc.perform(get("/api/users/{id}", missingId).header("Authorization", bearerToken(missingId)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("NOT_FOUND"));
     }

@@ -26,7 +26,10 @@ import java.util.List;
 /**
  * 그룹(독서모임/가족 등) CRUD + 멤버 관리 API (Step 5). 생성자가 소유자가 되고 자동으로
  * 첫 멤버가 된다. 그룹 정보 수정/삭제/멤버 추가는 소유자만, 멤버 제거는 본인 또는 소유자가
- * 가능하다 (GroupService 참고). 조회는 Book/User와 동일한 원칙으로 열어둔다.
+ * 가능하다 (GroupService 참고).
+ *
+ * <p><b>(G20 확장, 2026-09-10)</b> 조회(목록/단건/멤버 목록)는 더 이상 무조건 열려있지 않다 —
+ * 목록은 본인이 속한 그룹만 반환하고, 단건/멤버 목록은 요청자가 해당 그룹의 멤버인지 확인한다.
  */
 @RestController
 @RequestMapping("/api/groups")
@@ -45,15 +48,15 @@ public class GroupController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "그룹 단건 조회")
-    public GroupResponse getById(@PathVariable Long id) {
-        return groupService.getById(id);
+    @Operation(summary = "그룹 단건 조회 (그룹 멤버만 가능)")
+    public GroupResponse getById(@PathVariable Long id, @AuthenticationPrincipal Long currentUserId) {
+        return groupService.getById(id, currentUserId);
     }
 
     @GetMapping
-    @Operation(summary = "그룹 전체 목록 조회")
-    public List<GroupResponse> getAll() {
-        return groupService.getAll();
+    @Operation(summary = "본인이 속한 그룹 목록 조회")
+    public List<GroupResponse> getAll(@AuthenticationPrincipal Long currentUserId) {
+        return groupService.getAll(currentUserId);
     }
 
     @PatchMapping("/{id}")
@@ -71,9 +74,9 @@ public class GroupController {
     }
 
     @GetMapping("/{id}/members")
-    @Operation(summary = "그룹 멤버 목록 조회")
-    public List<GroupMemberResponse> listMembers(@PathVariable Long id) {
-        return groupService.listMembers(id);
+    @Operation(summary = "그룹 멤버 목록 조회 (그룹 멤버만 가능)")
+    public List<GroupMemberResponse> listMembers(@PathVariable Long id, @AuthenticationPrincipal Long currentUserId) {
+        return groupService.listMembers(id, currentUserId);
     }
 
     @PostMapping("/{id}/members")

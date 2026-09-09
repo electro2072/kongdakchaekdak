@@ -27,8 +27,10 @@ import java.util.List;
 /**
  * 책 기록(일정/서재) CRUD API (Step 2-b). User CRUD(Step 2-a)의 뒤를 이어
  * 등록/조회/수정/완독 처리를 제공한다. Step 3부터 인증(Authorization: Bearer {token})이
- * 필요하다 (SecurityConfig 참고). 조회(단건/목록)는 다른 회원의 책도 볼 수 있게 열려 있지만
- * (공유 앱 특성), 등록은 본인 명의로만 가능하고 수정/완독/삭제는 본인 소유 책에 대해서만
+ * 필요하다 (SecurityConfig 참고). 단건 조회(getById)는 다른 회원의 책도 볼 수 있게 열려 있지만,
+ * 목록 조회(search)는 인증된 본인 서재만 반환한다 — 원래는 클라이언트가 보낸 userId를 그대로
+ * 신뢰해 파라미터를 생략하면 전 회원 서재가 덤프되는 문제가 있었다(G20, 2026-09-10 수정).
+ * 등록은 본인 명의로만 가능하고 수정/완독/삭제는 본인 소유 책에 대해서만
  * 가능하도록 소유자 검증이 적용되어 있다 (BookService 참고).
  */
 @RestController
@@ -53,14 +55,14 @@ public class BookController {
     }
 
     @GetMapping
-    @Operation(summary = "책 기록 목록 조회 (userId/status로 필터링 가능)")
+    @Operation(summary = "본인 서재 목록 조회 (status로 필터링 가능)")
     public List<BookResponse> search(
-            @RequestParam(required = false) Long userId,
+            @AuthenticationPrincipal Long currentUserId,
             // API 설계 초안 기준 status=reading/done (소문자) 이라 String으로 받아 대소문자 무관하게 변환한다.
             @RequestParam(required = false) String status
     ) {
         BookStatus bookStatus = status == null ? null : BookStatus.valueOf(status.toUpperCase());
-        return bookService.search(userId, bookStatus);
+        return bookService.search(currentUserId, bookStatus);
     }
 
     @PutMapping("/{id}")
