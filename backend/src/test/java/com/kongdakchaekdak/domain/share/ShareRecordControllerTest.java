@@ -135,7 +135,7 @@ class ShareRecordControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"));
+                .andExpect(jsonPath("$.error").value("INVALID_SHARE_REQUEST"));
     }
 
     @Test
@@ -156,7 +156,7 @@ class ShareRecordControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
     }
 
     @Test
@@ -172,7 +172,7 @@ class ShareRecordControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"));
+                .andExpect(jsonPath("$.error").value("INVALID_SHARE_REQUEST"));
     }
 
     @Test
@@ -189,7 +189,7 @@ class ShareRecordControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"));
+                .andExpect(jsonPath("$.error").value("INVALID_SHARE_REQUEST"));
     }
 
     @Test
@@ -211,7 +211,7 @@ class ShareRecordControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("NOT_GROUP_MEMBER"));
     }
 
     @Test
@@ -253,7 +253,7 @@ class ShareRecordControllerTest {
 
         mockMvc.perform(delete("/api/share-records/{id}", recordId).header("Authorization", otherToken))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
 
         mockMvc.perform(delete("/api/share-records/{id}", recordId).header("Authorization", sharerToken))
                 .andExpect(status().isNoContent());
@@ -309,7 +309,7 @@ class ShareRecordControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"));
+                .andExpect(jsonPath("$.error").value("INVALID_SHARE_REQUEST"));
     }
 
     @Test
@@ -326,7 +326,7 @@ class ShareRecordControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"));
+                .andExpect(jsonPath("$.error").value("INVALID_SHARE_REQUEST"));
     }
 
     @Test
@@ -350,7 +350,7 @@ class ShareRecordControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"));
+                .andExpect(jsonPath("$.error").value("INVALID_SHARE_REQUEST"));
     }
 
     @Test
@@ -373,7 +373,7 @@ class ShareRecordControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"));
+                .andExpect(jsonPath("$.error").value("PHOTO_LIMIT_EXCEEDED"));
     }
 
     @Test
@@ -420,7 +420,7 @@ class ShareRecordControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"));
+                .andExpect(jsonPath("$.error").value("INVALID_SHARE_REQUEST"));
     }
 
     @Test

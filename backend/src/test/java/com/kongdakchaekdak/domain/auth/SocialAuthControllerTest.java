@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.auth;
 
+import com.kongdakchaekdak.common.exception.ErrorCode;
 import com.kongdakchaekdak.common.exception.InvalidCredentialsException;
 import com.kongdakchaekdak.domain.auth.oauth2.AppleOAuthClient;
 import com.kongdakchaekdak.domain.auth.oauth2.GoogleOAuthClient;
@@ -118,13 +119,13 @@ class SocialAuthControllerTest {
     @Test
     void 카카오_토큰이_유효하지_않으면_401() throws Exception {
         when(kakaoOAuthClient.fetchUserInfo(anyString()))
-                .thenThrow(new InvalidCredentialsException("카카오 인증에 실패했습니다. 액세스 토큰을 확인해주세요."));
+                .thenThrow(new InvalidCredentialsException(ErrorCode.SOCIAL_AUTH_FAILED, "카카오 인증에 실패했습니다. 액세스 토큰을 확인해주세요."));
 
         String body = objectMapper.writeValueAsString(Map.of("accessToken", "invalid-token"));
 
         mockMvc.perform(post("/api/auth/kakao").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("INVALID_CREDENTIALS"));
+                .andExpect(jsonPath("$.error").value("SOCIAL_AUTH_FAILED"));
     }
 
     @Test
@@ -172,13 +173,13 @@ class SocialAuthControllerTest {
     @Test
     void 애플_identity_token이_유효하지_않으면_401() throws Exception {
         when(appleOAuthClient.fetchUserInfo(anyString()))
-                .thenThrow(new InvalidCredentialsException("애플 인증에 실패했습니다. identity token을 확인해주세요."));
+                .thenThrow(new InvalidCredentialsException(ErrorCode.SOCIAL_AUTH_FAILED, "애플 인증에 실패했습니다. identity token을 확인해주세요."));
 
         String body = objectMapper.writeValueAsString(Map.of("idToken", "invalid-token"));
 
         mockMvc.perform(post("/api/auth/apple").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("INVALID_CREDENTIALS"));
+                .andExpect(jsonPath("$.error").value("SOCIAL_AUTH_FAILED"));
     }
 
     @Test

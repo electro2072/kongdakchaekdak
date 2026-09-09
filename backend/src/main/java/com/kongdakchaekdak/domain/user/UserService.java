@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.user;
 
+import com.kongdakchaekdak.common.exception.ErrorCode;
 import com.kongdakchaekdak.common.exception.ForbiddenException;
 import com.kongdakchaekdak.common.exception.ResourceNotFoundException;
 import com.kongdakchaekdak.common.logging.AuditLogger;
@@ -73,12 +74,12 @@ public class UserService {
     // 공유 앱 특성상 계속 열어둔다 — 여기서 막는 건 쓰기(수정/삭제) 작업뿐이다.
     private void requireOwner(Long targetUserId, Long currentUserId) {
         if (!targetUserId.equals(currentUserId)) {
-            throw new ForbiddenException("본인 계정만 수정/삭제할 수 있습니다.");
+            throw new ForbiddenException(ErrorCode.NOT_OWNER, "본인 계정만 수정/삭제할 수 있습니다.");
         }
     }
 
     private User findUserOrThrow(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다. id=" + id));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND, "사용자를 찾을 수 없습니다. id=" + id));
     }
 }

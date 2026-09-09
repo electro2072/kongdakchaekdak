@@ -112,7 +112,7 @@ class BookNoteControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createBody))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
 
         // 내 소감 하나 만들어두고, 다른 사람이 그걸 수정/삭제하려 하면 막혀야 함
         String myBody = objectMapper.writeValueAsString(Map.of("content", "내 소감"));
@@ -129,12 +129,12 @@ class BookNoteControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("content", "해킹"))))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
 
         mockMvc.perform(delete("/api/books/{bookId}/notes/{noteId}", bookId, noteId)
                         .header("Authorization", otherToken))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.share;
 
+import com.kongdakchaekdak.common.exception.ErrorCode;
 import com.kongdakchaekdak.common.exception.ForbiddenException;
 import com.kongdakchaekdak.common.exception.InvalidRequestException;
 import com.kongdakchaekdak.common.exception.ResourceNotFoundException;
@@ -70,7 +71,7 @@ public class ShareRecordService {
     @Transactional
     public ShareRecordResponse create(ShareRecordCreateRequest request, Long currentUserId) {
         User sharer = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다. id=" + currentUserId));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND, "사용자를 찾을 수 없습니다. id=" + currentUserId));
 
         Book book = resolveBook(request, currentUserId);
         List<ShareTargetRequest> targetRequests = resolveTargets(request);
@@ -107,10 +108,10 @@ public class ShareRecordService {
     @Transactional
     public void delete(Long id, Long currentUserId) {
         ShareRecord record = shareRecordRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("공유 기록을 찾을 수 없습니다. id=" + id));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND, "공유 기록을 찾을 수 없습니다. id=" + id));
 
         if (!record.getUser().getId().equals(currentUserId)) {
-            throw new ForbiddenException("본인이 공유한 기록만 삭제할 수 있습니다.");
+            throw new ForbiddenException(ErrorCode.NOT_OWNER, "본인이 공유한 기록만 삭제할 수 있습니다.");
         }
 
         shareRecordTargetRepository.deleteByShareRecordId(id);
@@ -137,12 +138,12 @@ public class ShareRecordService {
             return null;
         }
         if (request.bookId() == null) {
-            throw new InvalidRequestException("shareType이 BOOK이면 bookId가 필수입니다.");
+            throw new InvalidRequestException(ErrorCode.INVALID_SHARE_REQUEST, "shareType이 BOOK이면 bookId가 필수입니다.");
         }
         Book book = bookRepository.findById(request.bookId())
-                .orElseThrow(() -> new ResourceNotFoundException("책 기록을 찾을 수 없습니다. id=" + request.bookId()));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND, "책 기록을 찾을 수 없습니다. id=" + request.bookId()));
         if (!book.getUser().getId().equals(currentUserId)) {
-            throw new ForbiddenException("본인 소유 책만 공유할 수 있습니다.");
+            throw new ForbiddenException(ErrorCode.NOT_OWNER, "본인 소유 책만 공유할 수 있습니다.");
         }
         return book;
     }
@@ -156,12 +157,12 @@ public class ShareRecordService {
 
         List<ShareTargetRequest> targets = request.targets();
         if (targets == null || targets.isEmpty()) {
-            throw new InvalidRequestException("scope가 " + request.scope() + "이면 targets가 최소 1개 필요합니다.");
+            throw new InvalidRequestException(ErrorCode.INVALID_SHARE_REQUEST, "scope가 " + request.scope() + "이면 targets가 최소 1개 필요합니다.");
         }
         if (request.scope() == ShareScope.GROUP) {
             boolean allGroup = targets.stream().allMatch(t -> t.targetType() == ShareTargetType.GROUP);
             if (!allGroup) {
-                throw new InvalidRequestException("scope가 GROUP이면 targets는 전부 targetType=GROUP이어야 합니다.");
+                throw new InvalidRequestException(ErrorCode.INVALID_SHARE_REQUEST, "scope가 GROUP이면 targets는 전부 targetType=GROUP이어야 합니다.");
             }
         }
         return targets;
@@ -170,17 +171,17 @@ public class ShareRecordService {
     private void validateTarget(ShareTargetRequest target, Long currentUserId) {
         if (target.targetType() == ShareTargetType.USER) {
             if (!userRepository.existsById(target.targetId())) {
-                throw new ResourceNotFoundException("공유 대상 사용자를 찾을 수 없습니다. id=" + target.targetId());
+                throw new ResourceNotFoundException(ErrorCode.SHARE_TARGET_NOT_FOUND, "공유 대상 사용자를 찾을 수 없습니다. id=" + target.targetId());
             }
             return;
         }
 
         Group group = groupRepository.findById(target.targetId())
-                .orElseThrow(() -> new ResourceNotFoundException("공유 대상 그룹을 찾을 수 없습니다. id=" + target.targetId()));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.SHARE_TARGET_NOT_FOUND, "공유 대상 그룹을 찾을 수 없습니다. id=" + target.targetId()));
         boolean isOwner = group.getOwner().getId().equals(currentUserId);
         boolean isMember = groupMemberRepository.existsByGroupIdAndUserId(group.getId(), currentUserId);
         if (!isOwner && !isMember) {
-            throw new ForbiddenException("본인이 속한 그룹에만 공유할 수 있습니다. groupId=" + group.getId());
+            throw new ForbiddenException(ErrorCode.NOT_GROUP_MEMBER, "본인이 속한 그룹에만 공유할 수 있습니다. groupId=" + group.getId());
         }
     }
 
@@ -190,12 +191,12 @@ public class ShareRecordService {
             return null;
         }
         if (request.shareType() != ShareType.BOOK) {
-            throw new InvalidRequestException("bookNoteId는 shareType이 BOOK일 때만 지정할 수 있습니다.");
+            throw new InvalidRequestException(ErrorCode.INVALID_SHARE_REQUEST, "bookNoteId는 shareType이 BOOK일 때만 지정할 수 있습니다.");
         }
         BookNote note = bookNoteRepository.findById(request.bookNoteId())
-                .orElseThrow(() -> new ResourceNotFoundException("소감을 찾을 수 없습니다. id=" + request.bookNoteId()));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND, "소감을 찾을 수 없습니다. id=" + request.bookNoteId()));
         if (!note.getBook().getId().equals(book.getId())) {
-            throw new InvalidRequestException("bookNoteId는 공유하는 책(bookId) 소속 소감이어야 합니다.");
+            throw new InvalidRequestException(ErrorCode.INVALID_SHARE_REQUEST, "bookNoteId는 공유하는 책(bookId) 소속 소감이어야 합니다.");
         }
         return note;
     }
@@ -208,18 +209,18 @@ public class ShareRecordService {
             return List.of();
         }
         if (request.shareType() != ShareType.BOOK) {
-            throw new InvalidRequestException("photoIds는 shareType이 BOOK일 때만 지정할 수 있습니다.");
+            throw new InvalidRequestException(ErrorCode.INVALID_SHARE_REQUEST, "photoIds는 shareType이 BOOK일 때만 지정할 수 있습니다.");
         }
         if (photoIds.size() > MAX_PHOTOS) {
-            throw new InvalidRequestException("사진은 한 번에 최대 " + MAX_PHOTOS + "장까지 선택할 수 있습니다.");
+            throw new InvalidRequestException(ErrorCode.PHOTO_LIMIT_EXCEEDED, "사진은 한 번에 최대 " + MAX_PHOTOS + "장까지 선택할 수 있습니다.");
         }
 
         List<BookPhoto> photos = new ArrayList<>();
         for (Long photoId : photoIds) {
             BookPhoto photo = bookPhotoRepository.findById(photoId)
-                    .orElseThrow(() -> new ResourceNotFoundException("사진을 찾을 수 없습니다. id=" + photoId));
+                    .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND, "사진을 찾을 수 없습니다. id=" + photoId));
             if (!photo.getBook().getId().equals(book.getId())) {
-                throw new InvalidRequestException("photoIds는 공유하는 책(bookId) 소속 사진이어야 합니다. id=" + photoId);
+                throw new InvalidRequestException(ErrorCode.INVALID_SHARE_REQUEST, "photoIds는 공유하는 책(bookId) 소속 사진이어야 합니다. id=" + photoId);
             }
             photos.add(photo);
         }
@@ -231,7 +232,7 @@ public class ShareRecordService {
     private String resolveDashboardSnapshot(ShareRecordCreateRequest request, Long currentUserId) {
         if (request.shareType() != ShareType.DASHBOARD) {
             if (request.dashboardPeriod() != null || request.dashboardDate() != null) {
-                throw new InvalidRequestException(
+                throw new InvalidRequestException(ErrorCode.INVALID_SHARE_REQUEST,
                         "dashboardPeriod/dashboardDate는 shareType이 DASHBOARD일 때만 지정할 수 있습니다.");
             }
             return null;
@@ -242,7 +243,7 @@ public class ShareRecordService {
         try {
             referenceMonth = request.dashboardDate() == null ? YearMonth.now() : YearMonth.parse(request.dashboardDate());
         } catch (DateTimeParseException ex) {
-            throw new InvalidRequestException("dashboardDate는 yyyy-MM 형식이어야 합니다. 입력값=" + request.dashboardDate());
+            throw new InvalidRequestException(ErrorCode.INVALID_SHARE_REQUEST, "dashboardDate는 yyyy-MM 형식이어야 합니다. 입력값=" + request.dashboardDate());
         }
 
         DashboardResponse dashboard = dashboardService.getDashboard(currentUserId, period, referenceMonth);

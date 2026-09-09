@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.auth.oauth2;
 
+import com.kongdakchaekdak.common.exception.ErrorCode;
 import com.kongdakchaekdak.common.exception.InvalidCredentialsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
@@ -47,17 +48,17 @@ public class GoogleOAuthClient {
                     idToken);
             body = response.getBody();
         } catch (RestClientException e) {
-            throw new InvalidCredentialsException("구글 인증에 실패했습니다. ID 토큰을 확인해주세요.");
+            throw new InvalidCredentialsException(ErrorCode.SOCIAL_AUTH_FAILED, "구글 인증에 실패했습니다. ID 토큰을 확인해주세요.");
         }
 
         if (body == null || body.get("sub") == null) {
-            throw new InvalidCredentialsException("구글 사용자 정보를 가져오지 못했습니다.");
+            throw new InvalidCredentialsException(ErrorCode.SOCIAL_AUTH_FAILED, "구글 사용자 정보를 가져오지 못했습니다.");
         }
 
         String expectedClientId = googleOAuthProperties.clientId();
         String audience = String.valueOf(body.get("aud"));
         if (expectedClientId == null || expectedClientId.isBlank() || !expectedClientId.equals(audience)) {
-            throw new InvalidCredentialsException("구글 ID 토큰의 발급 대상(aud)이 이 앱의 Client ID와 일치하지 않습니다.");
+            throw new InvalidCredentialsException(ErrorCode.SOCIAL_AUTH_FAILED, "구글 ID 토큰의 발급 대상(aud)이 이 앱의 Client ID와 일치하지 않습니다.");
         }
 
         String googleId = String.valueOf(body.get("sub"));

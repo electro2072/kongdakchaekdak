@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.auth;
 
+import com.kongdakchaekdak.common.exception.ErrorCode;
 import com.kongdakchaekdak.common.exception.ResourceNotFoundException;
 import com.kongdakchaekdak.domain.auth.dto.TokenResponse;
 import com.kongdakchaekdak.domain.user.User;
@@ -35,7 +36,7 @@ public class AuthService {
 
     public UserResponse me(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다. id=" + userId));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND, "사용자를 찾을 수 없습니다. id=" + userId));
         return UserResponse.from(user);
     }
 

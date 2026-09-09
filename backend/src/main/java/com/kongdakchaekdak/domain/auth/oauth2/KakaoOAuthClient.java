@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.auth.oauth2;
 
+import com.kongdakchaekdak.common.exception.ErrorCode;
 import com.kongdakchaekdak.common.exception.InvalidCredentialsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
@@ -41,11 +42,11 @@ public class KakaoOAuthClient {
                     });
             body = response.getBody();
         } catch (RestClientException e) {
-            throw new InvalidCredentialsException("카카오 인증에 실패했습니다. 액세스 토큰을 확인해주세요.");
+            throw new InvalidCredentialsException(ErrorCode.SOCIAL_AUTH_FAILED, "카카오 인증에 실패했습니다. 액세스 토큰을 확인해주세요.");
         }
 
         if (body == null || body.get("id") == null) {
-            throw new InvalidCredentialsException("카카오 사용자 정보를 가져오지 못했습니다.");
+            throw new InvalidCredentialsException(ErrorCode.SOCIAL_AUTH_FAILED, "카카오 사용자 정보를 가져오지 못했습니다.");
         }
 
         String kakaoId = String.valueOf(body.get("id"));

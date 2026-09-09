@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.auth.oauth2;
 
+import com.kongdakchaekdak.common.exception.ErrorCode;
 import com.kongdakchaekdak.common.exception.InvalidCredentialsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
@@ -41,12 +42,12 @@ public class NaverOAuthClient {
                     });
             body = response.getBody();
         } catch (RestClientException e) {
-            throw new InvalidCredentialsException("네이버 인증에 실패했습니다. 액세스 토큰을 확인해주세요.");
+            throw new InvalidCredentialsException(ErrorCode.SOCIAL_AUTH_FAILED, "네이버 인증에 실패했습니다. 액세스 토큰을 확인해주세요.");
         }
 
         Object innerResponse = body == null ? null : body.get("response");
         if (!(innerResponse instanceof Map<?, ?> profile) || profile.get("id") == null) {
-            throw new InvalidCredentialsException("네이버 사용자 정보를 가져오지 못했습니다.");
+            throw new InvalidCredentialsException(ErrorCode.SOCIAL_AUTH_FAILED, "네이버 사용자 정보를 가져오지 못했습니다.");
         }
 
         String naverId = String.valueOf(profile.get("id"));

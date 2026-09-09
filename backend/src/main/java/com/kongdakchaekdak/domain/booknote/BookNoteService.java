@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.booknote;
 
+import com.kongdakchaekdak.common.exception.ErrorCode;
 import com.kongdakchaekdak.common.exception.ForbiddenException;
 import com.kongdakchaekdak.common.exception.ResourceNotFoundException;
 import com.kongdakchaekdak.domain.book.Book;
@@ -60,21 +61,21 @@ public class BookNoteService {
 
     private Book findBookOrThrow(Long bookId) {
         return bookRepository.findById(bookId)
-                .orElseThrow(() -> new ResourceNotFoundException("책 기록을 찾을 수 없습니다. id=" + bookId));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND, "책 기록을 찾을 수 없습니다. id=" + bookId));
     }
 
     private BookNote findNoteOrThrow(Long bookId, Long noteId) {
         BookNote note = bookNoteRepository.findById(noteId)
-                .orElseThrow(() -> new ResourceNotFoundException("소감을 찾을 수 없습니다. id=" + noteId));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND, "소감을 찾을 수 없습니다. id=" + noteId));
         if (!note.getBook().getId().equals(bookId)) {
-            throw new ResourceNotFoundException("해당 책 기록에 속한 소감이 아닙니다. bookId=" + bookId + ", noteId=" + noteId);
+            throw new ResourceNotFoundException(ErrorCode.NOT_FOUND, "해당 책 기록에 속한 소감이 아닙니다. bookId=" + bookId + ", noteId=" + noteId);
         }
         return note;
     }
 
     private void requireOwner(Book book, Long currentUserId) {
         if (!book.getUser().getId().equals(currentUserId)) {
-            throw new ForbiddenException("본인 책 기록에만 소감을 작성/수정/삭제할 수 있습니다.");
+            throw new ForbiddenException(ErrorCode.NOT_OWNER, "본인 책 기록에만 소감을 작성/수정/삭제할 수 있습니다.");
         }
     }
 }

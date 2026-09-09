@@ -158,7 +158,7 @@ class BookControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
     }
 
     @Test
@@ -189,18 +189,18 @@ class BookControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateBody))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
 
         mockMvc.perform(patch("/api/books/{id}/complete", otherBookId)
                         .header("Authorization", bearerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
 
         mockMvc.perform(delete("/api/books/{id}", otherBookId).header("Authorization", bearerToken))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
     }
 
     // 2026-08-27: Book.genre가 자유 String에서 Genre enum(6개 고정 카테고리)으로 바뀐 뒤

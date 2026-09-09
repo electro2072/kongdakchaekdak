@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.bookphoto;
 
+import com.kongdakchaekdak.common.exception.ErrorCode;
 import com.kongdakchaekdak.common.exception.ForbiddenException;
 import com.kongdakchaekdak.common.exception.ImageStorageUnavailableException;
 import com.kongdakchaekdak.common.exception.ResourceNotFoundException;
@@ -134,10 +135,10 @@ public class BookPhotoService {
     @Transactional
     public void delete(Long bookId, Long photoId, Long currentUserId) {
         BookPhoto photo = bookPhotoRepository.findById(photoId)
-                .orElseThrow(() -> new ResourceNotFoundException("사진을 찾을 수 없습니다. id=" + photoId));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND, "사진을 찾을 수 없습니다. id=" + photoId));
 
         if (!photo.getBook().getId().equals(bookId)) {
-            throw new ResourceNotFoundException("해당 책 기록에 속한 사진이 아닙니다. bookId=" + bookId + ", photoId=" + photoId);
+            throw new ResourceNotFoundException(ErrorCode.NOT_FOUND, "해당 책 기록에 속한 사진이 아닙니다. bookId=" + bookId + ", photoId=" + photoId);
         }
         requireOwner(photo.getBook(), currentUserId);
 
@@ -146,13 +147,13 @@ public class BookPhotoService {
 
     private Book findBookOrThrow(Long bookId) {
         return bookRepository.findById(bookId)
-                .orElseThrow(() -> new ResourceNotFoundException("책 기록을 찾을 수 없습니다. id=" + bookId));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND, "책 기록을 찾을 수 없습니다. id=" + bookId));
     }
 
     // 본인 소유의 책에만 사진을 등록/삭제할 수 있도록 강제한다 (BookService의 소유자 검증과 동일한 원칙).
     private void requireOwner(Book book, Long currentUserId) {
         if (!book.getUser().getId().equals(currentUserId)) {
-            throw new ForbiddenException("본인 책 기록에만 사진을 추가/삭제할 수 있습니다.");
+            throw new ForbiddenException(ErrorCode.NOT_OWNER, "본인 책 기록에만 사진을 추가/삭제할 수 있습니다.");
         }
     }
 

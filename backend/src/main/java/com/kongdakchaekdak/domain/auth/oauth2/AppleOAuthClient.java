@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.auth.oauth2;
 
+import com.kongdakchaekdak.common.exception.ErrorCode;
 import com.kongdakchaekdak.common.exception.InvalidCredentialsException;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -36,12 +37,12 @@ public class AppleOAuthClient {
             // BadJOSEException(서명 위조/클레임 불일치), ParseException(JWT 형식이 아님),
             // JOSEException(JWKS 조회 실패 등)을 한꺼번에 처리한다 — 어느 경우든 클라이언트
             // 입장에서는 "인증 실패"로 취급하면 충분하고, 원인별로 다른 응답을 줄 이유가 없다.
-            throw new InvalidCredentialsException("애플 인증에 실패했습니다. identity token을 확인해주세요.");
+            throw new InvalidCredentialsException(ErrorCode.SOCIAL_AUTH_FAILED, "애플 인증에 실패했습니다. identity token을 확인해주세요.");
         }
 
         String appleUserId = claims.getSubject();
         if (appleUserId == null || appleUserId.isBlank()) {
-            throw new InvalidCredentialsException("애플 사용자 정보를 가져오지 못했습니다.");
+            throw new InvalidCredentialsException(ErrorCode.SOCIAL_AUTH_FAILED, "애플 사용자 정보를 가져오지 못했습니다.");
         }
 
         return new SocialUserInfo(appleUserId, null);

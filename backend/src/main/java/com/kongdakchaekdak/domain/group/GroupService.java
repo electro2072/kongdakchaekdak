@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.group;
 
+import com.kongdakchaekdak.common.exception.ErrorCode;
 import com.kongdakchaekdak.common.exception.DuplicateResourceException;
 import com.kongdakchaekdak.common.exception.ForbiddenException;
 import com.kongdakchaekdak.common.exception.ResourceNotFoundException;
@@ -88,7 +89,7 @@ public class GroupService {
 
         User target = findUserOrThrow(request.userId());
         if (groupMemberRepository.existsByGroupIdAndUserId(groupId, request.userId())) {
-            throw new DuplicateResourceException("이미 그룹에 속한 사용자입니다. userId=" + request.userId());
+            throw new DuplicateResourceException(ErrorCode.ALREADY_GROUP_MEMBER, "이미 그룹에 속한 사용자입니다. userId=" + request.userId());
         }
 
         GroupMember saved = groupMemberRepository.save(new GroupMember(group, target));
@@ -99,15 +100,15 @@ public class GroupService {
     public void removeMember(Long groupId, Long targetUserId, Long currentUserId) {
         Group group = findGroupOrThrow(groupId);
         GroupMember membership = groupMemberRepository.findByGroupIdAndUserId(groupId, targetUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 사용자는 그룹 멤버가 아닙니다. userId=" + targetUserId));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND, "해당 사용자는 그룹 멤버가 아닙니다. userId=" + targetUserId));
 
         boolean isSelf = targetUserId.equals(currentUserId);
         boolean isOwner = group.getOwner().getId().equals(currentUserId);
         if (!isSelf && !isOwner) {
-            throw new ForbiddenException("본인 또는 그룹장만 멤버를 내보낼 수 있습니다.");
+            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY, "본인 또는 그룹장만 멤버를 내보낼 수 있습니다.");
         }
         if (isSelf && group.getOwner().getId().equals(targetUserId)) {
-            throw new ForbiddenException("그룹장은 탈퇴할 수 없습니다. 그룹을 삭제해주세요.");
+            throw new ForbiddenException(ErrorCode.GROUP_LEADER_CANNOT_LEAVE, "그룹장은 탈퇴할 수 없습니다. 그룹을 삭제해주세요.");
         }
 
         groupMemberRepository.delete(membership);
@@ -115,17 +116,17 @@ public class GroupService {
 
     private Group findGroupOrThrow(Long groupId) {
         return groupRepository.findById(groupId)
-                .orElseThrow(() -> new ResourceNotFoundException("그룹을 찾을 수 없습니다. id=" + groupId));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND, "그룹을 찾을 수 없습니다. id=" + groupId));
     }
 
     private User findUserOrThrow(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다. id=" + userId));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND, "사용자를 찾을 수 없습니다. id=" + userId));
     }
 
     private void requireOwner(Group group, Long currentUserId) {
         if (!group.getOwner().getId().equals(currentUserId)) {
-            throw new ForbiddenException("그룹장만 수행할 수 있는 작업입니다.");
+            throw new ForbiddenException(ErrorCode.GROUP_LEADER_ONLY, "그룹장만 수행할 수 있는 작업입니다.");
         }
     }
 }

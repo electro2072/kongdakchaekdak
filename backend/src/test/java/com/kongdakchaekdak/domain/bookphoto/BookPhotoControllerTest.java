@@ -149,7 +149,7 @@ class BookPhotoControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createBody))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
     }
 
     @Test
@@ -172,7 +172,7 @@ class BookPhotoControllerTest {
         mockMvc.perform(delete("/api/books/{bookId}/photos/{photoId}", bookId, photoId)
                         .header("Authorization", otherToken))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
     }
 
     @Test

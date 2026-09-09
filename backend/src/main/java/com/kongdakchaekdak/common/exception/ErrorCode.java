@@ -14,9 +14,8 @@ import org.springframework.http.HttpStatus;
  * 짧은 식별자가 필요한 경우에는 코드가 아니라 {@code RequestTraceFilter}의 traceId를 쓴다 —
  * 에러의 "종류"가 아니라 "그 요청 한 건"을 특정하므로 CS 대응에 유용하다.
  *
- * <p><b>이관 진행 중</b>: {@code FORBIDDEN}, {@code INVALID_REQUEST}, {@code INVALID_CREDENTIALS},
- * {@code DUPLICATE_RESOURCE}는 각 예외 타입의 기본 코드로만 남아 있는 구(舊) 코드다. 세부 코드로
- * 전부 이관된 뒤 제거한다 — 신규 코드에서는 사용하지 않는다.
+ * <p>2026-09-09 개편 시점에 구 코드({@code FORBIDDEN}, {@code INVALID_REQUEST},
+ * {@code INVALID_CREDENTIALS}, {@code DUPLICATE_RESOURCE})는 전부 세부 코드로 이관되어 제거됐다.
  */
 public enum ErrorCode {
 
@@ -25,9 +24,6 @@ public enum ErrorCode {
     UNAUTHENTICATED(HttpStatus.UNAUTHORIZED),
     /** 소셜 제공자(카카오·네이버·구글·애플) 토큰 검증 실패. 어느 제공자인지는 프론트가 이미 안다. */
     SOCIAL_AUTH_FAILED(HttpStatus.UNAUTHORIZED),
-    /** @deprecated 이관용 기본 코드. {@link #SOCIAL_AUTH_FAILED}를 쓸 것. */
-    @Deprecated
-    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED),
 
     // --- 403 권한 ---
     /** 본인 소유가 아닌 책·소감·사진·계정·공유기록에 대한 조작. */
@@ -41,9 +37,6 @@ public enum ErrorCode {
      * 별도 코드로 분리했다 — 프론트는 그룹 삭제 CTA가 있는 다이얼로그를 띄운다.
      */
     GROUP_LEADER_CANNOT_LEAVE(HttpStatus.FORBIDDEN),
-    /** @deprecated 이관용 기본 코드. 세부 403 코드를 쓸 것. */
-    @Deprecated
-    FORBIDDEN(HttpStatus.FORBIDDEN),
 
     // --- 404 ---
     /** 조회 대상 리소스 없음 — 프론트는 목록을 갱신하고 이전 화면으로 돌아간다. */
@@ -54,9 +47,6 @@ public enum ErrorCode {
     // --- 409 ---
     /** 이미 그룹에 속한 사용자를 다시 추가. */
     ALREADY_GROUP_MEMBER(HttpStatus.CONFLICT),
-    /** @deprecated 이관용 기본 코드. */
-    @Deprecated
-    DUPLICATE_RESOURCE(HttpStatus.CONFLICT),
 
     // --- 400 ---
     /** Bean Validation 실패 — {@code fieldErrors}에 필드별 사유가 담긴다. */
@@ -70,9 +60,6 @@ public enum ErrorCode {
     INVALID_SHARE_REQUEST(HttpStatus.BAD_REQUEST),
     /** 요청 본문(JSON) 파싱 실패 — enum 라벨 오류 포함. */
     MALFORMED_REQUEST(HttpStatus.BAD_REQUEST),
-    /** @deprecated 이관용 기본 코드. {@link #INVALID_SHARE_REQUEST} 등 세부 코드를 쓸 것. */
-    @Deprecated
-    INVALID_REQUEST(HttpStatus.BAD_REQUEST),
 
     // --- 503 / 500 ---
     /** 이미지 업로드(presigned URL) 설정 문제로 기능 사용 불가. */

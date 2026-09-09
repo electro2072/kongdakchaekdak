@@ -83,11 +83,11 @@ class GroupControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("name", "이름 바꿔치기"))))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("GROUP_LEADER_ONLY"));
 
         mockMvc.perform(delete("/api/groups/{id}", groupId).header("Authorization", otherToken))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("GROUP_LEADER_ONLY"));
 
         mockMvc.perform(patch("/api/groups/{id}", groupId)
                         .header("Authorization", ownerToken)
@@ -129,7 +129,7 @@ class GroupControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("userId", memberId))))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("DUPLICATE_RESOURCE"));
+                .andExpect(jsonPath("$.error").value("ALREADY_GROUP_MEMBER"));
     }
 
     @Test
@@ -153,7 +153,7 @@ class GroupControllerTest {
         mockMvc.perform(delete("/api/groups/{id}/members/{userId}", groupId, ownerId)
                         .header("Authorization", ownerToken))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("GROUP_LEADER_CANNOT_LEAVE"));
     }
 
     @Test

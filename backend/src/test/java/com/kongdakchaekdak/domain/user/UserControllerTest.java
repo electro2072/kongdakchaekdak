@@ -122,7 +122,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateBody))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
     }
 
     @Test
@@ -141,7 +141,7 @@ class UserControllerTest {
         String attackerToken = bearerToken(victimId + 1);
         mockMvc.perform(delete("/api/users/{id}", victimId).header("Authorization", attackerToken))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
     }
 
     @Test
