@@ -97,7 +97,7 @@ kongdakchaekdak/
 |---|---|
 | [기획서 v1](docs/콩닥책닥_기획서_v1.md) | 문제 정의 · 페르소나 · 기능 명세 F-01~F-12 · IA |
 | [화면설계서 (wireframe)](docs/독서기록공유앱_화면설계서_wireframe_v2-5.html) | 전체 화면 와이어프레임 |
-| [프론트 아키텍처](docs/%5Bfrontend%5D%20독서기록앱_아키텍처문서_v1.md) · [백엔드 아키텍처](docs/%5Bbackend%5D%20독서기록앱_아키텍처문서_v1.md) | 구조 설계 문서 |
+| [아키텍처](docs/architecture/) | 시스템 개요 · [프론트](docs/architecture/frontend.md) · [백엔드](docs/architecture/backend.md) |
 | [백엔드 구축 계획](docs/독서기록앱_백엔드구축계획.md) · [TODO v2](docs/독서기록앱_TODO리스트_v2.md) | 진행 계획과 현황 |
 | [개인정보처리방침](PRIVACY.md) | Privacy Policy |
 

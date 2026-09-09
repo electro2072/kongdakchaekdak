@@ -1,0 +1,744 @@
+<title>콩닥책닥 프론트엔드 아키텍처</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root {
+    --p50:#f4f9eb;  --p100:#ebf5db; --p200:#d6e5bd; --p300:#b9cd98; --p400:#99ae73;
+    --p500:#7a9052; --p600:#607537; --p700:#485a21; --p800:#32410f; --p900:#1e2903;
+    --n50:#f6f7f3;  --n100:#eeefea; --n200:#dadbd6; --n300:#bdbfb8; --n400:#8e9089;
+    --n500:#6b6d66; --n600:#52534d; --n700:#3c3e39; --n800:#262723; --n900:#11120f;
+    --success:#607537; --warning:#906600; --error:#b6143f; --info:#1d60bc;
+    --chart1:#485a21; --chart2:#e8929b; --chart3:#efb94a; --chart4:#9b7ba8;
+
+    --bg: var(--n50);
+    --surface: #ffffff;
+    --surface-tint: var(--p50);
+    --text: var(--n900);
+    --text-soft: var(--n600);
+    --text-faint: var(--n500);
+    --hairline: rgba(17,18,15,0.10);
+    --accent: var(--p700);
+    --accent-soft: var(--p200);
+    --code-bg: var(--n100);
+    --code-text: var(--n800);
+    --shadow: 0 1px 2px rgba(17,18,15,0.05), 0 4px 16px rgba(17,18,15,0.04);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --p50:#121906;  --p100:#1b2309; --p200:#27330d; --p300:#667b3d; --p400:#667b3d;
+      --p500:#748a48; --p600:#657b39; --p700:#8da267; --p800:#adc08b; --p900:#cfdeb7;
+      --n50:#1a1c17;  --n100:#1e211b; --n200:#373934; --n300:#454741; --n400:#5f625b;
+      --n500:#83857e; --n600:#aeb0a9; --n700:#d3d5ce; --n800:#eef0e9; --n900:#f5f6f1;
+      --success:#748a48; --warning:#d59800; --error:#eb596e; --info:#5f99ed;
+      --chart1:#8da267; --chart2:#cd717c; --chart3:#ce9b2b; --chart4:#7d588c;
+
+      --bg: var(--n50);
+      --surface: #242721;
+      --surface-tint: var(--p100);
+      --text: var(--n900);
+      --text-soft: var(--n600);
+      --text-faint: var(--n500);
+      --hairline: rgba(255,255,255,0.10);
+      --accent: var(--p700);
+      --accent-soft: var(--p300);
+      --code-bg: #1c1e19;
+      --code-text: var(--n800);
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.25);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --p50:#121906;  --p100:#1b2309; --p200:#27330d; --p300:#667b3d; --p400:#667b3d;
+    --p500:#748a48; --p600:#657b39; --p700:#8da267; --p800:#adc08b; --p900:#cfdeb7;
+    --n50:#1a1c17;  --n100:#1e211b; --n200:#373934; --n300:#454741; --n400:#5f625b;
+    --n500:#83857e; --n600:#aeb0a9; --n700:#d3d5ce; --n800:#eef0e9; --n900:#f5f6f1;
+    --success:#748a48; --warning:#d59800; --error:#eb596e; --info:#5f99ed;
+    --chart1:#8da267; --chart2:#cd717c; --chart3:#ce9b2b; --chart4:#7d588c;
+
+    --bg: var(--n50);
+    --surface: #242721;
+    --surface-tint: var(--p100);
+    --text: var(--n900);
+    --text-soft: var(--n600);
+    --text-faint: var(--n500);
+    --hairline: rgba(255,255,255,0.10);
+    --accent: var(--p700);
+    --accent-soft: var(--p300);
+    --code-bg: #1c1e19;
+    --code-text: var(--n800);
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.25);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 0;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  nav.toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 32px 20px 32px 28px;
+    border-right: 1px solid var(--hairline);
+  }
+  nav.toc .brand {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 18px;
+  }
+  nav.toc a {
+    display: block;
+    padding: 6px 10px;
+    margin: 1px 0;
+    border-radius: 8px;
+    color: var(--text-soft);
+    text-decoration: none;
+    font-size: 13px;
+    border-left: 2px solid transparent;
+  }
+  nav.toc a:hover { background: var(--surface-tint); color: var(--text); }
+  nav.toc a.num { color: var(--text-faint); font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-right: 6px; }
+
+  main {
+    min-width: 0;
+    padding: 48px 40px 100px;
+  }
+
+  header.doc-head {
+    margin-bottom: 40px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-size: 30px;
+    font-weight: 900;
+    margin: 0 0 10px;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  .doc-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 12.5px;
+    color: var(--text-faint);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 12px;
+  }
+  .doc-meta b { color: var(--text-soft); font-weight: 500; }
+
+  .caveat {
+    margin-top: 20px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--warning) 12%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent);
+    font-size: 13.5px;
+    color: var(--text);
+    line-height: 1.65;
+  }
+  .caveat b { color: var(--warning); }
+
+  section { margin-bottom: 52px; scroll-margin-top: 20px; }
+  section h2 {
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 0 0 6px;
+  }
+  section h2 .idx {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  section > p.lede { color: var(--text-soft); margin: 0 0 20px; max-width: 68ch; }
+  section h3 { font-size: 15px; font-weight: 700; margin: 24px 0 10px; color: var(--text); }
+
+  p { max-width: 68ch; }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+  }
+  .panel.pad { padding: 20px 22px; }
+  .panel.diagram { padding: 22px; }
+  .panel.diagram pre.mermaid { margin: 0; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 560px; }
+  thead th {
+    text-align: left;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+    font-weight: 500;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--hairline);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--hairline);
+    vertical-align: top;
+    color: var(--text-soft);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody td:first-child { color: var(--text); font-weight: 500; white-space: nowrap; }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 0.1em 0.4em;
+    border-radius: 5px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .badge.done { background: color-mix(in srgb, var(--success) 16%, transparent); color: var(--success); }
+  .badge.partial { background: color-mix(in srgb, var(--warning) 16%, transparent); color: var(--warning); }
+  .badge.orphan { background: color-mix(in srgb, var(--error) 14%, transparent); color: var(--error); }
+  .badge.dot::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  pre.code-block {
+    margin: 0;
+    padding: 18px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    background: var(--code-bg);
+    color: var(--code-text);
+    border-radius: 14px;
+    overflow-x: auto;
+    border: 1px solid var(--hairline);
+  }
+  pre.code-block .kw { color: var(--info); }
+  pre.code-block .tp { color: var(--accent); }
+  pre.code-block .cm { color: var(--text-faint); font-style: italic; }
+
+  ul.clean { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  ul.clean li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13.5px;
+    color: var(--text-soft);
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+  }
+  ul.clean li .badge { margin-top: 1px; flex-shrink: 0; }
+
+  .swatch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 10px;
+  }
+  .swatch { border-radius: 10px; overflow: hidden; border: 1px solid var(--hairline); }
+  .swatch .fill { height: 44px; }
+  .swatch .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    padding: 6px 8px;
+    background: var(--surface);
+    color: var(--text-soft);
+  }
+  .swatch .label b { display: block; color: var(--text); font-size: 11px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+  footer.doc-foot {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--hairline);
+    font-size: 12px;
+    color: var(--text-faint);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .mobile-toc-toggle { display: none; }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc {
+      position: relative;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--hairline);
+      padding: 16px 20px;
+    }
+    nav.toc .toc-list { display: none; }
+    nav.toc.open .toc-list { display: block; }
+    .mobile-toc-toggle {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 6px 0;
+      cursor: pointer;
+    }
+    main { padding: 32px 20px 80px; }
+  }
+</style>
+
+
+<div class="layout">
+  <nav class="toc" id="toc">
+    <div class="brand">콩닥책닥 · FE ARCH</div>
+    <button class="mobile-toc-toggle" id="tocToggle">목차 ▾</button>
+    <div class="toc-list">
+      <a href="#요약"><span class="num">00</span>요약</a>
+      <a href="#레이어-구조"><span class="num">01</span>레이어 구조</a>
+      <a href="#화면-인벤토리"><span class="num">02</span>화면 인벤토리</a>
+      <a href="#내비게이션"><span class="num">03</span>내비게이션</a>
+      <a href="#상태-관리"><span class="num">04</span>상태 관리</a>
+      <a href="#서비스-레이어"><span class="num">05</span>서비스 레이어</a>
+      <a href="#주요-데이터-타입"><span class="num">06</span>주요 데이터 타입</a>
+      <a href="#테마-시스템"><span class="num">07</span>테마 시스템</a>
+      <a href="#테스트"><span class="num">08</span>테스트</a>
+      <a href="#구조상-남은-부채"><span class="num">09</span>구조상 남은 부채</a>
+    </div>
+  </nav>
+
+  <main>
+    <header class="doc-head">
+      <div class="eyebrow">프론트엔드 아키텍처 · v1</div>
+      <h1>콩닥책닥 프론트엔드 아키텍처</h1>
+      <p class="doc-meta">
+        <span><strong>v1 · 기준 커밋 <code>74974fe</code> (2026-09-09)</strong> · 이전 개정 2026-08-31</span>
+        <span>범위: <code>frontend/</code> (React Native 0.74 + TypeScript) — 백엔드/디자인은 참고로만 언급</span>
+        <span>진행률·미연동 현황은 이 문서가 아니라 <a href="../연동매트릭스_v1.md"><code>../연동매트릭스_v1.md</code></a>를 봅니다.</span>
+      </p>
+    </header>
+
+
+
+    <section id="요약">
+      <h2><span class="idx">00</span>요약</h2>
+      <div class="panel pad">
+<p>화면(Screens) → 내비게이션 → 상태(Context·Hooks) → 서비스(Services) → 백엔드 API 순서의 레이어 구조를 따르는 React Native 단일 앱입니다. 화면 15개, 하단 탭 4개, 스택 라우트 10개가 등록되어 있습니다.</p>
+<p>이전 개정 이후 구조적으로 달라진 것은 세 가지입니다. <strong>공용 HTTP 클라이언트(<code>apiClient</code>)가 생겨</strong> 서비스들이 그 위에 올라갔고, <strong>세션이 암호화 스토리지에 영속화</strong>되어 앱을 껐다 켜도 로그인이 유지되며, <strong>Context가 3층(Auth / Profile / Library)으로 분리</strong>되어 화면이 mock 배열 대신 Context를 통해 데이터를 받습니다.</p>
+<p>데이터 출처는 화면마다 다릅니다. 인증·프로필·서재·대시보드는 실제 API를, 일정 상세·알림·그룹 관리·공유 대상 목록은 아직 <code>src/mocks/</code>를 씁니다.</p>
+      </div>
+    </section>
+    <section id="레이어-구조">
+      <h2><span class="idx">01</span>레이어 구조</h2>
+      <div class="panel pad">
+<pre class="mermaid">graph TD
+  subgraph UI[&quot;화면 (src/screens)&quot;]
+    direction LR
+    Auth[&quot;Login · Signup&quot;]
+    Tabs[&quot;Schedule · Library · Share · Profile&quot;]
+    Push[&quot;BookDetail · BookSearch · BookRegisterConfirm&lt;br/&gt;BookNoteEdit · Dashboard · ProfileEdit&lt;br/&gt;GroupManagement · ScheduleDetail · Notifications&quot;]
+  end
+
+  subgraph NAV[&quot;내비게이션 (src/navigation)&quot;]
+    Root[&quot;RootNavigator&lt;br/&gt;isRestoring / isLoggedIn 분기&quot;]
+    AuthStack[&quot;AuthStack&quot;]
+    MainStack[&quot;MainStack&quot;]
+    MainTabs[&quot;MainTabs&quot;]
+  end
+
+  subgraph STATE[&quot;상태 (Context · Hooks)&quot;]
+    AuthCtx[&quot;AuthContext&lt;br/&gt;세션·토큰&quot;]
+    ProfileCtx[&quot;ProfileContext&lt;br/&gt;내 정보·통계&quot;]
+    LibraryCtx[&quot;LibraryContext&lt;br/&gt;서재·소감·사진&quot;]
+    Hooks[&quot;useDashboard · useBookSearch · useTheme&quot;]
+  end
+
+  subgraph SERVICE[&quot;서비스 (src/services)&quot;]
+    ApiClient[&quot;apiClient&lt;br/&gt;공용 fetch · 401 핸들러&quot;]
+    Secure[&quot;secureStorage&lt;br/&gt;EncryptedStorage&quot;]
+    Social[&quot;socialAuth/ kakao · google · naver&quot;]
+    BookSvc[&quot;bookService&lt;br/&gt;BookSearchProvider 레지스트리&quot;]
+  end
+
+  subgraph EXT[&quot;외부&quot;]
+    BE[&quot;Spring Boot API&quot;]
+    Providers[&quot;카카오 · 구글 · 네이버 SDK&quot;]
+    BookApis[&quot;알라딘 · 카카오 도서 API&quot;]
+  end
+
+  Root --&gt; AuthStack --&gt; Auth
+  Root --&gt; MainStack --&gt; MainTabs --&gt; Tabs
+  MainStack --&gt; Push
+
+  Auth --&gt; AuthCtx
+  Tabs --&gt; ProfileCtx
+  Tabs --&gt; LibraryCtx
+  Push --&gt; LibraryCtx
+  Push --&gt; Hooks
+
+  AuthCtx --&gt; Secure
+  AuthCtx --&gt; Social --&gt; Providers
+  ProfileCtx --&gt; ApiClient
+  LibraryCtx --&gt; ApiClient
+  Hooks --&gt; ApiClient
+  Hooks --&gt; BookSvc --&gt; BookApis
+  ApiClient --&gt; BE</pre>
+      </div>
+    </section>
+    <section id="화면-인벤토리">
+      <h2><span class="idx">02</span>화면 인벤토리</h2>
+      <div class="panel pad">
+<p>15개 화면 전부 내비게이터에 등록되어 있습니다. (이전 개정에서 "고아 상태"로 적혔던 <code>BookSearchScreen</code>은 <code>MainStack</code>에 정상 등록됐습니다.)</p>
+<table>
+<thead>
+<tr>
+<th>화면</th>
+<th>파일</th>
+<th>라우트</th>
+<th>데이터 출처</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>로그인</td>
+<td><code>LoginScreen.tsx</code></td>
+<td><code>AuthStack/Login</code></td>
+<td><code>authApi</code> (실연동)</td>
+</tr>
+<tr>
+<td>회원가입</td>
+<td><code>SignupScreen.tsx</code></td>
+<td><code>AuthStack/Signup</code></td>
+<td><code>AuthContext</code></td>
+</tr>
+<tr>
+<td>일정(홈)</td>
+<td><code>ScheduleScreen.tsx</code></td>
+<td><code>Tabs/Schedule</code></td>
+<td><code>ProfileContext</code></td>
+</tr>
+<tr>
+<td>서재</td>
+<td><code>LibraryScreen.tsx</code></td>
+<td><code>Tabs/Library</code></td>
+<td><code>LibraryContext</code> (실연동)</td>
+</tr>
+<tr>
+<td>공유</td>
+<td><code>ShareScreen.tsx</code></td>
+<td><code>Tabs/Share</code></td>
+<td><code>LibraryContext</code> + <code>MOCK_SHARE_GROUPS</code></td>
+</tr>
+<tr>
+<td>프로필</td>
+<td><code>ProfileScreen.tsx</code></td>
+<td><code>Tabs/Profile</code></td>
+<td><code>AuthContext</code> · <code>ProfileContext</code> (실연동)</td>
+</tr>
+<tr>
+<td>책 상세</td>
+<td><code>BookDetailScreen.tsx</code></td>
+<td><code>MainStack/BookDetail</code></td>
+<td><code>LibraryContext</code> (실연동)</td>
+</tr>
+<tr>
+<td>책 검색</td>
+<td><code>BookSearchScreen.tsx</code></td>
+<td><code>MainStack/BookSearch</code></td>
+<td><code>useBookSearch</code> → 알라딘/카카오</td>
+</tr>
+<tr>
+<td>책 등록 확인</td>
+<td><code>BookRegisterConfirmScreen.tsx</code></td>
+<td><code>MainStack/BookRegisterConfirm</code></td>
+<td><code>LibraryContext</code></td>
+</tr>
+<tr>
+<td>소감 작성·수정</td>
+<td><code>BookNoteEditScreen.tsx</code></td>
+<td><code>MainStack/BookNoteEdit</code></td>
+<td><code>LibraryContext</code></td>
+</tr>
+<tr>
+<td>대시보드(Recap)</td>
+<td><code>DashboardScreen.tsx</code></td>
+<td><code>MainStack/Dashboard</code></td>
+<td><code>useDashboard</code> (실연동)</td>
+</tr>
+<tr>
+<td>프로필 편집</td>
+<td><code>ProfileEditScreen.tsx</code></td>
+<td><code>MainStack/ProfileEdit</code></td>
+<td><code>ProfileContext</code> (실연동)</td>
+</tr>
+<tr>
+<td>그룹 관리·공유 이력</td>
+<td><code>GroupManagementScreen.tsx</code></td>
+<td><code>MainStack/GroupManagement</code></td>
+<td>mock</td>
+</tr>
+<tr>
+<td>일정 상세</td>
+<td><code>ScheduleDetailScreen.tsx</code></td>
+<td><code>MainStack/ScheduleDetail</code></td>
+<td>mock</td>
+</tr>
+<tr>
+<td>알림 목록</td>
+<td><code>NotificationScreen.tsx</code></td>
+<td><code>MainStack/Notifications</code></td>
+<td>mock</td>
+</tr>
+</tbody>
+</table>
+      </div>
+    </section>
+    <section id="내비게이션">
+      <h2><span class="idx">03</span>내비게이션</h2>
+      <div class="panel pad">
+<p><code>src/navigation/</code>이 4개 파일로 나뉘어 있습니다.</p>
+<ul>
+<li><strong><code>RootNavigator</code></strong> — <code>AuthContext</code>의 <code>isRestoring</code> / <code>isLoggedIn</code>을 보고 분기합니다. 부팅 직후 저장된 세션을 복원하는 동안이 <code>isRestoring</code>이고, 이 상태를 두지 않으면 복원 성공 직전에 로그인 화면이 한 번 번쩍이게 됩니다.</li>
+<li><strong><code>AuthStack</code></strong> — <code>Login</code> → <code>Signup</code>.</li>
+<li><strong><code>MainTabs</code></strong> — 일정 / 서재 / 공유 / 프로필 4탭. 아이콘은 <code>components/TabBarIcons.tsx</code>.</li>
+<li><strong><code>MainStack</code></strong> — 탭 위에 전체화면으로 push되는 10개 라우트. 와이어프레임상 상세 화면에는 탭바가 없어야 하므로 탭 안이 아니라 위에 쌓습니다.</li>
+</ul>
+<p>라우트 파라미터 타입은 <code>navigation/types.ts</code> 한 곳에 모여 있고, 각 라우트에 어느 화면의 어느 버튼에서 진입하는지가 주석으로 붙어 있습니다. <code>Share</code> 탭만 파라미터가 <code>{bookId?: string} | undefined</code>인데, 탭을 직접 누르는 경로와 책 상세의 "이 책 공유하기"로 들어오는 경로가 함께 있기 때문입니다.</p>
+      </div>
+    </section>
+    <section id="상태-관리">
+      <h2><span class="idx">04</span>상태 관리</h2>
+      <div class="panel pad">
+<h3>4.1 AuthContext — 세션과 토큰</h3>
+<p><code>accessToken</code>, <code>sessionUser</code>, <code>isLoggedIn</code>, <code>isRestoring</code>을 들고 있습니다.</p>
+<p><strong>세션은 영속화됩니다.</strong> <code>react-native-encrypted-storage</code>에 <code>@kongdakchaekdak/accessToken</code> 키로 저장하고, 부팅 시 복원한 뒤 <code>GET /api/auth/me</code>로 검증합니다. 검증에 실패하면 저장된 토큰을 폐기하고 로그인 화면으로 돌립니다. 다만 네트워크 오류(<code>ApiError.status === 0</code>)는 토큰 무효와 구분해서 세션을 유지합니다 — 지하철에서 앱을 열었다고 로그아웃시키면 안 되기 때문입니다.</p>
+<blockquote>
+<p>이전 개정에는 "세션 영속화가 없음"으로 적혀 있었습니다. 2026-09-08 구현됐고 실기기 검증(S1-1)까지 통과했습니다. AsyncStorage가 아니라 EncryptedStorage이며, 네이티브 모듈이라 <strong>JS 번들 갱신만으로는 반영되지 않고 재빌드가 필요</strong>합니다.</p>
+</blockquote>
+<h3>4.2 ProfileContext — 내 정보와 통계</h3>
+<p><code>userApi.getMe()</code> / <code>updateUser()</code> + <code>profileStatsApi.fetchProfileStats()</code>를 감쌉니다. 초기값이 mock이 아니라 <code>EMPTY_PROFILE</code>인 것이 설계 포인트입니다 — 부팅 시점에 <code>AuthProvider</code>가 이미 세션 검증으로 사용자 정보를 받아오므로, 여기서 다시 mock을 채웠다가 덮어쓰면 화면이 두 번 바뀝니다.</p>
+<h3>4.3 LibraryContext — 서재</h3>
+<p><code>libraryApi</code>(책·소감·사진)를 감싸고 <code>AuthContext</code>(사용자 ID)와 <code>ProfileContext</code>에 의존합니다. 책 목록 조회, 등록, 완독 처리, 삭제, 소감 CRUD, 사진 조회를 한 곳에서 관리합니다.</p>
+<h3>4.4 훅</h3>
+<ul>
+<li><strong><code>useDashboard</code></strong> — 기간(<code>month</code>/<code>quarter</code>/<code>year</code>) 상태 + <code>GET /api/dashboard?period=&amp;date=</code> 호출 + 로딩/에러/재시도. <code>date</code>는 현재 달(<code>yyyy-MM</code>)을 보내고 그 달이 속한 기간은 백엔드가 계산합니다.</li>
+<li><strong><code>useBookSearch</code></strong> — <code>bookService.search(query, providerId?)</code> 호출과 로딩/에러 상태.</li>
+<li><strong><code>useTheme</code></strong> — 라이트/다크 팔레트 전환.</li>
+</ul>
+      </div>
+    </section>
+    <section id="서비스-레이어">
+      <h2><span class="idx">05</span>서비스 레이어</h2>
+      <div class="panel pad">
+<h3>5.1 공용 클라이언트 — <code>apiClient.ts</code></h3>
+<p>모든 인증 API가 통과하는 단일 함수 <code>apiFetch&lt;T&gt;(path, init)</code>입니다.</p>
+<ul>
+<li>베이스 URL은 <code>react-native-config</code>의 <code>API_BASE_URL</code>, 없으면 <code>http://10.0.2.2:8080</code>(안드로이드 에뮬레이터에서 호스트를 가리키는 주소).</li>
+<li>토큰이 설정돼 있으면 <code>Authorization: Bearer</code> 자동 부착 (<code>setApiAccessToken</code>).</li>
+<li><strong>401이면 등록된 핸들러를 호출</strong>해 앱 전역을 로그아웃시킵니다 (<code>registerUnauthorizedHandler</code>). 화면마다 401을 처리하지 않기 위한 장치입니다.</li>
+<li>실패는 <code>status</code>를 가진 <code>ApiError</code>로 정규화합니다. <strong>네트워크 자체가 실패하면 <code>status: 0</code></strong> — 이 규약 때문에 "서버가 거절함"과 "서버에 닿지 못함"을 호출부에서 구분할 수 있습니다(§4.1 세션 복원, <code>components/NetworkError.tsx</code> 배너).</li>
+<li><code>204 No Content</code>는 본문 파싱을 건너뜁니다.</li>
+</ul>
+<h3>5.2 저장소 — <code>secureStorage.ts</code></h3>
+<p><code>SecureStorage</code> 인터페이스 뒤에 <code>react-native-encrypted-storage</code>를 두었습니다. 인터페이스로 감싼 덕분에 테스트에서는 <code>__mocks__/react-native-encrypted-storage.js</code>로 교체됩니다(패키지가 공식 mock을 제공하지 않아 직접 둔 것).</p>
+<h3>5.3 소셜 로그인</h3>
+<table>
+<thead>
+<tr>
+<th>제공자</th>
+<th>파일</th>
+<th>SDK</th>
+<th>서버로 보내는 값</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>카카오</td>
+<td><code>socialAuth/kakaoAuth.ts</code></td>
+<td><code>@react-native-seoul/kakao-login</code> 6.0.4</td>
+<td><code>accessToken</code></td>
+</tr>
+<tr>
+<td>네이버</td>
+<td><code>socialAuth/naverAuth.ts</code></td>
+<td><code>@react-native-seoul/naver-login</code> 5.0.1</td>
+<td><code>accessToken</code></td>
+</tr>
+<tr>
+<td>구글</td>
+<td><code>socialAuth/googleAuth.ts</code></td>
+<td><code>@react-native-google-signin/google-signin</code> 16.1.4</td>
+<td><code>idToken</code></td>
+</tr>
+</tbody>
+</table>
+<p>셋 다 <code>authApi.socialLogin()</code>을 통해 <code>POST /api/auth/{provider}</code>로 보내고, 응답 <code>TokenResponse.isNewUser</code>로 회원가입 화면 진입 여부를 분기합니다.</p>
+<p>카카오 SDK는 사용자 취소를 구분하는 전용 에러 코드가 없어 취소도 "로그인 실패"로 처리됩니다. 구글·네이버는 취소 시 조용히 로그인 화면으로 돌아옵니다. SDK 차이에서 오는 것이라 앱에서 통일할 수 없습니다.</p>
+<h3>5.4 도서 검색 — <code>bookService</code></h3>
+<p><code>BookSearchProvider</code> 인터페이스(<code>providerId</code> + <code>search(query)</code>)를 <code>AladinApi</code>와 <code>KakaoApi</code>가 구현하고, <code>bookService</code>가 <code>Map&lt;BookProviderId, provider&gt;</code>로 들고 있는 레지스트리 구조입니다.</p>
+<p><strong>두 API 결과를 병합하지 않습니다.</strong> <code>search(query, providerId?)</code>는 지정된 provider <strong>하나만</strong> 호출하고, 미지정 시 기본값은 알라딘입니다. 새 도서 API를 붙이려면 인터페이스를 구현한 클래스 하나를 만들어 <code>bookService</code> 생성자에 등록하면 되고, 화면·훅 코드는 손대지 않습니다.</p>
+<h3>5.5 백엔드 API 래퍼</h3>
+<table>
+<thead>
+<tr>
+<th>파일</th>
+<th>감싸는 엔드포인트</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>authApi.ts</code></td>
+<td><code>POST /api/auth/{kakao,google,naver}</code></td>
+</tr>
+<tr>
+<td><code>userApi.ts</code></td>
+<td><code>GET /api/auth/me</code>, <code>PATCH /api/users/{id}</code></td>
+</tr>
+<tr>
+<td><code>libraryApi.ts</code></td>
+<td><code>/api/books</code> 및 하위 <code>notes</code>·<code>photos</code> (사진은 presigned URL 2단계)</td>
+</tr>
+<tr>
+<td><code>profileStatsApi.ts</code></td>
+<td>전용 엔드포인트 없음 — 아래 참고</td>
+</tr>
+</tbody>
+</table>
+<p><code>profileStatsApi</code>는 통계 전용 API가 없어서 <code>GET /api/books?status=done</code>과 <code>GET /api/share-records</code> 두 개를 <code>Promise.allSettled</code>로 묶어 세는 방식입니다. <strong>한쪽이 실패해도 프로필 전체를 실패시키지 않고</strong> 실패한 카운트만 0으로 두고 로그를 남깁니다 — 통계는 화면의 보조 정보이기 때문입니다. 남의 프로필 통계가 필요해지는 시점에는 <code>UserResponse</code>에 필드를 추가하는 쪽으로 갈아타야 합니다(현재 <code>/api/share-records</code>는 내 것만 반환).</p>
+      </div>
+    </section>
+    <section id="주요-데이터-타입">
+      <h2><span class="idx">06</span>주요 데이터 타입</h2>
+      <div class="panel pad">
+<pre><code class="language-ts">// 인증
+interface TokenResponse {
+  accessToken: string;
+  tokenType: 'Bearer';
+  expiresIn: number;
+  isNewUser: boolean;   // true=신규가입 → Signup, false=기존 → 메인
+}
+
+// 서재 (libraryApi)
+type BookStatusResponse = 'READING' | 'DONE';
+
+// 대시보드
+type DashboardPeriod = 'month' | 'quarter' | 'year';        // 앱 내부
+type DashboardPeriodResponse = 'MONTH' | 'QUARTER' | 'YEAR'; // 응답 필드
+
+interface DashboardResponse {
+  userId: number;
+  period: DashboardPeriodResponse;
+  periodLabel: string;
+  startDate: string;
+  endDate: string;
+  completedBookCount: number;
+  totalPagesRead: number;
+  genreRatios: GenreRatioDto[];      // { genre, count, ratio }
+  monthlyTrend: MonthlyTrendDto[];   // { yearMonth, completedCount }
+  highlights: DashboardHighlights;   // topGenre · longestReadBook · fastestReadBook
+  recommendedCaption: string;
+}
+</code></pre>
+<p><code>GET /api/dashboard</code>의 <code>period</code> 쿼리 파라미터는 대소문자를 가리지 않지만, <strong>대시보드 공유(<code>POST /api/share-records</code>)의 <code>dashboardPeriod</code> 필드는 소문자만 받습니다.</strong> 백엔드가 2026-08-31에 다른 enum들과 계약을 통일하면서 정해진 것으로, 두 경로가 서로 다른 규칙을 쓰는 게 아니라 전자만 별도 로직이라 관대한 것입니다.</p>
+      </div>
+    </section>
+    <section id="테마-시스템">
+      <h2><span class="idx">07</span>테마 시스템</h2>
+      <div class="panel pad">
+<ul>
+<li><strong><code>theme/colors.ts</code></strong> — <code>ThemeColors</code> 인터페이스 37개 키. <code>p50~p900</code>(쑥송편 그린 램프), <code>n50~n900</code>(뉴트럴), <code>success</code>/<code>warning</code>/<code>error</code>/<code>info</code>, <strong><code>chart1~chart6</code></strong>, <code>surface</code>, <code>accentSolidBg</code>, <code>onAccentSolid</code>, <code>warnBg</code>/<code>warnText</code>, <code>hairline</code>.</li>
+<li><strong><code>theme/typography.ts</code></strong> — <code>TypographyVariant</code>별 <code>TextStyle</code> 맵.</li>
+<li><strong><code>constants/genreColors.ts</code></strong> — <strong>장르 6개가 각각 고정색을 갖습니다.</strong> 순위가 아니라 장르 이름이 색을 결정하므로, 도넛차트에서 소설은 항상 같은 색입니다.</li>
+</ul>
+<blockquote>
+<p>이전 개정의 "1위=chart1, 2위=chart2, 4위 이하는 <code>n200</code> 기타" 규칙은 폐기됐습니다. 과학·경제/경영이 <code>chart5</code>/<code>chart6</code>을 받으면서 6개 장르가 전부 고유색을 갖게 됐고, <code>Genre</code>가 자유 텍스트 없는 닫힌 열거형이라 "기타" 처리 자체가 필요 없어졌습니다.</p>
+</blockquote>
+<p>같은 장르라도 <strong>쓰이는 자리마다 색 조합이 다릅니다.</strong> 도넛차트는 <code>chart1~6</code> 토큰을 그대로, 선택 칩(<code>GENRE_CHIP_COLORS</code>)은 배경이 장르 고유색, 서재 배지(<code>GENRE_BADGE_COLORS</code>)는 옅은 틴트 배경에 진한 텍스트(다크모드 반전)입니다. 셋은 서로 재사용하지 않습니다.</p>
+      </div>
+    </section>
+    <section id="테스트">
+      <h2><span class="idx">08</span>테스트</h2>
+      <div class="panel pad">
+<p>Jest + <code>react-native</code> 프리셋. <code>frontend/__tests__/</code>에 8개 파일 37개 케이스가 있고, CI(<code>.github/workflows/frontend-test.yml</code>)가 <code>frontend/**</code> 변경 시 실행합니다.</p>
+<p><code>jest.config.js</code>의 <code>moduleNameMapper</code>에 우회 3건이 있습니다 — <code>lucide-react-native</code>의 ESM 빌드를 CJS로 강제 매핑, AsyncStorage와 EncryptedStorage를 인메모리 mock으로 대체. 앞의 것은 프리셋이 <code>.mjs</code>를 변환하지 못해서, 뒤의 둘은 네이티브 모듈이 테스트 환경에 링크되지 않아서입니다.</p>
+      </div>
+    </section>
+    <section id="구조상-남은-부채">
+      <h2><span class="idx">09</span>구조상 남은 부채</h2>
+      <div class="panel pad">
+<p>기능 미완성 항목이 아니라 <strong>구조가 어긋나 있는 것들</strong>만 적습니다. 기능 현황은 연동매트릭스를 봅니다.</p>
+<ul>
+<li><strong><code>src/mocks/libraryBooks.ts</code>가 타입 모듈 겸용입니다.</strong> <code>LibraryBook</code>·<code>LibraryNote</code>·<code>LibraryPhoto</code>·<code>BookStatus</code>가 여기 있어서, 실연동이 끝난 <code>LibraryScreen</code>·<code>BookDetailScreen</code>이 여전히 <code>mocks/</code>를 import합니다. 타입은 <code>src/types/</code>로 옮기는 게 맞습니다.</li>
+<li><strong><code>theme/typography.ts</code>의 <code>FONT_FAMILY</code>가 미지정이라 시스템 폰트로 폴백 중입니다.</strong> Pretendard 번들링이 남아 있습니다.</li>
+<li><strong>일정·알림·그룹 관리는 백엔드 엔드포인트 자체가 없습니다.</strong> 프론트의 mock은 그래서 남아 있는 것이고, 프론트만으로는 걷어낼 수 없습니다(연동매트릭스 A표 참고).</li>
+</ul>
+      </div>
+    </section>
+
+    <footer class="doc-foot">콩닥책닥 프론트엔드 아키텍처 · 기준 커밋 74974fe · 이 파일은 frontend.md에서 생성됨</footer>
+  </main>
+</div>
+
+<script>
+  (function () {
+    var toggle = document.getElementById('tocToggle');
+    var toc = document.getElementById('toc');
+    if (toggle) {
+      toggle.addEventListener('click', function () { toc.classList.toggle('open'); });
+    }
+  })();
+</script>
+<script type="module">
+  // 다이어그램 렌더링. 로드에 실패해도 <pre class="mermaid">의 소스가 그대로 남아
+  // 내용을 읽을 수 있으므로 오프라인에서도 문서가 깨지지 않는다.
+  try {
+    const m = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
+    const dark = matchMedia('(prefers-color-scheme: dark)').matches
+      && document.documentElement.dataset.theme !== 'light';
+    m.default.initialize({startOnLoad: true, theme: dark ? 'dark' : 'neutral',
+      fontFamily: "'Noto Sans KR', sans-serif"});
+  } catch (e) { /* 소스 그대로 표시 */ }
+</script>
