@@ -32,8 +32,6 @@ import type {
  * 목록 조회(GET /api/books)는 소감·장소사진을 함께 주지 않는다. 그래서 책 상세를 열 때
  * loadBookDetail(bookId)로 notes/photos를 따로 채운다 — 서재 목록에서 N권만큼 추가 요청을
  * 보내지 않기 위한 절충이다.
- *
- * 게스트(비회원 둘러보기)는 accessToken도 userId도 없어서 서버 호출을 하지 않고 빈 서재를 본다.
  */
 
 interface LibraryContextValue {

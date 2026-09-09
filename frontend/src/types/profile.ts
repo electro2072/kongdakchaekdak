@@ -22,7 +22,7 @@ export interface ProfileSummary {
 }
 
 /**
- * 로그인 전/게스트/로딩 중에 쓰는 빈 프로필. mock 예시값("책읽는 콩이", 12/27)을 초기값으로
+ * 로그인 전/로딩 중에 쓰는 빈 프로필. mock 예시값("책읽는 콩이", 12/27)을 초기값으로
  * 두면 실패했을 때 남의 데이터처럼 보이는 값이 화면에 남는다 — 비어 있는 게 낫다.
  */
 export const EMPTY_PROFILE: ProfileSummary = {

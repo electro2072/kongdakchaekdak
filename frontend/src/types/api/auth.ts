@@ -4,9 +4,12 @@
  * 2026-09-09: "인터페이스 한 폴더에 모아놓기" 리팩터링으로 authApi.ts에 있던 타입 정의를
  * 이 파일로 옮겼다. authApi.ts는 이제 이 파일에서 타입을 import해서 쓰기만 한다 —
  * 타입 정의는 여기 한 곳(src/types/api/)에만 있다.
+ *
+ * 2026-09-09 업데이트: `apple` 추가 — `claude/독서기록앱_프론트백엔드요청_Apple로그인추가_비회원모드폐기_v1.md`
+ * 반영. iOS 전용(Android는 노출 안 함), 요청 바디는 구글과 동일하게 `{ idToken }`.
  */
 
-export type SocialProvider = 'kakao' | 'google' | 'naver';
+export type SocialProvider = 'kakao' | 'google' | 'naver' | 'apple';
 
 /**
  * claude/독서기록앱_백엔드요청_프론트_인증API변경_v1.md 2번 항목(백엔드 확정 스펙) 기준.

@@ -24,7 +24,7 @@ type ProfileEditableFields = Pick<
 interface ProfileContextValue {
   profile: ProfileSummary;
   /**
-   * GET /api/auth/me로 확인한 로그인 사용자 id. 게스트이거나 아직 확인 전이면 null.
+   * GET /api/auth/me로 확인한 로그인 사용자 id. 아직 확인 전(또는 로그아웃 상태)이면 null.
    * LibraryContext가 GET /api/books?userId= · POST /api/books 바디에 쓴다.
    */
   userId: number | null;
@@ -61,8 +61,6 @@ function mapUserResponseToEditableFields(
  * /api/auth/me를 부르므로, 그 응답(sessionUser)이 있으면 그대로 시드로 쓰고 같은 요청을
  * 두 번 보내지 않는다 — 방금 로그인한 경우처럼 시드가 없을 때만 직접 호출한다.
  *
- * 게스트(비회원 둘러보기)는 accessToken이 없어 아무것도 부르지 않고 빈 프로필로 남는다.
- *
  * updateProfile은 낙관적으로 로컬 state를 먼저 갱신한 뒤 PATCH를 보낸다 — 성공하면 응답으로
  * 다시 동기화하고, 실패하면 이전 값으로 롤백한 뒤 에러를 던진다(ProfileEditScreen이 토스트 처리).
  */
@@ -79,8 +77,8 @@ export function ProfileProvider({children}: {children: React.ReactNode}) {
 
   // 로그아웃하면 이전 사용자의 값이 화면에 남지 않도록 되돌린다.
   // userId가 잡혀 있을 때(= 실제 계정으로 /api/auth/me를 받아본 적이 있을 때)만 되돌린다 —
-  // 마운트 직후나 게스트(비회원 둘러보기)까지 싸잡아 초기화하면, 아직 로그인하지 않은 상태에서
-  // 로컬로만 들고 있는 값을 effect 순서(자식 effect가 먼저 돈다)에 따라 날려버린다.
+  // 마운트 직후까지 싸잡아 초기화하면, 아직 로그인하지 않은 상태에서 로컬로만 들고 있는 값을
+  // effect 순서(자식 effect가 먼저 돈다)에 따라 날려버린다.
   useEffect(() => {
     if (isLoggedIn && accessToken) {
       return;
@@ -179,7 +177,9 @@ export function ProfileProvider({children}: {children: React.ReactNode}) {
         const previous = profile;
         setProfile(prev => ({...prev, ...fields}));
         if (userId === null) {
-          // 게스트 진입(비회원 둘러보기) — 실제 계정이 없어 로컬 상태만 갱신한다.
+          // userId가 아직 확인되지 않은 순간의 방어 가드(레이스 컨디션) — 로컬 상태만 갱신한다.
+          // "비회원으로 둘러보기"(게스트 모드)는 2026-09-09 폐기됐으므로 정상 흐름에서는
+          // 이 분기를 타지 않는다.
           return;
         }
         try {

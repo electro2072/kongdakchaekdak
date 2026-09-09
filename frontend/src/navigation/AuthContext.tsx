@@ -26,11 +26,11 @@ interface AuthContextValue {
    * 메인으로 넘어가는 게 보이지 않는다.
    */
   isRestoring: boolean;
-  /** 소셜 로그인으로 백엔드에서 발급받은 앱 자체 accessToken. 게스트 진입 시엔 null. */
+  /** 소셜 로그인으로 백엔드에서 발급받은 앱 자체 accessToken. 로그인 전(또는 복원 중)엔 null. */
   accessToken: string | null;
   /**
    * 부팅 시 세션 검증(GET /api/auth/me)이 성공했을 때의 응답. 없으면 null
-   * (이번 실행에서 방금 로그인했거나, 게스트이거나, 오프라인 복원인 경우).
+   * (이번 실행에서 방금 로그인했거나, 오프라인 복원인 경우).
    * ProfileProvider가 이 값을 초기 시드로 써서 부팅 직후 /api/auth/me를 두 번 치지 않게 한다.
    */
   sessionUser: UserResponse | null;
@@ -41,9 +41,11 @@ interface AuthContextValue {
    */
   setAccessToken: (token: string) => void;
   /**
-   * 실제로 로그인 상태로 전환한다(하단 탭 진입). SignupScreen "시작하기"와
-   * "비회원으로 둘러보기"에서 호출 — 둘 다 인자 없이 호출하며, accessToken은 이미
-   * setAccessToken으로 저장돼 있으면 그대로 유지되고 게스트 진입이면 null로 남는다.
+   * 실제로 로그인 상태로 전환한다(하단 탭 진입). 기존 계정으로 소셜 로그인 완료 시
+   * (LoginScreen)와 신규 가입 완료 시(SignupScreen "시작하기")에 호출 — 둘 다 인자 없이
+   * 호출하며, 두 경우 모두 accessToken은 이미 setAccessToken으로 저장돼 있다.
+   * (2026-09-09: "비회원으로 둘러보기" 폐기 — accessToken 없이 login()이 호출되는 경로는
+   * 이제 없다. `claude/독서기록앱_프론트백엔드요청_Apple로그인추가_비회원모드폐기_v1.md` 참고.)
    */
   login: () => void;
   logout: () => void;
@@ -64,8 +66,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
  * 인증 상태.
  *
  * 세션 영속화(연동매트릭스 §2.1 #5 / 릴리스 게이트 G3): accessToken을 secureStorage에 저장해
- * 앱을 껐다 켜도 로그인 상태를 유지한다. 게스트(비회원 둘러보기) 세션은 그대로 미영속 —
- * 저장할 유효한 토큰이 없어서 재시작하면 다시 로그인 화면부터 시작한다.
+ * 앱을 껐다 켜도 로그인 상태를 유지한다.
  *
  * 부팅 시엔 저장된 토큰을 그대로 믿지 않고 GET /api/auth/me로 한 번 검증한다. 백엔드에
  * 리프레시 토큰이 없어서 만료·무효화된 토큰은 실제로 호출해봐야만 알 수 있기 때문이다.

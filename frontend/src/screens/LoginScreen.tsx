@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   SafeAreaView,
   View,
   Text,
@@ -22,22 +23,37 @@ import {
 } from '../services/socialAuth/googleAuth';
 import {signInWithKakao} from '../services/socialAuth/kakaoAuth';
 import {signInWithNaver} from '../services/socialAuth/naverAuth';
+import {
+  APPLE_SIGN_IN_CANCELLED,
+  AppleButton,
+  isAppleSignInSupported,
+  signInWithApple,
+} from '../services/socialAuth/appleAuth';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
-type SocialProviderKey = 'naver' | 'kakao' | 'google';
+type SocialProviderKey = 'apple' | 'naver' | 'kakao' | 'google';
 
 /**
- * Frame 01 · 로그인 / 온보딩 (Hi-Fi 목업 v1.7/v1.8 기준: design/hifi_mockup_v1.html)
- * 소셜 로그인 버튼은 기획서 3-5 순서(네이버 → 카카오 → 구글) 그대로 노출한다.
+ * Frame 01 · 로그인 / 온보딩 (Hi-Fi 목업 v1.18 기준: design/hifi_mockup_v1.html)
+ *
+ * 2026-09-09 업데이트(`claude/독서기록앱_프론트백엔드요청_Apple로그인추가_비회원모드폐기_v1.md`
+ * 반영) — 사용자 결정 2건: ① "비회원으로 둘러보기" 폐기(버튼/로직 완전 제거), ② iOS 전용
+ * Apple 로그인 버튼 신규 추가. 버튼 순서가 Apple(iOS만, 맨 위) → 네이버 → 카카오 → 구글로
+ * 바뀌었다 — App Store 심사 가이드라인 4.8(다른 소셜 로그인을 제공하면 Apple 로그인도 동등하거나
+ * 더 눈에 띄게 제공해야 함) 때문에 Apple 버튼은 다른 버튼들보다 위, 최소 동일 크기로 둔다.
+ * Apple 버튼은 직접 스타일링하지 않고 공식 컴포넌트(`AppleButton`, `@invertase/react-native-apple-authentication`)를
+ * 그대로 쓴다 — Apple이 버튼 디자인(로고 위치/최소 크기/코너 반경)을 심사에서 확인하기 때문.
  *
  * 41번 항목(2026-08-29)부터 실제 SDK 연동됨 — 각 버튼은 (1) 해당 플랫폼 SDK로 로그인해
- * provider 토큰(카카오/네이버는 accessToken, 구글은 idToken)을 받고, (2) 그 토큰을
- * POST /api/auth/{provider}로 백엔드에 보내 앱 자체 accessToken으로 교환한 뒤,
+ * provider 토큰(카카오/네이버는 accessToken, 구글/애플은 idToken 또는 identityToken)을 받고,
+ * (2) 그 토큰을 POST /api/auth/{provider}로 백엔드에 보내 앱 자체 accessToken으로 교환한 뒤,
  * (3) AuthContext에 저장한다. 42·43번 항목(2026-08-29)에서 백엔드가 응답에 isNewUser(boolean)
  * 필드를 추가해주기로 확정하면서, 이제 여기서 신규/기존 사용자를 분기한다 — 신규 계정이면 회원가입
  * (추가 정보 입력) 화면으로 이동하고, 기존 계정이면 화면 이동 없이 바로 로그인 완료 처리(하단 탭
  * 진입)한다. 자세한 배경은 claude/독서기록앱_프론트요청_백엔드_인증API_신규회원판별_v1.md 참고.
+ * 애플도 동일한 isNewUser 분기를 그대로 탄다 — 애플 전용 분기는 불필요하다(백엔드 설계 문서
+ * `claude/독서기록앱_백엔드_애플로그인_설계_v1.md` 8번 섹션 참고).
  *
  * 카카오는 v6.0.4 공식 문서에 취소 전용 에러 코드가 없어 취소도 일반 실패와 동일하게
  * 처리된다(services/socialAuth/kakaoAuth.ts 주석 참고) — 실기기 테스트로 실제 취소 시
@@ -54,7 +70,7 @@ type SocialProviderKey = 'naver' | 'kakao' | 'google';
 export function LoginScreen({navigation}: Props) {
   const {login, setAccessToken} = useAuth();
   const {profile} = useProfile();
-  const {colors, typography, radii} = useTheme();
+  const {colors, typography, radii, isDark} = useTheme();
   const {showToast} = useToast();
   const [loadingProvider, setLoadingProvider] =
     useState<SocialProviderKey | null>(null);
@@ -133,7 +149,27 @@ export function LoginScreen({navigation}: Props) {
     }
   };
 
+  const handleAppleLogin = async () => {
+    setLoadingProvider('apple');
+    try {
+      const identityToken = await signInWithApple();
+      if (identityToken === APPLE_SIGN_IN_CANCELLED) {
+        return; // 사용자 취소 — 얼럿 없이 조용히 종료
+      }
+      const {accessToken, isNewUser} = await socialLogin(
+        'apple',
+        identityToken,
+      );
+      completeSocialLogin(accessToken, isNewUser);
+    } catch (error) {
+      handleSocialLoginError('애플', error);
+    } finally {
+      setLoadingProvider(null);
+    }
+  };
+
   const isBusy = loadingProvider !== null;
+  const showAppleButton = Platform.OS === 'ios' && isAppleSignInSupported;
 
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: colors.surface}]}>
@@ -155,6 +191,34 @@ export function LoginScreen({navigation}: Props) {
       <View style={styles.spacer} />
 
       <View style={styles.buttons}>
+        {showAppleButton && (
+          <View
+            style={isBusy && loadingProvider !== 'apple' && styles.buttonDisabled}
+            pointerEvents={isBusy && loadingProvider !== 'apple' ? 'none' : 'auto'}>
+            {loadingProvider === 'apple' ? (
+              <View
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: isDark ? colors.surface : colors.n900,
+                    borderRadius: radii.md,
+                  },
+                ]}>
+                <ActivityIndicator color={isDark ? colors.n900 : colors.surface} />
+              </View>
+            ) : (
+              <AppleButton
+                buttonStyle={
+                  isDark ? AppleButton.Style.WHITE : AppleButton.Style.BLACK
+                }
+                buttonType={AppleButton.Type.SIGN_IN}
+                cornerRadius={radii.md}
+                style={styles.button}
+                onPress={handleAppleLogin}
+              />
+            )}
+          </View>
+        )}
         <TouchableOpacity
           style={[
             styles.button,
@@ -216,22 +280,6 @@ export function LoginScreen({navigation}: Props) {
           )}
         </TouchableOpacity>
       </View>
-
-      <TouchableOpacity
-        style={styles.guestLink}
-        onPress={() => {
-          login();
-          showToast({type: 'success', message: '둘러보기를 시작할게요!'});
-        }}
-        disabled={isBusy}>
-        <Text
-          style={[
-            typography.caption,
-            {color: colors.n500, textDecorationLine: 'underline'},
-          ]}>
-          비회원으로 둘러보기
-        </Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -267,7 +315,7 @@ const styles = StyleSheet.create({
   },
   buttons: {
     gap: 10,
-    marginBottom: 22,
+    marginBottom: 32,
   },
   button: {
     height: 44,
@@ -277,9 +325,5 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.6,
-  },
-  guestLink: {
-    alignItems: 'center',
-    paddingBottom: 24,
   },
 });

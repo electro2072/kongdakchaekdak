@@ -21,17 +21,24 @@ const SOCIAL_LOGIN_PATH: Record<SocialProvider, string> = {
   kakao: "/api/auth/kakao",
   google: "/api/auth/google",
   naver: "/api/auth/naver",
+  apple: "/api/auth/apple",
 };
 
-/** 카카오/네이버는 accessToken, 구글은 idToken을 요청 바디에 담아 보내야 한다 (백엔드 확정 스펙). */
+/**
+ * 카카오/네이버는 accessToken, 구글/애플은 idToken을 요청 바디에 담아 보내야 한다
+ * (백엔드 확정 스펙 — 애플은 2026-09-09 추가, `claude/독서기록앱_프론트백엔드요청_Apple로그인추가_비회원모드폐기_v1.md`
+ * 참고. 애플이 실제로 보내는 값은 identityToken(JWT)이지만 요청 바디 필드명은 구글과 동일하게
+ * `idToken`이다 — 백엔드 `AppleIdTokenRequest`가 그렇게 정의돼 있다).
+ */
 const SOCIAL_LOGIN_BODY_KEY: Record<SocialProvider, "accessToken" | "idToken"> = {
   kakao: "accessToken",
   google: "idToken",
   naver: "accessToken",
+  apple: "idToken",
 };
 
 /**
- * 소셜 로그인 provider 토큰(카카오/네이버 accessToken, 구글 idToken)을 백엔드에 보내
+ * 소셜 로그인 provider 토큰(카카오/네이버 accessToken, 구글/애플 idToken)을 백엔드에 보내
  * 앱 자체 JWT(TokenResponse)로 교환한다.
  */
 export async function socialLogin(
