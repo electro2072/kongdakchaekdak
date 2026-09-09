@@ -18,6 +18,7 @@ import type {MainStackParamList} from '../navigation/types';
 import {useLibrary} from '../navigation/LibraryContext';
 import {useToast} from '../components/Toast';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 
 const MAX_NOTE_LENGTH = 500;
 const WARNING_THRESHOLD = 490;
@@ -60,20 +61,17 @@ export function BookNoteEditScreen() {
     try {
       if (existingNote && noteId) {
         await updateNote(bookId, noteId, trimmed);
-        showToast({type: 'success', message: '소감을 수정했어요'});
+        showToast({type: 'success', message: t('bookNote.updateSuccess')});
       } else {
         await addNote(bookId, trimmed);
-        showToast({type: 'success', message: '소감을 저장했어요'});
+        showToast({type: 'success', message: t('bookNote.createSuccess')});
       }
       navigation.goBack();
     } catch (e) {
       // 저장에 실패하면 화면을 닫지 않는다 — 작성한 내용을 잃지 않도록.
       showToast({
         type: 'error',
-        message:
-          e instanceof Error
-            ? e.message
-            : '저장에 실패했어요. 다시 시도해주세요.',
+        message: e instanceof Error ? e.message : t('bookNote.saveFailure'),
       });
     } finally {
       setIsSaving(false);
@@ -94,7 +92,7 @@ export function BookNoteEditScreen() {
           // 끊길 수 있다(ProfileEditScreen 닉네임 칸과 같은 종류의 IME 조합 버그) — 그냥
           // setContent(text)로 통과시키고 길이 제한은 maxLength에만 맡긴다.
           onChangeText={setContent}
-          placeholder="이 책을 읽으며 든 생각을 자유롭게 남겨보세요"
+          placeholder={t('bookNote.placeholder')}
           placeholderTextColor={colors.n400}
           multiline
           maxLength={MAX_NOTE_LENGTH}
@@ -134,7 +132,9 @@ export function BookNoteEditScreen() {
             {borderColor: colors.n300, borderRadius: radii.pill},
           ]}
           onPress={() => navigation.goBack()}>
-          <Text style={[typography.button, {color: colors.n700}]}>취소</Text>
+          <Text style={[typography.button, {color: colors.n700}]}>
+            {t('common.cancel')}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           testID="note-save-button"
@@ -146,7 +146,7 @@ export function BookNoteEditScreen() {
           onPress={handleSave}
           disabled={!canSave || isSaving}>
           <Text style={[typography.button, {color: colors.onAccentSolid}]}>
-            {isSaving ? '저장하는 중…' : '저장하기'}
+            {isSaving ? t('common.saving') : t('common.saveAction')}
           </Text>
         </TouchableOpacity>
       </View>

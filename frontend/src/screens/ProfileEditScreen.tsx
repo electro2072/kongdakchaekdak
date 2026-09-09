@@ -25,6 +25,7 @@ import {
 } from '../constants/profileOptions';
 import {GENRE_CHIP_COLORS} from '../constants/genreColors';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 import {useToast} from '../components/Toast';
 
 /**
@@ -59,7 +60,7 @@ export function ProfileEditScreen() {
   const trimmedNickname = sanitizeNickname(nickname).trim();
   const nicknameError =
     nickname.length > 0 && trimmedNickname.length < MIN_NICKNAME_LENGTH
-      ? `닉네임은 ${MIN_NICKNAME_LENGTH}자 이상 입력해주세요`
+      ? t('profile.edit.nicknameTooShort', {min: MIN_NICKNAME_LENGTH})
       : null;
   const canSubmit = trimmedNickname.length >= MIN_NICKNAME_LENGTH;
 
@@ -83,12 +84,12 @@ export function ProfileEditScreen() {
         gender,
         interests,
       });
-      showToast({type: 'success', message: '수정한 내역을 저장했어요'});
+      showToast({type: 'success', message: t('profile.edit.saveSuccess')});
       navigation.goBack();
     } catch {
       // 2026-09-08 업데이트: PATCH /api/users/{id} 실제 연동 — 실패 시 ProfileContext가
       // 이전 값으로 롤백해두므로, 여기서는 에러 토스트만 띄우고 화면에 남아 재시도할 수 있게 한다.
-      showToast({type: 'error', message: '저장하지 못했어요. 다시 시도해주세요.'});
+      showToast({type: 'error', message: t('profile.edit.saveFailure')});
     } finally {
       setIsSaving(false);
     }
@@ -105,21 +106,30 @@ export function ProfileEditScreen() {
           </View>
           {/* TODO: 이미지 피커 라이브러리(react-native-image-picker 등) 선정 후 연결 — 이번 범위 제외 */}
           <TouchableOpacity>
-            <Text style={[typography.caption, {color: colors.p700, fontWeight: '600'}]}>
-              사진 변경
+            <Text
+              style={[
+                typography.caption,
+                {color: colors.p700, fontWeight: '600'},
+              ]}>
+              {t('profile.edit.changePhoto')}
             </Text>
           </TouchableOpacity>
         </View>
 
         <Field
-          label="닉네임 (필수)"
-          hint={`${MIN_NICKNAME_LENGTH}~${MAX_NICKNAME_LENGTH}자, 한글/영문/숫자만`}>
+          label={t('profile.edit.nicknameLabel')}
+          hint={t('profile.edit.nicknameHint', {
+            min: MIN_NICKNAME_LENGTH,
+            max: MAX_NICKNAME_LENGTH,
+          })}>
           <TextInput
             testID="nickname-input"
             value={nickname}
-            onChangeText={text => setNickname(sanitizeNicknameWhileTyping(text))}
+            onChangeText={text =>
+              setNickname(sanitizeNicknameWhileTyping(text))
+            }
             maxLength={MAX_NICKNAME_LENGTH}
-            placeholder="닉네임을 입력해주세요"
+            placeholder={t('profile.edit.nicknamePlaceholder')}
             placeholderTextColor={colors.n400}
             autoCorrect={false}
             spellCheck={false}
@@ -148,12 +158,12 @@ export function ProfileEditScreen() {
           ) : null}
         </Field>
 
-        <Field label="한줄소개" hint="선택">
+        <Field label={t('profile.edit.bioLabel')} hint={t('common.optional')}>
           <TextInput
             testID="bio-input"
             value={bio}
             onChangeText={setBio}
-            placeholder="나를 짧게 소개해보세요"
+            placeholder={t('profile.edit.bioPlaceholder')}
             placeholderTextColor={colors.n400}
             autoCorrect={false}
             spellCheck={false}
@@ -170,7 +180,7 @@ export function ProfileEditScreen() {
           />
         </Field>
 
-        <Field label="성별">
+        <Field label={t('profile.edit.genderLabel')}>
           <View style={styles.row}>
             {GENDER_OPTIONS.map(option => {
               const selected = gender === option.key;
@@ -205,13 +215,16 @@ export function ProfileEditScreen() {
           </View>
         </Field>
 
-        <Field label="관심 분야" hint="중복선택">
+        <Field
+          label={t('profile.edit.interestsLabel')}
+          hint={t('common.multiSelect')}>
           <View style={[styles.row, styles.wrap]}>
             {INTEREST_OPTIONS.map(item => {
               const selected = interests.includes(item);
               // 6개 장르 고정색 전환(claude/독서기록앱_프론트요청_디자인_6개장르고정색전환_v1.md) —
               // 선택된 칩은 항상 그 장르 고유색, 미선택은 기존처럼 중립색
-              const chipColor = GENRE_CHIP_COLORS[item as Genre][isDark ? 'dark' : 'light'];
+              const chipColor =
+                GENRE_CHIP_COLORS[item as Genre][isDark ? 'dark' : 'light'];
               return (
                 <TouchableOpacity
                   key={item}
@@ -251,7 +264,7 @@ export function ProfileEditScreen() {
         onPress={handleSave}
         disabled={!canSubmit || isSaving}>
         <Text style={[typography.button, {color: colors.onAccentSolid}]}>
-          저장하기
+          {t('common.saveAction')}
         </Text>
       </TouchableOpacity>
     </SafeAreaView>

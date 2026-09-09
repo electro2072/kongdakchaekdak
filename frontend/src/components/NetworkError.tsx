@@ -2,6 +2,7 @@ import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import {WifiOff} from 'lucide-react-native';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 
 interface NetworkErrorProps {
   message?: string;
@@ -13,7 +14,7 @@ interface NetworkErrorProps {
  * 어느 화면의 API 호출이 실패하든 재사용할 수 있게 만든 공통 컴포넌트.
  */
 export function NetworkError({
-  message = '네트워크에 연결할 수 없어요',
+  message = t('state.networkError'),
   onRetry,
 }: NetworkErrorProps) {
   const {colors, typography, radii} = useTheme();
@@ -42,7 +43,7 @@ export function NetworkError({
           ]}
           onPress={onRetry}>
           <Text style={[typography.button, {color: colors.p700}]}>
-            다시 시도
+            {t('common.retry')}
           </Text>
         </TouchableOpacity>
       ) : null}

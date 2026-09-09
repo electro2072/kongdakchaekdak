@@ -27,11 +27,12 @@ import type {ShareScope} from '../types/share';
 import {useLibrary} from '../navigation/LibraryContext';
 import {MOCK_SHARE_GROUPS} from '../mocks/shareGroups';
 import {useTheme} from '../theme';
+import {t, type StringKey} from '../strings';
 
-const SCOPE_OPTIONS: {key: ShareScope; label: string}[] = [
-  {key: 'all', label: '전체 공개'},
-  {key: 'group', label: '그룹 선택'},
-  {key: 'custom', label: '인원 직접 선택'},
+const SCOPE_OPTIONS: {key: ShareScope; labelKey: StringKey}[] = [
+  {key: 'all', labelKey: 'share.scopeAll'},
+  {key: 'group', labelKey: 'share.scopeGroup'},
+  {key: 'custom', labelKey: 'share.scopeCustom'},
 ];
 
 /**
@@ -54,12 +55,12 @@ export function ShareScreen() {
 
   const scopeLabel = (option: (typeof SCOPE_OPTIONS)[number]) => {
     if (option.key !== 'group') {
-      return option.label;
+      return t(option.labelKey);
     }
     const summary = MOCK_SHARE_GROUPS.map(
       g => `${g.name}(${g.memberCount})`,
     ).join(' · ');
-    return `${option.label} — ${summary}`;
+    return t('share.scopeSummary', {label: t(option.labelKey), summary});
   };
 
   const groupLinkCard = (
@@ -78,7 +79,7 @@ export function ShareScreen() {
         <Users size={18} color={colors.p700} />
         <Text
           style={[typography.bodyStrong, {color: colors.n900, fontSize: 12.5}]}>
-          그룹 관리 · 공유 이력
+          {t('share.groupHistoryLink')}
         </Text>
       </View>
       <ChevronRight size={16} color={colors.n500} />
@@ -90,7 +91,9 @@ export function ShareScreen() {
       <SafeAreaView
         style={[styles.container, {backgroundColor: colors.surface}]}>
         <View style={styles.emptyPageHeader}>
-          <Text style={[typography.h3, {color: colors.n900}]}>공유</Text>
+          <Text style={[typography.h3, {color: colors.n900}]}>
+            {t('share.header')}
+          </Text>
         </View>
         <View style={styles.emptyPageHeader}>{groupLinkCard}</View>
         <View style={styles.emptyState}>
@@ -100,7 +103,7 @@ export function ShareScreen() {
               typography.caption,
               {color: colors.n600, textAlign: 'center', marginTop: 12},
             ]}>
-            서재에서 공유할 책을 먼저 선택해주세요
+            {t('share.emptyTitle')}
           </Text>
         </View>
       </SafeAreaView>
@@ -113,7 +116,7 @@ export function ShareScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
         <Text style={[typography.h3, {color: colors.n900, marginBottom: 12}]}>
-          공유
+          {t('share.header')}
         </Text>
 
         {groupLinkCard}
@@ -132,7 +135,7 @@ export function ShareScreen() {
           </View>
           <Text
             style={[typography.bodyStrong, {color: colors.n900, fontSize: 12}]}>
-            공유할 기록: {book.title}
+            {t('share.targetBook', {title: book.title})}
           </Text>
         </View>
 
@@ -141,7 +144,7 @@ export function ShareScreen() {
             typography.overline,
             {color: colors.n600, marginBottom: 6, textTransform: 'none'},
           ]}>
-          공유 범위
+          {t('share.scopeLabel')}
         </Text>
         <View style={[styles.scopeList, {borderColor: colors.hairline}]}>
           {SCOPE_OPTIONS.map((option, index) => {
@@ -184,7 +187,7 @@ export function ShareScreen() {
               textTransform: 'none',
             },
           ]}>
-          공유 카드 미리보기
+          {t('share.previewLabel')}
         </Text>
         <View
           style={[
@@ -202,8 +205,8 @@ export function ShareScreen() {
             ]}>
             {book.notes.length > 0
               ? `${book.notes[0].content.slice(0, 12)}...`
-              : '소감 없음'}{' '}
-            · {book.dateRangeLabel} 완독
+              : t('share.noNote')}{' '}
+            {t('share.completedSuffix', {dateRange: book.dateRangeLabel})}
           </Text>
         </View>
 
@@ -219,7 +222,7 @@ export function ShareScreen() {
                 typography.caption,
                 {color: colors.warnText, fontSize: 11, flex: 1},
               ]}>
-              이 링크를 아는 사람은 누구나 볼 수 있어요
+              {t('share.publicLinkNotice')}
             </Text>
           </View>
         )}
@@ -232,7 +235,7 @@ export function ShareScreen() {
             ]}>
             <Share2 size={15} color={colors.onAccentSolid} />
             <Text style={[typography.button, {color: colors.onAccentSolid}]}>
-              앱 내 공유
+              {t('share.inAppShare')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -242,7 +245,7 @@ export function ShareScreen() {
             ]}>
             <MessageCircle size={15} color={colors.n700} />
             <Text style={[typography.button, {color: colors.n700}]}>
-              SNS 공유
+              {t('share.snsShare')}
             </Text>
           </TouchableOpacity>
         </View>

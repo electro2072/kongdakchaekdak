@@ -1,10 +1,11 @@
-import React from "react";
-import { FlatList, View, StyleSheet } from "react-native";
-import { SearchX } from "lucide-react-native";
-import { Book } from "../types/book";
-import { BookListItem } from "./BookListItem";
-import { EmptyState } from "./EmptyState";
-import { LoadingSkeleton } from "./LoadingSkeleton";
+import React from 'react';
+import {FlatList, View, StyleSheet} from 'react-native';
+import {SearchX} from 'lucide-react-native';
+import {Book} from '../types/book';
+import {BookListItem} from './BookListItem';
+import {EmptyState} from './EmptyState';
+import {LoadingSkeleton} from './LoadingSkeleton';
+import {t} from '../strings';
 
 interface BookListProps {
   books: Book[];
@@ -13,7 +14,7 @@ interface BookListProps {
 }
 
 /** FlatList 목록. 로딩/빈 상태 처리. API를 모르고 props로만 동작한다. */
-export function BookList({ books, isLoading, onSelectBook }: BookListProps) {
+export function BookList({books, isLoading, onSelectBook}: BookListProps) {
   if (isLoading) {
     return (
       <View style={styles.padded}>
@@ -26,8 +27,8 @@ export function BookList({ books, isLoading, onSelectBook }: BookListProps) {
     return (
       <EmptyState
         icon={SearchX}
-        title="검색 결과가 없어요"
-        description="다른 검색어로 다시 시도해보세요"
+        title={t('bookSearch.emptyTitle')}
+        description={t('bookSearch.emptyDescription')}
       />
     );
   }
@@ -35,8 +36,10 @@ export function BookList({ books, isLoading, onSelectBook }: BookListProps) {
   return (
     <FlatList
       data={books}
-      keyExtractor={(item) => `${item.providerId}-${item.id}`}
-      renderItem={({ item }) => <BookListItem book={item} onPress={onSelectBook} />}
+      keyExtractor={item => `${item.providerId}-${item.id}`}
+      renderItem={({item}) => (
+        <BookListItem book={item} onPress={onSelectBook} />
+      )}
     />
   );
 }

@@ -32,6 +32,7 @@ import type {MainStackParamList} from '../navigation/types';
 import {useLibrary} from '../navigation/LibraryContext';
 import type {LibraryNote, LibraryPhoto} from '../mocks/libraryBooks';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 import {useToast} from '../components/Toast';
 import {ActionSheet} from '../components/ActionSheet';
 import {ConfirmDialog} from '../components/ConfirmDialog';
@@ -104,7 +105,7 @@ export function BookDetailScreen() {
   // 실패해도 책 본문은 이미 목록에서 받아둔 값으로 보이므로 토스트만 띄우고 화면은 유지한다.
   useEffect(() => {
     loadBookDetail(bookId).catch(() => {
-      showToast({type: 'error', message: '소감과 사진을 불러오지 못했어요'});
+      showToast({type: 'error', message: t('bookDetail.detailLoadFailure')});
     });
     // 화면을 다시 열 때마다 최신 상태로 맞춘다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -117,14 +118,12 @@ export function BookDetailScreen() {
     setIsCompleting(true);
     try {
       await completeBook(bookId);
-      showToast({type: 'success', message: '완독 처리했어요'});
+      showToast({type: 'success', message: t('bookDetail.completeSuccess')});
     } catch (e) {
       showToast({
         type: 'error',
         message:
-          e instanceof Error
-            ? e.message
-            : '완독 처리에 실패했어요. 다시 시도해주세요.',
+          e instanceof Error ? e.message : t('bookDetail.completeFailure'),
       });
     } finally {
       setIsCompleting(false);
@@ -157,7 +156,7 @@ export function BookDetailScreen() {
             typography.caption,
             {color: colors.n600, textAlign: 'center', marginTop: 40},
           ]}>
-          책 정보를 찾을 수 없어요
+          {t('bookDetail.notFound')}
         </Text>
       </SafeAreaView>
     );
@@ -175,10 +174,10 @@ export function BookDetailScreen() {
     if (response.errorCode) {
       const message =
         response.errorCode === 'camera_unavailable'
-          ? '이 기기에서는 카메라를 쓸 수 없어요'
+          ? t('bookDetail.photo.cameraUnavailable')
           : response.errorCode === 'permission'
-          ? '사진 권한이 필요해요. 설정에서 허용해주세요'
-          : response.errorMessage ?? '사진을 가져오지 못했어요';
+          ? t('bookDetail.photo.permissionDenied')
+          : response.errorMessage ?? t('bookDetail.photo.pickFailure');
       showToast({type: 'error', message});
       return;
     }
@@ -186,7 +185,7 @@ export function BookDetailScreen() {
     if (uri) {
       setPendingPhotoUri(uri);
     } else {
-      showToast({type: 'error', message: '사진을 가져오지 못했어요'});
+      showToast({type: 'error', message: t('bookDetail.photo.pickFailure')});
     }
   };
 
@@ -214,14 +213,15 @@ export function BookDetailScreen() {
     try {
       // addPhoto 내부가 presigned-url 발급 → S3 PUT → POST .../photos 3단계를 처리한다.
       await addPhoto(book.id, {uri, label: label?.trim() || undefined});
-      showToast({type: 'success', message: '사진을 추가했어요'});
+      showToast({
+        type: 'success',
+        message: t('bookDetail.photo.uploadSuccess'),
+      });
     } catch (e) {
       showToast({
         type: 'error',
         message:
-          e instanceof Error
-            ? e.message
-            : '사진 업로드에 실패했어요. 다시 시도해주세요.',
+          e instanceof Error ? e.message : t('bookDetail.photo.uploadFailure'),
       });
     } finally {
       setIsUploadingPhoto(false);
@@ -261,7 +261,8 @@ export function BookDetailScreen() {
             </Text>
             <Text
               style={[typography.caption, {color: colors.n600, fontSize: 10}]}>
-              읽은 기간{'\n'}
+              {t('bookDetail.readPeriodLabel')}
+              {'\n'}
               <Text
                 style={{color: colors.n900, fontSize: 11, fontWeight: '700'}}>
                 {book.dateRangeLabel}
@@ -274,7 +275,7 @@ export function BookDetailScreen() {
           <View style={styles.sectionLabelRow}>
             <Camera size={13} color={colors.n600} />
             <Text style={[typography.caption, {color: colors.n600}]}>
-              장소 사진
+              {t('bookDetail.placePhotoLabel')}
             </Text>
           </View>
           {book.photos.length > 0 ? (
@@ -283,7 +284,7 @@ export function BookDetailScreen() {
                 typography.caption,
                 {color: colors.n500, fontSize: 10.5, marginBottom: 6},
               ]}>
-              사진을 길게 누르면 삭제할 수 있어요
+              {t('bookDetail.placePhotoHint')}
             </Text>
           ) : null}
           <ScrollView
@@ -334,7 +335,9 @@ export function BookDetailScreen() {
         <View style={styles.section}>
           <View style={styles.sectionLabelRow}>
             <PenLine size={13} color={colors.n600} />
-            <Text style={[typography.caption, {color: colors.n600}]}>소감</Text>
+            <Text style={[typography.caption, {color: colors.n600}]}>
+              {t('bookDetail.noteSectionLabel')}
+            </Text>
           </View>
           <TouchableOpacity
             testID="add-note-button"
@@ -351,15 +354,23 @@ export function BookDetailScreen() {
                 typography.button,
                 {color: colors.n700, fontSize: 11.5, marginLeft: 4},
               ]}>
-              소감 작성하기
+              {t('bookDetail.writeNote')}
             </Text>
           </TouchableOpacity>
 
           {book.notes.length === 0 ? (
-            <Text
-              style={[typography.caption, {color: colors.n500, marginTop: 8}]}>
-              아직 작성한 소감이 없어요
-            </Text>
+            <View style={styles.noteEmpty}>
+              <Text style={[typography.caption, {color: colors.n600}]}>
+                {t('bookDetail.noNoteTitle')}
+              </Text>
+              <Text
+                style={[
+                  typography.caption,
+                  {color: colors.n500, marginTop: 2},
+                ]}>
+                {t('bookDetail.noNoteDescription')}
+              </Text>
+            </View>
           ) : (
             <View style={styles.noteList}>
               {book.notes.map(note => (
@@ -416,7 +427,9 @@ export function BookDetailScreen() {
             disabled={isCompleting}>
             <CheckCircle size={15} color={colors.p700} />
             <Text style={[typography.button, {color: colors.p700}]}>
-              {isCompleting ? '처리하는 중…' : '다 읽었어요 (완독 처리)'}
+              {isCompleting
+                ? t('bookDetail.completeButtonBusy')
+                : t('bookDetail.completeButton')}
             </Text>
           </TouchableOpacity>
         )}
@@ -434,7 +447,7 @@ export function BookDetailScreen() {
           }>
           <Share2 size={15} color={colors.onAccentSolid} />
           <Text style={[typography.button, {color: colors.onAccentSolid}]}>
-            이 책 공유하기
+            {t('bookDetail.shareButton')}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -444,13 +457,13 @@ export function BookDetailScreen() {
         options={[
           {
             key: 'camera',
-            label: '카메라로 촬영',
+            label: t('bookDetail.photo.takePhoto'),
             icon: Camera,
             onPress: handlePickFromCamera,
           },
           {
             key: 'library',
-            label: '앨범에서 선택',
+            label: t('bookDetail.photo.pickFromAlbum'),
             icon: ImageIcon,
             onPress: handlePickFromLibrary,
           },
@@ -460,9 +473,9 @@ export function BookDetailScreen() {
 
       <PromptDialog
         visible={pendingPhotoUri !== null}
-        title="촬영 장소를 입력해주세요"
-        message="입력하지 않아도 사진은 등록돼요"
-        placeholder="예: 홍대 카페"
+        title={t('bookDetail.photo.labelDialogTitle')}
+        message={t('bookDetail.photo.labelDialogMessage')}
+        placeholder={t('bookDetail.photo.labelPlaceholder')}
         value={photoLabelInput}
         onChangeText={setPhotoLabelInput}
         onSkip={() => finishAddPhoto(undefined)}
@@ -474,7 +487,7 @@ export function BookDetailScreen() {
         options={[
           {
             key: 'delete',
-            label: '삭제하기',
+            label: t('common.delete'),
             icon: Trash2,
             danger: true,
             onPress: () => {
@@ -491,10 +504,10 @@ export function BookDetailScreen() {
 
       <ConfirmDialog
         visible={photoToDelete !== null}
-        title="사진을 삭제할까요?"
-        message="삭제한 사진은 되돌릴 수 없어요"
-        cancelLabel="취소"
-        confirmLabel="삭제하기"
+        title={t('bookDetail.photo.deleteDialogTitle')}
+        message={t('bookDetail.photo.deleteDialogMessage')}
+        cancelLabel={t('common.cancel')}
+        confirmLabel={t('common.delete')}
         danger
         onCancel={() => setPhotoToDelete(null)}
         onConfirm={() => {
@@ -503,10 +516,16 @@ export function BookDetailScreen() {
           if (target) {
             deletePhoto(book.id, target.id)
               .then(() =>
-                showToast({type: 'success', message: '사진을 삭제했어요'}),
+                showToast({
+                  type: 'success',
+                  message: t('bookDetail.photo.deleteSuccess'),
+                }),
               )
               .catch(() =>
-                showToast({type: 'error', message: '사진 삭제에 실패했어요'}),
+                showToast({
+                  type: 'error',
+                  message: t('bookDetail.photo.deleteFailure'),
+                }),
               );
           }
         }}
@@ -517,7 +536,7 @@ export function BookDetailScreen() {
         options={[
           {
             key: 'edit',
-            label: '수정하기',
+            label: t('common.edit'),
             icon: PenLine,
             onPress: () => {
               const target = noteActionTarget;
@@ -532,7 +551,7 @@ export function BookDetailScreen() {
           },
           {
             key: 'delete',
-            label: '삭제하기',
+            label: t('common.delete'),
             icon: Trash2,
             danger: true,
             onPress: () => {
@@ -549,10 +568,10 @@ export function BookDetailScreen() {
 
       <ConfirmDialog
         visible={noteToDelete !== null}
-        title="소감을 삭제할까요?"
-        message="삭제한 소감은 되돌릴 수 없어요"
-        cancelLabel="취소"
-        confirmLabel="삭제하기"
+        title={t('bookDetail.note.deleteDialogTitle')}
+        message={t('bookDetail.note.deleteDialogMessage')}
+        cancelLabel={t('common.cancel')}
+        confirmLabel={t('common.delete')}
         danger
         onCancel={() => setNoteToDelete(null)}
         onConfirm={() => {
@@ -561,10 +580,16 @@ export function BookDetailScreen() {
           if (target) {
             deleteNote(book.id, target.id)
               .then(() =>
-                showToast({type: 'success', message: '소감을 삭제했어요'}),
+                showToast({
+                  type: 'success',
+                  message: t('bookDetail.note.deleteSuccess'),
+                }),
               )
               .catch(() =>
-                showToast({type: 'error', message: '소감 삭제에 실패했어요'}),
+                showToast({
+                  type: 'error',
+                  message: t('bookDetail.note.deleteFailure'),
+                }),
               );
           }
         }}
@@ -643,6 +668,9 @@ const styles = StyleSheet.create({
     height: 32,
     paddingHorizontal: 12,
     borderWidth: 1,
+  },
+  noteEmpty: {
+    marginTop: 8,
   },
   noteList: {
     marginTop: 10,

@@ -22,6 +22,7 @@ import {
 } from '../constants/profileOptions';
 import {GENRE_CHIP_COLORS} from '../constants/genreColors';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 import {ConfirmDialog} from '../components/ConfirmDialog';
 
 /**
@@ -57,10 +58,9 @@ export function SignupScreen() {
   const trimmedNickname = sanitizeNickname(nickname).trim();
   const nicknameError =
     nickname.length > 0 && trimmedNickname.length < MIN_NICKNAME_LENGTH
-      ? `닉네임은 ${MIN_NICKNAME_LENGTH}자 이상 입력해주세요`
+      ? t('auth.signup.nicknameTooShort', {min: MIN_NICKNAME_LENGTH})
       : null;
-  const canSubmit =
-    trimmedNickname.length >= MIN_NICKNAME_LENGTH;
+  const canSubmit = trimmedNickname.length >= MIN_NICKNAME_LENGTH;
 
   const toggleInterest = (item: string) => {
     setInterests(prev =>
@@ -86,21 +86,26 @@ export function SignupScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={{marginBottom: 16}}>
           <Text style={[typography.h3, {color: colors.n900, marginBottom: 4}]}>
-            몇 가지만 알려주세요
+            {t('auth.signup.title')}
           </Text>
           <Text style={[typography.caption, {color: colors.n600}]}>
-            닉네임 외 모든 정보는 선택이에요
+            {t('auth.signup.subtitle')}
           </Text>
         </View>
 
         <Field
-          label="닉네임 (필수)"
-          hint={`${MIN_NICKNAME_LENGTH}~${MAX_NICKNAME_LENGTH}자, 한글/영문/숫자만`}>
+          label={t('auth.signup.nicknameLabel')}
+          hint={t('auth.signup.nicknameHint', {
+            min: MIN_NICKNAME_LENGTH,
+            max: MAX_NICKNAME_LENGTH,
+          })}>
           <TextInput
             value={nickname}
-            onChangeText={text => setNickname(sanitizeNicknameWhileTyping(text))}
+            onChangeText={text =>
+              setNickname(sanitizeNicknameWhileTyping(text))
+            }
             maxLength={MAX_NICKNAME_LENGTH}
-            placeholder="닉네임을 입력해주세요"
+            placeholder={t('auth.signup.nicknamePlaceholder')}
             placeholderTextColor={colors.n400}
             autoCorrect={false}
             spellCheck={false}
@@ -129,7 +134,7 @@ export function SignupScreen() {
           ) : null}
         </Field>
 
-        <Field label="성별">
+        <Field label={t('auth.signup.genderLabel')}>
           <View style={styles.row}>
             {GENDER_OPTIONS.map(option => {
               const selected = gender === option.key;
@@ -163,13 +168,16 @@ export function SignupScreen() {
           </View>
         </Field>
 
-        <Field label="관심 분야" hint="중복선택">
+        <Field
+          label={t('auth.signup.interestsLabel')}
+          hint={t('common.multiSelect')}>
           <View style={[styles.row, styles.wrap]}>
             {INTEREST_OPTIONS.map(item => {
               const selected = interests.includes(item);
               // 6개 장르 고정색 전환(claude/독서기록앱_프론트요청_디자인_6개장르고정색전환_v1.md) —
               // 선택된 칩은 항상 그 장르 고유색, 미선택은 기존처럼 중립색
-              const chipColor = GENRE_CHIP_COLORS[item as Genre][isDark ? 'dark' : 'light'];
+              const chipColor =
+                GENRE_CHIP_COLORS[item as Genre][isDark ? 'dark' : 'light'];
               return (
                 <TouchableOpacity
                   key={item}
@@ -197,7 +205,7 @@ export function SignupScreen() {
           </View>
         </Field>
 
-        <Field label="속한 독서모임이 있나요?" hint="선택">
+        <Field label={t('auth.signup.groupLabel')} hint={t('common.optional')}>
           <View
             style={[
               styles.groupSearch,
@@ -206,7 +214,7 @@ export function SignupScreen() {
             <TextInput
               value={groupQuery}
               onChangeText={setGroupQuery}
-              placeholder="모임 이름으로 검색"
+              placeholder={t('auth.signup.groupPlaceholder')}
               placeholderTextColor={colors.n400}
               autoCorrect={false}
               spellCheck={false}
@@ -222,7 +230,7 @@ export function SignupScreen() {
                     typography.caption,
                     {color: colors.p700, fontWeight: '700', marginLeft: 2},
                   ]}>
-                  추가
+                  {t('common.add')}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -265,16 +273,16 @@ export function SignupScreen() {
         onPress={() => setShowWelcomeDialog(true)}
         disabled={!canSubmit}>
         <Text style={[typography.button, {color: colors.onAccentSolid}]}>
-          시작하기
+          {t('auth.signup.submit')}
         </Text>
       </TouchableOpacity>
 
       <ConfirmDialog
         visible={showWelcomeDialog}
-        title="가입을 환영해요!"
-        message="지금 바로 서재에 책을 꽂아보시겠어요?"
-        cancelLabel="건너뛰기"
-        confirmLabel="네"
+        title={t('auth.signup.welcomeDialogTitle')}
+        message={t('auth.signup.welcomeDialogMessage')}
+        cancelLabel={t('common.later')}
+        confirmLabel={t('auth.signup.welcomeDialogConfirm')}
         onCancel={() => {
           setShowWelcomeDialog(false);
           login();

@@ -6,8 +6,14 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import {t} from '../strings';
 import {Animated, StyleSheet, Text} from 'react-native';
-import {AlertCircle, AlertTriangle, CheckCircle, Info} from 'lucide-react-native';
+import {
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle,
+  Info,
+} from 'lucide-react-native';
 
 /**
  * 화면 하단 토스트/스낵바 — claude/독서기록앱_프론트요청_디자인_토스트스낵바컴포넌트.md
@@ -124,7 +130,7 @@ export function ToastProvider({children}: {children: React.ReactNode}) {
 export function useToast(): ToastContextValue {
   const context = useContext(ToastContext);
   if (!context) {
-    throw new Error('useToast는 ToastProvider 안에서만 사용할 수 있습니다.');
+    throw new Error(t('developer.toastOutsideProvider'));
   }
   return context;
 }

@@ -4,6 +4,7 @@ import type {AuthStackParamList} from './types';
 import {LoginScreen} from '../screens/LoginScreen';
 import {SignupScreen} from '../screens/SignupScreen';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
@@ -23,7 +24,7 @@ export function AuthStack() {
       <Stack.Screen
         name="Signup"
         component={SignupScreen}
-        options={{headerShown: true, title: '회원가입'}}
+        options={{headerShown: true, title: t('nav.signup')}}
       />
     </Stack.Navigator>
   );

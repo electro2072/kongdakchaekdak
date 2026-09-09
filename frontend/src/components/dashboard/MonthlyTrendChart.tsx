@@ -2,6 +2,7 @@ import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import type {MonthlyTrendDto} from '../../types/api/dashboard';
 import {useTheme} from '../../theme';
+import {t} from '../../strings';
 
 interface MonthlyTrendChartProps {
   monthlyTrend: MonthlyTrendDto[];
@@ -12,7 +13,7 @@ const MIN_BAR_HEIGHT = 4;
 
 function formatMonthLabel(yearMonth: string): string {
   const [, month] = yearMonth.split('-');
-  return `${Number(month)}월`;
+  return t('dashboard.monthLabel', {month: Number(month)});
 }
 
 /**
@@ -24,7 +25,10 @@ function formatMonthLabel(yearMonth: string): string {
 export function MonthlyTrendChart({monthlyTrend}: MonthlyTrendChartProps) {
   const {colors, typography} = useTheme();
 
-  const maxCount = Math.max(0, ...monthlyTrend.map(month => month.completedCount));
+  const maxCount = Math.max(
+    0,
+    ...monthlyTrend.map(month => month.completedCount),
+  );
   const peakIndex =
     maxCount > 0
       ? monthlyTrend.findIndex(month => month.completedCount === maxCount)
@@ -35,12 +39,16 @@ export function MonthlyTrendChart({monthlyTrend}: MonthlyTrendChartProps) {
       {monthlyTrend.map((month, index) => {
         const barHeight =
           maxCount > 0
-            ? Math.max((month.completedCount / maxCount) * CHART_HEIGHT, MIN_BAR_HEIGHT)
+            ? Math.max(
+                (month.completedCount / maxCount) * CHART_HEIGHT,
+                MIN_BAR_HEIGHT,
+              )
             : MIN_BAR_HEIGHT;
         const isPeak = index === peakIndex;
         return (
           <View key={month.yearMonth} style={styles.barColumn}>
-            <Text style={[typography.caption, {color: colors.n600, fontSize: 10}]}>
+            <Text
+              style={[typography.caption, {color: colors.n600, fontSize: 10}]}>
               {month.completedCount}
             </Text>
             <View
@@ -52,7 +60,8 @@ export function MonthlyTrendChart({monthlyTrend}: MonthlyTrendChartProps) {
                 },
               ]}
             />
-            <Text style={[typography.caption, {color: colors.n500, fontSize: 10}]}>
+            <Text
+              style={[typography.caption, {color: colors.n500, fontSize: 10}]}>
               {formatMonthLabel(month.yearMonth)}
             </Text>
           </View>

@@ -1,5 +1,6 @@
 import {apiFetch} from './apiClient';
 import {logger} from '../utils/logger';
+import {t} from '../strings';
 import type {
   BookCreatePayload,
   BookNoteResponse,
@@ -158,7 +159,7 @@ export async function uploadPhoto(
   });
   if (!putResponse.ok) {
     logger.error('libraryApi', 'S3 업로드 실패', {status: putResponse.status});
-    throw new Error('사진 업로드에 실패했어요. 잠시 후 다시 시도해주세요.');
+    throw new Error(t('failure.photoUpload'));
   }
 
   return apiFetch<BookPhotoResponse>(`/api/books/${bookId}/photos`, {

@@ -10,6 +10,7 @@ import {
 import {CalendarDays, MapPin} from 'lucide-react-native';
 import {MOCK_MEETING_DETAIL} from '../mocks/meetingDetail';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 
 /**
  * Frame 02.1 · 일정 상세 — Hi-Fi 목업 v1.3.2 기준(claude/독서기록앱_디자인시스템_Hifi목업_v1.md).
@@ -43,13 +44,21 @@ export function ScheduleDetailScreen() {
           </Text>
           <View style={styles.infoRow}>
             <CalendarDays size={15} color={colors.p700} />
-            <Text style={[typography.caption, {color: colors.n700, fontSize: 11.5}]}>
+            <Text
+              style={[
+                typography.caption,
+                {color: colors.n700, fontSize: 11.5},
+              ]}>
               {meeting.dateLabel} · {meeting.timeLabel}
             </Text>
           </View>
           <View style={styles.infoRow}>
             <MapPin size={15} color={colors.p700} />
-            <Text style={[typography.caption, {color: colors.n700, fontSize: 11.5}]}>
+            <Text
+              style={[
+                typography.caption,
+                {color: colors.n700, fontSize: 11.5},
+              ]}>
               {meeting.location}
             </Text>
           </View>
@@ -73,12 +82,19 @@ export function ScheduleDetailScreen() {
                 style={[
                   styles.avatar,
                   styles.moreBadge,
-                  {backgroundColor: colors.accentSolidBg, borderColor: colors.p50},
+                  {
+                    backgroundColor: colors.accentSolidBg,
+                    borderColor: colors.p50,
+                  },
                 ]}>
                 <Text
                   style={[
                     typography.caption,
-                    {color: colors.onAccentSolid, fontSize: 9.5, fontWeight: '700'},
+                    {
+                      color: colors.onAccentSolid,
+                      fontSize: 9.5,
+                      fontWeight: '700',
+                    },
                   ]}>
                   +{extraParticipants}
                 </Text>
@@ -92,7 +108,8 @@ export function ScheduleDetailScreen() {
             styles.noteCard,
             {borderColor: colors.hairline, borderRadius: radii.card},
           ]}>
-          <Text style={[typography.caption, {color: colors.n700, lineHeight: 18}]}>
+          <Text
+            style={[typography.caption, {color: colors.n700, lineHeight: 18}]}>
             {meeting.noteText}
           </Text>
         </View>
@@ -104,7 +121,7 @@ export function ScheduleDetailScreen() {
               {borderColor: colors.p700, borderRadius: radii.md},
             ]}>
             <Text style={[typography.button, {color: colors.p700}]}>
-              캘린더에 추가
+              {t('schedule.detail.addToCalendar')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -113,7 +130,7 @@ export function ScheduleDetailScreen() {
               {backgroundColor: colors.accentSolidBg, borderRadius: radii.md},
             ]}>
             <Text style={[typography.button, {color: colors.onAccentSolid}]}>
-              모임 상세보기
+              {t('schedule.detail.viewMeeting')}
             </Text>
           </TouchableOpacity>
         </View>

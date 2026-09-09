@@ -14,6 +14,7 @@ import type {
 import type {Genre} from '../constants/profileOptions';
 import {logger} from '../utils/logger';
 import {useAuth} from './AuthContext';
+import {t} from '../strings';
 import {useProfile} from './ProfileContext';
 import * as libraryApi from '../services/libraryApi';
 import type {
@@ -162,7 +163,7 @@ export function LibraryProvider({children}: {children: React.ReactNode}) {
       );
     } catch (e) {
       logger.error('LibraryContext', '서재 목록 조회 실패', {error: e});
-      setError('서재를 불러오지 못했어요. 잠시 후 다시 시도해주세요.');
+      setError(t('failure.library'));
     } finally {
       setIsLoading(false);
     }
@@ -182,7 +183,7 @@ export function LibraryProvider({children}: {children: React.ReactNode}) {
   const addBook = useCallback(
     async (input: NewBookInput): Promise<LibraryBook> => {
       if (userId === null) {
-        throw new Error('로그인 후에 책을 등록할 수 있어요.');
+        throw new Error(t('failure.loginRequiredToAddBook'));
       }
       const created = await libraryApi.createBook({
         userId,
@@ -330,9 +331,7 @@ export function LibraryProvider({children}: {children: React.ReactNode}) {
 export function useLibrary(): LibraryContextValue {
   const context = useContext(LibraryContext);
   if (!context) {
-    throw new Error(
-      'useLibrary는 LibraryProvider 안에서만 사용할 수 있습니다.',
-    );
+    throw new Error(t('developer.libraryOutsideProvider'));
   }
   return context;
 }

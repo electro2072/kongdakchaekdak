@@ -15,6 +15,7 @@ import {useAuth} from '../navigation/AuthContext';
 import {useProfile} from '../navigation/ProfileContext';
 import {ProfileStatCard} from '../components/ProfileStatCard';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 
 /**
  * Frame 05 · 프로필 탭 — design/hifi_mockup_v1.html 기준
@@ -63,18 +64,26 @@ export function ProfileScreen() {
           ]}
           onPress={() => navigation.navigate('ProfileEdit')}>
           <Text style={[typography.button, {color: colors.n700}]}>
-            프로필 편집
+            {t('profile.editButton')}
           </Text>
         </TouchableOpacity>
 
         <View style={styles.statRow}>
           <ProfileStatCard
-            label="읽은 책"
-            value={isStatsLoading ? '–' : profile.booksReadCount}
+            label={t('profile.booksRead')}
+            value={
+              isStatsLoading
+                ? t('profile.statPlaceholder')
+                : profile.booksReadCount
+            }
           />
           <ProfileStatCard
-            label="공유한 기록"
-            value={isStatsLoading ? '–' : profile.sharedRecordsCount}
+            label={t('profile.sharedRecords')}
+            value={
+              isStatsLoading
+                ? t('profile.statPlaceholder')
+                : profile.sharedRecordsCount
+            }
           />
         </View>
 
@@ -92,7 +101,7 @@ export function ProfileScreen() {
           <View style={styles.dashboardCardLeft}>
             <BarChart3 size={20} color={colors.p700} />
             <Text style={[typography.bodyStrong, {color: colors.n900}]}>
-              이번 분기 리캡 보기
+              {t('profile.recapCard')}
             </Text>
           </View>
           <ChevronRight size={18} color={colors.n500} />
@@ -107,7 +116,7 @@ export function ProfileScreen() {
           onPress={logout}>
           <LogOut size={15} color={colors.n700} />
           <Text style={[typography.button, {color: colors.n700}]}>
-            로그아웃
+            {t('profile.logout')}
           </Text>
         </TouchableOpacity>
       </ScrollView>

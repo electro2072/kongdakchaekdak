@@ -1,5 +1,6 @@
 import Config from 'react-native-config';
 import {logger} from '../utils/logger';
+import {t} from '../strings';
 
 /**
  * 인증이 필요한 백엔드 API 전용 공용 클라이언트.
@@ -33,12 +34,17 @@ export function setApiAccessToken(token: string | null): void {
  * 재로그인을 유도한다. 백엔드에 리프레시 토큰이 없어(회신 확인 완료) 만료/무효화된
  * accessToken은 실제로 API를 호출해봐야만 알 수 있다.
  */
-export function registerUnauthorizedHandler(handler: (() => void) | null): void {
+export function registerUnauthorizedHandler(
+  handler: (() => void) | null,
+): void {
   unauthorizedHandler = handler;
 }
 
 /** 인증이 필요한 API 공용 호출 함수. accessToken이 있으면 Authorization 헤더를 자동으로 붙인다. */
-export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function apiFetch<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
   const url = `${API_BASE_URL}${path}`;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -55,7 +61,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     response = await fetch(url, {...init, headers});
   } catch (error) {
     logger.error('apiClient', `네트워크 오류: ${path}`, {error});
-    throw new ApiError(0, '네트워크 연결을 확인해주세요.');
+    throw new ApiError(0, t('failure.network'));
   }
 
   if (!response.ok) {
@@ -72,7 +78,10 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     } catch {
       // 응답 본문이 JSON이 아니면 기본 메시지를 그대로 쓴다.
     }
-    logger.error('apiClient', `요청 실패: ${path}`, {status: response.status, message});
+    logger.error('apiClient', `요청 실패: ${path}`, {
+      status: response.status,
+      message,
+    });
     throw new ApiError(response.status, message);
   }
 

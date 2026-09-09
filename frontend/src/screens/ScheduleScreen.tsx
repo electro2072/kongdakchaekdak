@@ -13,20 +13,28 @@ import {Bell, BookOpen, CalendarDays, Plus} from 'lucide-react-native';
 import type {MainStackParamList} from '../navigation/types';
 import {useProfile} from '../navigation/ProfileContext';
 import {useTheme} from '../theme';
+import {t, type StringKey} from '../strings';
+import {josa} from '../utils/josa';
 
 /** 이 값(일) 이상 미접속이면 "오랜만이에요" 배너를 보여준다. */
 const INACTIVE_BANNER_THRESHOLD_DAYS = 30;
 
+/**
+ * 이 진행률(%) 이상이면 "두 모금이면 끝나요"로 문구를 바꾼다.
+ * 콩닥책닥_보이스확장_밥상레이어.md §4 일정 표의 조건부 문구.
+ */
+const ALMOST_DONE_PERCENT = 90;
+
 type DayState = 'normal' | 'today' | 'meeting';
 
-const WEEK_DAYS: {label: string; state: DayState; date?: number}[] = [
-  {label: '월', state: 'normal'},
-  {label: '화', state: 'normal'},
-  {label: '수', state: 'today', date: 18},
-  {label: '목', state: 'normal'},
-  {label: '금', state: 'normal'},
-  {label: '토', state: 'meeting'},
-  {label: '일', state: 'normal'},
+const WEEK_DAYS: {labelKey: StringKey; state: DayState; date?: number}[] = [
+  {labelKey: 'schedule.weekdays.mon', state: 'normal'},
+  {labelKey: 'schedule.weekdays.tue', state: 'normal'},
+  {labelKey: 'schedule.weekdays.wed', state: 'today', date: 18},
+  {labelKey: 'schedule.weekdays.thu', state: 'normal'},
+  {labelKey: 'schedule.weekdays.fri', state: 'normal'},
+  {labelKey: 'schedule.weekdays.sat', state: 'meeting'},
+  {labelKey: 'schedule.weekdays.sun', state: 'normal'},
 ];
 
 // TODO: Book/BookNote API 프론트 연동 전이라 화면설계서(Frame 02) 그대로의 mock 데이터를 사용한다.
@@ -69,14 +77,17 @@ export function ScheduleScreen() {
           <View>
             <Text
               style={[typography.h2, {fontWeight: '800', color: colors.n900}]}>
-              이번달 독서 일정
+              {t('schedule.monthlyTitle')}
             </Text>
             <Text
               style={[
                 typography.overline,
                 {color: colors.n600, marginTop: 4, textTransform: 'none'},
               ]}>
-              {MONTH_LABEL} · 지금까지 {COMPLETED_THIS_MONTH}권 완독
+              {t('schedule.monthSummary', {
+                month: MONTH_LABEL,
+                count: COMPLETED_THIS_MONTH,
+              })}
             </Text>
           </View>
           <TouchableOpacity
@@ -96,21 +107,20 @@ export function ScheduleScreen() {
                 typography.caption,
                 {color: colors.warnText, fontSize: 11, flex: 1},
               ]}>
-              {daysSinceLastLogin}일 동안 방문하지 않으셨어요. 오늘 한 페이지
-              읽어볼까요?
+              {t('schedule.returningBanner', {days: daysSinceLastLogin ?? 0})}
             </Text>
           </View>
         )}
 
         <View style={styles.weekRow}>
           {WEEK_DAYS.map(day => (
-            <View key={day.label} style={styles.dayColumn}>
+            <View key={day.labelKey} style={styles.dayColumn}>
               <Text
                 style={[
                   typography.overline,
                   {color: colors.n500, marginBottom: 6, textTransform: 'none'},
                 ]}>
-                {day.label}
+                {t(day.labelKey)}
               </Text>
               <View
                 style={[
@@ -161,15 +171,24 @@ export function ScheduleScreen() {
                   typography.bodyStrong,
                   {color: colors.n900, lineHeight: 18},
                 ]}>
-                오늘은 『{CURRENT_READING.title}』를{'\n'}마저 읽을 차례예요!
+                {t('schedule.currentReadingTitle', {
+                  title: CURRENT_READING.title,
+                  josa: josa(CURRENT_READING.title, '을/를'),
+                })}
               </Text>
               <Text
                 style={[
                   typography.caption,
                   {color: colors.n600, marginTop: 5, fontSize: 10.5},
                 ]}>
-                어제 {CURRENT_READING.lastReadPage}p까지 읽었어요 · 진행률{' '}
-                {CURRENT_READING.progressPercent}%
+                {CURRENT_READING.progressPercent >= ALMOST_DONE_PERCENT
+                  ? t('schedule.currentReadingAlmostDone', {
+                      percent: CURRENT_READING.progressPercent,
+                    })
+                  : t('schedule.currentReadingProgress', {
+                      page: CURRENT_READING.lastReadPage,
+                      percent: CURRENT_READING.progressPercent,
+                    })}
               </Text>
             </View>
           </View>
@@ -191,7 +210,7 @@ export function ScheduleScreen() {
                 typography.caption,
                 {color: colors.p700, fontWeight: '600', fontSize: 11},
               ]}>
-              이어서 읽기
+              {t('schedule.continueReading')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -214,13 +233,15 @@ export function ScheduleScreen() {
                 typography.caption,
                 {color: colors.n900, fontWeight: '700', fontSize: 12.5},
               ]}>
-              이번주 독서모임 일정이 있어요!
+              {t('schedule.meetingBanner')}
             </Text>
           </View>
           <Text
             style={[typography.caption, {color: colors.n600, fontSize: 10.5}]}>
-            {UPCOMING_MEETING.dateLabel} · 독서모임 "
-            {UPCOMING_MEETING.groupName}"
+            {t('schedule.meetingSubtitle', {
+              dateLabel: UPCOMING_MEETING.dateLabel,
+              groupName: UPCOMING_MEETING.groupName,
+            })}
           </Text>
         </TouchableOpacity>
 
@@ -232,7 +253,7 @@ export function ScheduleScreen() {
           onPress={() => navigation.navigate('BookSearch')}>
           <Plus size={15} color={colors.p700} />
           <Text style={[typography.button, {color: colors.p700}]}>
-            새 책 등록하기
+            {t('schedule.registerNewBook')}
           </Text>
         </TouchableOpacity>
 
@@ -241,7 +262,7 @@ export function ScheduleScreen() {
             typography.overline,
             {color: colors.n600, marginBottom: 8, textTransform: 'none'},
           ]}>
-          읽고 있는 책 · {READING_NOW_COUNT}
+          {t('schedule.readingNowCount', {count: READING_NOW_COUNT})}
         </Text>
         <View style={styles.coverRow}>
           {Array.from({length: READING_NOW_COUNT}).map((_, index) => (

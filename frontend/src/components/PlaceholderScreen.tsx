@@ -2,6 +2,7 @@ import React from 'react';
 import {SafeAreaView, Text, View, StyleSheet} from 'react-native';
 import type {LucideIcon} from 'lucide-react-native';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 
 interface PlaceholderScreenProps {
   icon: LucideIcon;
@@ -34,7 +35,7 @@ export function PlaceholderScreen({
         </Text>
         <Text
           style={[typography.overline, {color: colors.p700, marginBottom: 16}]}>
-          {frameLabel} · 준비 중
+          {t('state.preparing', {frame: frameLabel})}
         </Text>
         <Text
           style={[

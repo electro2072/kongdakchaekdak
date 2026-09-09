@@ -2,16 +2,17 @@ import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import type {DashboardPeriod} from '../../types/api/dashboard';
 import {useTheme} from '../../theme';
+import {t, type StringKey} from '../../strings';
 
 interface PeriodToggleProps {
   value: DashboardPeriod;
   onChange: (period: DashboardPeriod) => void;
 }
 
-const OPTIONS: Array<{value: DashboardPeriod; label: string}> = [
-  {value: 'month', label: '월간'},
-  {value: 'quarter', label: '분기'},
-  {value: 'year', label: '연간'},
+const OPTIONS: Array<{value: DashboardPeriod; labelKey: StringKey}> = [
+  {value: 'month', labelKey: 'dashboard.periodMonth'},
+  {value: 'quarter', labelKey: 'dashboard.periodQuarter'},
+  {value: 'year', labelKey: 'dashboard.periodYear'},
 ];
 
 /** Frame 05.1 기간 토글 — design/hifi_mockup_v1.html `.chip`/`.chip.selected` 스펙 */
@@ -41,7 +42,7 @@ export function PeriodToggle({value, onChange}: PeriodToggleProps) {
                   fontWeight: '600',
                 },
               ]}>
-              {option.label}
+              {t(option.labelKey)}
             </Text>
           </TouchableOpacity>
         );

@@ -15,6 +15,7 @@ import {ScheduleDetailScreen} from '../screens/ScheduleDetailScreen';
 import {NotificationScreen} from '../screens/NotificationScreen';
 import {useLibrary} from './LibraryContext';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -29,7 +30,8 @@ function BookDetailHeaderTitle() {
   const {books} = useLibrary();
   const {colors, typography} = useTheme();
   const title =
-    books.find(book => book.id === route.params.bookId)?.title ?? '책 상세';
+    books.find(book => book.id === route.params.bookId)?.title ??
+    t('nav.bookDetailFallback');
   return (
     <Text style={[typography.bodyStrong, {color: colors.n900, fontSize: 15}]}>
       {title}
@@ -61,29 +63,31 @@ export function MainStack() {
       <Stack.Screen
         name="BookSearch"
         component={BookSearchScreen}
-        options={{title: '책 검색', presentation: 'modal'}}
+        options={{title: t('nav.bookSearch'), presentation: 'modal'}}
       />
       <Stack.Screen
         name="BookRegisterConfirm"
         component={BookRegisterConfirmScreen}
-        options={{title: '책 등록 확인', presentation: 'modal'}}
+        options={{title: t('nav.bookRegisterConfirm'), presentation: 'modal'}}
       />
       <Stack.Screen
         name="BookNoteEdit"
         component={BookNoteEditScreen}
         options={({route}) => ({
-          title: route.params.noteId ? '소감 수정' : '소감 작성',
+          title: route.params.noteId
+            ? t('nav.bookNoteEdit')
+            : t('nav.bookNoteCreate'),
         })}
       />
       <Stack.Screen
         name="Dashboard"
         component={DashboardScreen}
-        options={{title: '독서 대시보드'}}
+        options={{title: t('nav.dashboard')}}
       />
       <Stack.Screen
         name="ProfileEdit"
         component={ProfileEditScreen}
-        options={{title: '프로필 편집'}}
+        options={{title: t('nav.profileEdit')}}
       />
       {/*
         아래 3개는 화면 파일과 types.ts 라우트 타입은 있었는데 라우터 등록만 빠져 있어서,
@@ -94,17 +98,17 @@ export function MainStack() {
       <Stack.Screen
         name="GroupManagement"
         component={GroupManagementScreen}
-        options={{title: '그룹 관리 · 공유 이력'}}
+        options={{title: t('nav.groupManagement')}}
       />
       <Stack.Screen
         name="ScheduleDetail"
         component={ScheduleDetailScreen}
-        options={{title: '일정 상세'}}
+        options={{title: t('nav.scheduleDetail')}}
       />
       <Stack.Screen
         name="Notifications"
         component={NotificationScreen}
-        options={{title: '알림'}}
+        options={{title: t('nav.notification')}}
       />
     </Stack.Navigator>
   );

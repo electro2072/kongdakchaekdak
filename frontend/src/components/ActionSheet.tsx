@@ -2,6 +2,7 @@ import React from 'react';
 import {Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import type {LucideIcon} from 'lucide-react-native';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 
 export interface ActionSheetOption {
   key: string;
@@ -40,7 +41,7 @@ export function ActionSheet({
   visible,
   title,
   options,
-  cancelLabel = '취소',
+  cancelLabel = t('common.cancel'),
   onCancel,
 }: ActionSheetProps) {
   const {colors, typography} = useTheme();

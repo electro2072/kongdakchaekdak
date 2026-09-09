@@ -20,6 +20,7 @@ import {useLibrary} from '../navigation/LibraryContext';
 import {INTEREST_OPTIONS, type Genre} from '../constants/profileOptions';
 import {GENRE_CHIP_COLORS} from '../constants/genreColors';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 import {useToast} from '../components/Toast';
 
 /**
@@ -39,7 +40,7 @@ export function BookRegisterConfirmScreen() {
     useRoute<RouteProp<MainStackParamList, 'BookRegisterConfirm'>>();
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const {addBook} = useLibrary();
+  const {addBook, books} = useLibrary();
   const {showToast} = useToast();
   const {book} = route.params;
 
@@ -51,6 +52,7 @@ export function BookRegisterConfirmScreen() {
       return;
     }
     setIsSubmitting(true);
+    const isFirstBook = books.length === 0;
     try {
       // 검색 결과의 id는 알라딘/카카오가 매긴 provider id라 서재 식별자로 쓸 수 없다.
       // POST /api/books 응답에 담긴 서버 id로 상세 화면에 이동해야 한다.
@@ -62,17 +64,21 @@ export function BookRegisterConfirmScreen() {
         // 이전엔 이 필드가 없어서 등록 직후 표지가 사라지고 서재/상세에 항상 placeholder만 보였음.
         coverImage: book.coverImageUrl ?? undefined,
       });
-      showToast({type: 'success', message: '서재에 등록했어요'});
+      // 보이스 문서 §5 마일스톤 — 서재가 비어 있었다면 이번이 "첫 책"이다.
+      // 평생 한 번만 보이는 문구라 여기에만 맛을 낸다(§1 선 1).
+      showToast({
+        type: 'success',
+        message: isFirstBook
+          ? t('milestone.firstBookRegistered')
+          : t('bookRegister.success'),
+      });
       // 뒤로가기 시 검색 화면이 아니라 서재 탭으로 돌아가도록 스택 맨 아래(Tabs)까지 걷어낸 뒤 push
       navigation.popToTop();
       navigation.navigate('BookDetail', {bookId: created.id});
     } catch (e) {
       showToast({
         type: 'error',
-        message:
-          e instanceof Error
-            ? e.message
-            : '등록에 실패했어요. 다시 시도해주세요.',
+        message: e instanceof Error ? e.message : t('bookRegister.failure'),
       });
     } finally {
       setIsSubmitting(false);
@@ -121,7 +127,7 @@ export function BookRegisterConfirmScreen() {
 
         <Text
           style={[typography.overline, {color: colors.n600, marginBottom: 8}]}>
-          장르 (필수)
+          {t('bookRegister.genreLabel')}
         </Text>
         <View style={[styles.row, styles.wrap]}>
           {INTEREST_OPTIONS.map(item => {
@@ -166,7 +172,9 @@ export function BookRegisterConfirmScreen() {
             {borderColor: colors.n300, borderRadius: radii.pill},
           ]}
           onPress={() => navigation.goBack()}>
-          <Text style={[typography.button, {color: colors.n700}]}>취소</Text>
+          <Text style={[typography.button, {color: colors.n700}]}>
+            {t('common.cancel')}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           testID="confirm-button"
@@ -178,7 +186,9 @@ export function BookRegisterConfirmScreen() {
           onPress={handleConfirm}
           disabled={!genre || isSubmitting}>
           <Text style={[typography.button, {color: colors.onAccentSolid}]}>
-            {isSubmitting ? '등록하는 중…' : '서재에 등록하기'}
+            {isSubmitting
+              ? t('bookRegister.submitting')
+              : t('bookRegister.submit')}
           </Text>
         </TouchableOpacity>
       </View>

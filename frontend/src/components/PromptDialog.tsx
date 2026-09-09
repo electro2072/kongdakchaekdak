@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 
 /**
  * 입력형 다이얼로그 — claude/독서기록앱_프론트요청_디자인_소감작성화면_장소사진추가화면_v1.md
@@ -53,7 +54,10 @@ export function PromptDialog({
       <View style={styles.scrim}>
         <View style={[styles.card, {backgroundColor: colors.surface}]}>
           <Text
-            style={[typography.bodyStrong, {color: colors.n900, fontSize: 13.5}]}>
+            style={[
+              typography.bodyStrong,
+              {color: colors.n900, fontSize: 13.5},
+            ]}>
             {title}
           </Text>
           {message ? (
@@ -98,18 +102,21 @@ export function PromptDialog({
               ]}
               onPress={onSkip}>
               <Text style={[typography.button, {color: colors.n700}]}>
-                건너뛰기
+                {t('common.skip')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               testID="prompt-dialog-save"
               style={[
                 styles.button,
-                {backgroundColor: colors.accentSolidBg, borderRadius: radii.pill},
+                {
+                  backgroundColor: colors.accentSolidBg,
+                  borderRadius: radii.pill,
+                },
               ]}
               onPress={onSave}>
               <Text style={[typography.button, {color: colors.onAccentSolid}]}>
-                저장
+                {t('common.save')}
               </Text>
             </TouchableOpacity>
           </View>

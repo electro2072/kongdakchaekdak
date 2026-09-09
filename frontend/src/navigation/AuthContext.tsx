@@ -17,6 +17,7 @@ import {
   secureStorage,
 } from '../services/secureStorage';
 import {getMe, type UserResponse} from '../services/userApi';
+import {t} from '../strings';
 
 interface AuthContextValue {
   isLoggedIn: boolean;
@@ -212,7 +213,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth는 AuthProvider 안에서만 사용할 수 있습니다.');
+    throw new Error(t('developer.authOutsideProvider'));
   }
   return context;
 }

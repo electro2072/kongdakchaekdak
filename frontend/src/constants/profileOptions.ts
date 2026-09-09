@@ -6,21 +6,27 @@
  * 가져다 쓰게 한다. 백엔드 `domain/common/Genre.java`의 한글 라벨과도 정확히 일치해야 한다
  * (개발현황.md 28번 항목 — 마지막 값 "경제·경영"은 가운뎃점 · U+00B7 포함).
  */
+import {ko, t} from '../strings';
 export const GENDER_OPTIONS = [
-  {key: 'female', label: '여성'},
-  {key: 'male', label: '남성'},
-  {key: 'unspecified', label: '선택 안 함'},
+  {key: 'female', label: t('profile.gender.female')},
+  {key: 'male', label: t('profile.gender.male')},
+  {key: 'unspecified', label: t('profile.gender.unspecified')},
 ] as const;
 
 export type GenderKey = (typeof GENDER_OPTIONS)[number]['key'];
 
+/**
+ * 문구는 strings/ko.ts의 `genre` 블록에 있다 — 화면 문자열을 한곳에 모으는 원칙을 따르되,
+ * 이 6개는 백엔드 Genre enum과 일치해야 하는 마스터 데이터라 리소스 쪽에도 경고를 달아뒀다.
+ * 여기서 `as const`로 다시 묶어야 `Genre` 유니온 타입이 리터럴로 유지된다.
+ */
 export const INTEREST_OPTIONS = [
-  '소설',
-  '에세이',
-  '자기계발',
-  '인문',
-  '과학',
-  '경제·경영',
+  ko.genre.novel,
+  ko.genre.essay,
+  ko.genre.selfHelp,
+  ko.genre.humanities,
+  ko.genre.science,
+  ko.genre.business,
 ] as const;
 
 /** 관심분야이자 책 장르(Book.genre)이기도 한 닫힌 6개 열거형 — constants/genreColors.ts가 이 타입 기준으로 색을 고정 매핑한다 */

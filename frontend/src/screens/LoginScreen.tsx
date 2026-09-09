@@ -16,6 +16,7 @@ import {useProfile} from '../navigation/ProfileContext';
 import {useTheme} from '../theme';
 import {useToast} from '../components/Toast';
 import {logger} from '../utils/logger';
+import {t} from '../strings';
 import {socialLogin} from '../services/authApi';
 import {
   GOOGLE_SIGN_IN_CANCELLED,
@@ -95,13 +96,20 @@ export function LoginScreen({navigation}: Props) {
       navigation.navigate('Signup');
     } else {
       login();
-      showToast({type: 'success', message: `${profile.nickname}님, 환영해요!`});
+      showToast({
+        type: 'success',
+        message: t('auth.login.welcomeToast', {nickname: profile.nickname}),
+      });
     }
   };
 
   const handleSocialLoginError = (label: string, error: unknown) => {
-    logger.error('LoginScreen', `소셜 로그인 실패 (${label})`, error);
-    Alert.alert('로그인 실패', '잠시 후 다시 시도해주세요.');
+    logger.error(
+      'LoginScreen',
+      t('developer.socialLoginFailed', {provider: label}),
+      error,
+    );
+    Alert.alert(t('auth.login.failureTitle'), t('auth.login.failureMessage'));
   };
 
   const handleNaverLogin = async () => {
@@ -114,7 +122,7 @@ export function LoginScreen({navigation}: Props) {
       const {accessToken, isNewUser} = await socialLogin('naver', naverToken);
       completeSocialLogin(accessToken, isNewUser);
     } catch (error) {
-      handleSocialLoginError('네이버', error);
+      handleSocialLoginError(t('auth.provider.naver'), error);
     } finally {
       setLoadingProvider(null);
     }
@@ -127,7 +135,7 @@ export function LoginScreen({navigation}: Props) {
       const {accessToken, isNewUser} = await socialLogin('kakao', kakaoToken);
       completeSocialLogin(accessToken, isNewUser);
     } catch (error) {
-      handleSocialLoginError('카카오', error);
+      handleSocialLoginError(t('auth.provider.kakao'), error);
     } finally {
       setLoadingProvider(null);
     }
@@ -143,7 +151,7 @@ export function LoginScreen({navigation}: Props) {
       const {accessToken, isNewUser} = await socialLogin('google', idToken);
       completeSocialLogin(accessToken, isNewUser);
     } catch (error) {
-      handleSocialLoginError('구글', error);
+      handleSocialLoginError(t('auth.provider.google'), error);
     } finally {
       setLoadingProvider(null);
     }
@@ -162,7 +170,7 @@ export function LoginScreen({navigation}: Props) {
       );
       completeSocialLogin(accessToken, isNewUser);
     } catch (error) {
-      handleSocialLoginError('애플', error);
+      handleSocialLoginError(t('auth.provider.apple'), error);
     } finally {
       setLoadingProvider(null);
     }
@@ -177,14 +185,14 @@ export function LoginScreen({navigation}: Props) {
 
       <View style={styles.logoBlock}>
         <View style={[styles.logo, {borderRadius: 18}]}>
-          <Text style={styles.logoLine}>콩닥</Text>
-          <Text style={styles.logoLine}>책닥</Text>
+          <Text style={styles.logoLine}>{t('auth.login.logoLine1')}</Text>
+          <Text style={styles.logoLine}>{t('auth.login.logoLine2')}</Text>
         </View>
         <Text style={[typography.h2, {fontWeight: '800', color: colors.n900}]}>
-          콩닥책닥
+          {t('auth.login.appName')}
         </Text>
         <Text style={[typography.caption, {color: colors.n600, marginTop: 6}]}>
-          오늘 읽은 한 페이지를 자랑해보세요
+          {t('auth.login.tagline')}
         </Text>
       </View>
 
@@ -193,8 +201,12 @@ export function LoginScreen({navigation}: Props) {
       <View style={styles.buttons}>
         {showAppleButton && (
           <View
-            style={isBusy && loadingProvider !== 'apple' && styles.buttonDisabled}
-            pointerEvents={isBusy && loadingProvider !== 'apple' ? 'none' : 'auto'}>
+            style={
+              isBusy && loadingProvider !== 'apple' && styles.buttonDisabled
+            }
+            pointerEvents={
+              isBusy && loadingProvider !== 'apple' ? 'none' : 'auto'
+            }>
             {loadingProvider === 'apple' ? (
               <View
                 style={[
@@ -204,7 +216,9 @@ export function LoginScreen({navigation}: Props) {
                     borderRadius: radii.md,
                   },
                 ]}>
-                <ActivityIndicator color={isDark ? colors.n900 : colors.surface} />
+                <ActivityIndicator
+                  color={isDark ? colors.n900 : colors.surface}
+                />
               </View>
             ) : (
               <AppleButton
@@ -235,7 +249,7 @@ export function LoginScreen({navigation}: Props) {
             <ActivityIndicator color={colors.n700} />
           ) : (
             <Text style={[typography.button, {color: colors.n700}]}>
-              네이버로 시작하기
+              {t('auth.login.naverButton')}
             </Text>
           )}
         </TouchableOpacity>
@@ -255,7 +269,7 @@ export function LoginScreen({navigation}: Props) {
             <ActivityIndicator color={colors.n700} />
           ) : (
             <Text style={[typography.button, {color: colors.n700}]}>
-              카카오로 시작하기
+              {t('auth.login.kakaoButton')}
             </Text>
           )}
         </TouchableOpacity>
@@ -275,7 +289,7 @@ export function LoginScreen({navigation}: Props) {
             <ActivityIndicator color={colors.n700} />
           ) : (
             <Text style={[typography.button, {color: colors.n700}]}>
-              Google로 시작하기
+              {t('auth.login.googleButton')}
             </Text>
           )}
         </TouchableOpacity>

@@ -12,6 +12,7 @@ import type {ShareHistoryItem} from '../types/share';
 import {MOCK_SHARE_GROUPS} from '../mocks/shareGroups';
 import {MOCK_SHARE_HISTORY} from '../mocks/shareHistory';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 
 /**
  * Frame 04.1 · 공유 탭 (그룹 관리 · 공유 이력) —
@@ -35,7 +36,7 @@ export function GroupManagementScreen() {
             typography.overline,
             {color: colors.n600, marginBottom: 8, textTransform: 'none'},
           ]}>
-          내 그룹
+          {t('group.myGroups')}
         </Text>
         {MOCK_SHARE_GROUPS.map(group => (
           <View
@@ -57,8 +58,12 @@ export function GroupManagementScreen() {
             </Text>
             <TouchableOpacity
               style={[styles.manageChip, {borderColor: colors.hairline}]}>
-              <Text style={[typography.caption, {color: colors.n600, fontSize: 10.5}]}>
-                관리
+              <Text
+                style={[
+                  typography.caption,
+                  {color: colors.n600, fontSize: 10.5},
+                ]}>
+                {t('common.manage')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -70,7 +75,7 @@ export function GroupManagementScreen() {
           ]}>
           <Plus size={14} color={colors.p700} />
           <Text style={[typography.button, {color: colors.p700}]}>
-            새 그룹 만들기
+            {t('group.createGroup')}
           </Text>
         </TouchableOpacity>
 
@@ -84,7 +89,7 @@ export function GroupManagementScreen() {
               textTransform: 'none',
             },
           ]}>
-          공유 이력
+          {t('group.shareHistory')}
         </Text>
         {MOCK_SHARE_HISTORY.map(item => (
           <HistoryRow key={item.id} item={item} />

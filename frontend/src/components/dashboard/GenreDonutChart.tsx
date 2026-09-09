@@ -3,6 +3,7 @@ import {View, Text, StyleSheet} from 'react-native';
 import Svg, {Circle} from 'react-native-svg';
 import type {GenreRatioDto} from '../../types/api/dashboard';
 import {useTheme} from '../../theme';
+import {t} from '../../strings';
 import {GENRE_CHART_COLOR_KEY} from '../../constants/genreColors';
 import type {Genre} from '../../constants/profileOptions';
 
@@ -86,9 +87,15 @@ export function GenreDonutChart({genreRatios}: GenreDonutChartProps) {
       </Svg>
       <View style={styles.legend}>
         {slices.length === 0 ? (
-          <Text style={[typography.caption, {color: colors.n500}]}>
-            아직 완독한 책이 없어요
-          </Text>
+          <View>
+            <Text style={[typography.bodyStrong, {color: colors.n700}]}>
+              {t('dashboard.emptyTitle')}
+            </Text>
+            <Text
+              style={[typography.caption, {color: colors.n500, marginTop: 4}]}>
+              {t('dashboard.emptyDescription')}
+            </Text>
+          </View>
         ) : (
           slices.map((slice, index) => (
             <View key={`${slice.label}-${index}`} style={styles.legendRow}>

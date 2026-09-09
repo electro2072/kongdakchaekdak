@@ -15,6 +15,7 @@ import {
 } from '../services/userApi';
 import {fetchProfileStats} from '../services/profileStatsApi';
 import {useAuth} from './AuthContext';
+import {t} from '../strings';
 
 type ProfileEditableFields = Pick<
   ProfileSummary,
@@ -128,9 +129,7 @@ export function ProfileProvider({children}: {children: React.ReactNode}) {
           return;
         }
         logger.error('ProfileContext', '프로필 조회 실패', {error: e});
-        setError(
-          e instanceof Error ? e.message : '프로필을 불러오지 못했어요.',
-        );
+        setError(e instanceof Error ? e.message : t('failure.profile'));
       })
       .finally(() => {
         if (!cancelled) {
@@ -206,9 +205,7 @@ export function ProfileProvider({children}: {children: React.ReactNode}) {
 export function useProfile(): ProfileContextValue {
   const context = useContext(ProfileContext);
   if (!context) {
-    throw new Error(
-      'useProfile은 ProfileProvider 안에서만 사용할 수 있습니다.',
-    );
+    throw new Error(t('developer.profileOutsideProvider'));
   }
   return context;
 }

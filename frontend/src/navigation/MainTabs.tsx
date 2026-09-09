@@ -16,6 +16,7 @@ import {ShareScreen} from '../screens/ShareScreen';
 import {ProfileScreen} from '../screens/ProfileScreen';
 import {useAuth} from './AuthContext';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -37,7 +38,8 @@ const TAB_ICON: Record<
 export function MainTabs() {
   const {colors} = useTheme();
   const {pendingBookSearchOnEntry, setPendingBookSearchOnEntry} = useAuth();
-  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<MainStackParamList>>();
 
   // 신규 가입 온보딩 다이얼로그(SignupScreen)에서 "네"를 선택했으면, 로그인 직후 처음 뜨는
   // 이 탭 화면 위로 BookSearch 모달을 자동으로 한 번 push한다 — Tabs가 스택에 그대로 남아있는
@@ -71,22 +73,22 @@ export function MainTabs() {
       <Tab.Screen
         name="Schedule"
         component={ScheduleScreen}
-        options={{title: '일정'}}
+        options={{title: t('nav.tabs.schedule')}}
       />
       <Tab.Screen
         name="Library"
         component={LibraryScreen}
-        options={{title: '서재'}}
+        options={{title: t('nav.tabs.library')}}
       />
       <Tab.Screen
         name="Share"
         component={ShareScreen}
-        options={{title: '공유'}}
+        options={{title: t('nav.tabs.share')}}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{title: '프로필'}}
+        options={{title: t('nav.tabs.profile')}}
       />
     </Tab.Navigator>
   );

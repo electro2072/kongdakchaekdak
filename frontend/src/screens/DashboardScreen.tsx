@@ -17,6 +17,7 @@ import {ProfileStatCard} from '../components/ProfileStatCard';
 import {LoadingSkeleton} from '../components/LoadingSkeleton';
 import {NetworkError} from '../components/NetworkError';
 import {useTheme} from '../theme';
+import {t} from '../strings';
 
 /**
  * Frame 05.1 · 독서 대시보드(Recap) — design/hifi_mockup_v1.html 기준
@@ -45,26 +46,33 @@ export function DashboardScreen() {
         ) : data ? (
           <>
             <View style={styles.statRow}>
-              <ProfileStatCard label="완독한 책" value={data.completedBookCount} />
-              <ProfileStatCard label="읽은 페이지" value={data.totalPagesRead} />
+              <ProfileStatCard
+                label={t('dashboard.completedBooks')}
+                value={data.completedBookCount}
+              />
+              <ProfileStatCard
+                label={t('dashboard.pagesRead')}
+                value={data.totalPagesRead}
+              />
             </View>
 
             <View style={styles.section}>
               <Text style={[typography.caption, {color: colors.n600}]}>
-                장르 비율
+                {t('dashboard.genreRatio')}
               </Text>
               <GenreDonutChart genreRatios={data.genreRatios} />
             </View>
 
             <View style={styles.section}>
               <Text style={[typography.caption, {color: colors.n600}]}>
-                월별 완독 추이
+                {t('dashboard.monthlyTrend')}
               </Text>
               <MonthlyTrendChart monthlyTrend={data.monthlyTrend} />
             </View>
 
             <HighlightCard
               highlights={data.highlights}
+              period={period}
               recommendedCaption={data.recommendedCaption}
             />
 
@@ -76,17 +84,21 @@ export function DashboardScreen() {
                 ]}>
                 <Download size={15} color={colors.n700} />
                 <Text style={[typography.button, {color: colors.n700}]}>
-                  이미지 저장
+                  {t('dashboard.saveImage')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
                   styles.primaryButton,
-                  {backgroundColor: colors.accentSolidBg, borderRadius: radii.pill},
+                  {
+                    backgroundColor: colors.accentSolidBg,
+                    borderRadius: radii.pill,
+                  },
                 ]}>
                 <Share2 size={15} color={colors.onAccentSolid} />
-                <Text style={[typography.button, {color: colors.onAccentSolid}]}>
-                  공유 탭으로
+                <Text
+                  style={[typography.button, {color: colors.onAccentSolid}]}>
+                  {t('dashboard.goToShare')}
                 </Text>
               </TouchableOpacity>
             </View>

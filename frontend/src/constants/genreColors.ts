@@ -1,5 +1,6 @@
 import type {ThemeColors} from '../theme';
 import {type Genre} from './profileOptions';
+import {ko} from '../strings';
 
 /**
  * 6개 장르 고정 색 매핑 (claude/독서기록앱_프론트요청_디자인_6개장르고정색전환_v1.md, 2026-08-28).
@@ -23,12 +24,12 @@ export const GENRE_CHART_COLOR_KEY: Record<
   Genre,
   Extract<keyof ThemeColors, `chart${number}`>
 > = {
-  소설: 'chart1',
-  에세이: 'chart2',
-  자기계발: 'chart3',
-  인문: 'chart4',
-  과학: 'chart5',
-  '경제·경영': 'chart6',
+  [ko.genre.novel]: 'chart1',
+  [ko.genre.essay]: 'chart2',
+  [ko.genre.selfHelp]: 'chart3',
+  [ko.genre.humanities]: 'chart4',
+  [ko.genre.science]: 'chart5',
+  [ko.genre.business]: 'chart6',
 };
 
 interface GenreColorPair {
@@ -38,20 +39,56 @@ interface GenreColorPair {
 
 /** 관심분야·장르 선택 칩 — 배경은 장르 고유색 그대로, 텍스트만 대비색 */
 export const GENRE_CHIP_COLORS: Record<Genre, GenreColorPair> = {
-  소설: {light: {bg: '#485a21', text: '#ffffff'}, dark: {bg: '#748a48', text: '#ffffff'}},
-  에세이: {light: {bg: '#e8929b', text: '#430011'}, dark: {bg: '#cd717c', text: '#34000a'}},
-  자기계발: {light: {bg: '#efb94a', text: '#3e2200'}, dark: {bg: '#ce9b2b', text: '#2c1400'}},
-  인문: {light: {bg: '#9b7ba8', text: '#1e0228'}, dark: {bg: '#7d588c', text: '#ffffff'}},
-  과학: {light: {bg: '#0089ff', text: '#001a33'}, dark: {bg: '#009af3', text: '#001522'}},
-  '경제·경영': {light: {bg: '#1c1a46', text: '#ffffff'}, dark: {bg: '#98bed3', text: '#061117'}},
+  [ko.genre.novel]: {
+    light: {bg: '#485a21', text: '#ffffff'},
+    dark: {bg: '#748a48', text: '#ffffff'},
+  },
+  [ko.genre.essay]: {
+    light: {bg: '#e8929b', text: '#430011'},
+    dark: {bg: '#cd717c', text: '#34000a'},
+  },
+  [ko.genre.selfHelp]: {
+    light: {bg: '#efb94a', text: '#3e2200'},
+    dark: {bg: '#ce9b2b', text: '#2c1400'},
+  },
+  [ko.genre.humanities]: {
+    light: {bg: '#9b7ba8', text: '#1e0228'},
+    dark: {bg: '#7d588c', text: '#ffffff'},
+  },
+  [ko.genre.science]: {
+    light: {bg: '#0089ff', text: '#001a33'},
+    dark: {bg: '#009af3', text: '#001522'},
+  },
+  [ko.genre.business]: {
+    light: {bg: '#1c1a46', text: '#ffffff'},
+    dark: {bg: '#98bed3', text: '#061117'},
+  },
 };
 
 /** 서재 목록 책 장르 배지 — 배경은 옅은 틴트, 텍스트는 진한 색(다크모드는 반전) */
 export const GENRE_BADGE_COLORS: Record<Genre, GenreColorPair> = {
-  소설: {light: {bg: '#f4f9eb', text: '#485a21'}, dark: {bg: '#070a03', text: '#748a48'}},
-  에세이: {light: {bg: '#ffe7e9', text: '#430011'}, dark: {bg: '#1c080b', text: '#cd717c'}},
-  자기계발: {light: {bg: '#f8edda', text: '#673e00'}, dark: {bg: '#170e00', text: '#ce9b2b'}},
-  인문: {light: {bg: '#f6e9fc', text: '#602f72'}, dark: {bg: '#150a1a', text: '#7d588c'}},
-  과학: {light: {bg: '#e9f3ff', text: '#0047ab'}, dark: {bg: '#030e19', text: '#009af3'}},
-  '경제·경영': {light: {bg: '#eceef9', text: '#1c1a46'}, dark: {bg: '#061117', text: '#98bed3'}},
+  [ko.genre.novel]: {
+    light: {bg: '#f4f9eb', text: '#485a21'},
+    dark: {bg: '#070a03', text: '#748a48'},
+  },
+  [ko.genre.essay]: {
+    light: {bg: '#ffe7e9', text: '#430011'},
+    dark: {bg: '#1c080b', text: '#cd717c'},
+  },
+  [ko.genre.selfHelp]: {
+    light: {bg: '#f8edda', text: '#673e00'},
+    dark: {bg: '#170e00', text: '#ce9b2b'},
+  },
+  [ko.genre.humanities]: {
+    light: {bg: '#f6e9fc', text: '#602f72'},
+    dark: {bg: '#150a1a', text: '#7d588c'},
+  },
+  [ko.genre.science]: {
+    light: {bg: '#e9f3ff', text: '#0047ab'},
+    dark: {bg: '#030e19', text: '#009af3'},
+  },
+  [ko.genre.business]: {
+    light: {bg: '#eceef9', text: '#1c1a46'},
+    dark: {bg: '#061117', text: '#98bed3'},
+  },
 };

@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import type {DashboardPeriod, DashboardResponse} from '../types/api/dashboard';
 import {apiFetch} from '../services/apiClient';
+import {t} from '../strings';
 
 interface UseDashboardResult {
   period: DashboardPeriod;
@@ -47,9 +48,7 @@ export function useDashboard(
       })
       .catch(e => {
         if (!cancelled) {
-          setError(
-            e instanceof Error ? e.message : '대시보드를 불러오지 못했어요.',
-          );
+          setError(e instanceof Error ? e.message : t('failure.dashboard'));
         }
       })
       .finally(() => {
