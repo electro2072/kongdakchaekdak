@@ -475,6 +475,38 @@ export const ko = {
   },
 
   /**
+   * 서버 에러 응답의 `error` 코드(backend `common/exception/ErrorCode.java` 15종,
+   * `ErrorCode.name()` 그대로)를 사용자 문구로 매핑한다. "백엔드는 코드만, 문구는 프론트가"가
+   * 설계 원칙이다(docs/콩닥책닥_에러코드체계_설계_v1.md §3, G21 — 2026-09-10 개편).
+   * 키 이름은 코드명을 camelCase로 옮긴 것 — `services/apiClient.ts`의 매핑 테이블과
+   * 1:1로 대응하니 코드가 늘면 양쪽 다 같이 늘릴 것.
+   *
+   * `internalServerError`의 `{traceId}`는 백엔드가 실어 보내는 8자리 요청 추적 번호다 — CS 문의
+   * 시 이 번호로 서버 로그를 찾을 수 있다는 의미이지, 예외 메시지 원문이 아니다.
+   *
+   * [담백] failure 블록과 마찬가지로 실패 문구는 장난스러운 말투를 쓰지 않는다.
+   */
+  apiError: {
+    unauthenticated: '로그인이 필요해요. 다시 로그인해주세요.',
+    socialAuthFailed: '로그인에 실패했어요. 잠시 후 다시 시도해주세요.',
+    notOwner: '본인이 등록한 항목만 이용할 수 있어요.',
+    notGroupMember: '모임 멤버만 이용할 수 있어요.',
+    groupLeaderOnly: '모임장만 할 수 있는 기능이에요.',
+    groupLeaderCannotLeave: '모임장은 모임을 나갈 수 없어요. 모임을 삭제해주세요.',
+    notFound: '요청하신 내용을 찾을 수 없어요.',
+    shareTargetNotFound: '공유 대상을 찾을 수 없어요. 다시 선택해주세요.',
+    alreadyGroupMember: '이미 모임에 속해 있어요.',
+    validationFailed: '입력한 내용을 다시 확인해주세요.',
+    photoLimitExceeded: '사진은 정해진 개수까지만 추가할 수 있어요.',
+    invalidShareRequest: '공유 요청을 처리할 수 없어요. 잠시 후 다시 시도해주세요.',
+    malformedRequest: '요청을 처리할 수 없어요. 앱을 최신 버전으로 업데이트해주세요.',
+    imageStorageUnavailable: '지금은 사진 업로드를 이용할 수 없어요. 잠시 후 다시 시도해주세요.',
+    internalServerError: '오류가 발생했어요 (오류번호: {traceId})',
+    /** 매핑표에 없는 코드(신규 코드 누락) · 응답이 JSON이 아닌 경우의 최종 폴백. */
+    unknown: '요청을 처리하지 못했어요. 잠시 후 다시 시도해주세요.',
+  },
+
+  /**
    * 개발자용 예외 메시지.
    * 사용자에게 노출되지 않지만, 문자열을 코드에서 떼어놓는 원칙은 동일하게 적용한다.
    */

@@ -16,9 +16,10 @@
  * (src/services/kakao/kakaoApi.types.ts, src/services/aladin/aladinApi.types.ts에 그대로 둠).
  * Group/ShareRecord 관련 타입은 백엔드 DTO가 아직 없어 여기에도 없다(둘 다 mock 상태).
  */
-
+ 
 export * from './auth';
 export * from './user';
 export * from './library';
 export * from './dashboard';
 export * from './profileStats';
+export * from './error';
