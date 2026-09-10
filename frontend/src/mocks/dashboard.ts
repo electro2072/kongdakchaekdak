@@ -9,19 +9,22 @@ import type {DashboardPeriod, DashboardResponse} from '../types/api/dashboard';
 //           4개 모두 각자 고유색(소설=chart1, 인문=chart4, 과학=chart5, 자기계발=chart3)으로 표시된다.
 // year   — 완독 0권(가입 직후 등) 특수 케이스 — genreRatios: [], highlights 전부 null,
 //          monthlyTrend도 전부 0이라 막대그래프 "전부 p100" 케이스까지 같이 검증한다.
+//
+// ⚠️ 키 이름은 실제 백엔드 응답과 같아야 한다(BUG-20260910-b01). 이 mock이 `ratio`를 갖고 있어서
+// jest가 `percentage` 불일치를 못 잡았다. `__tests__/dashboardDtoContract.test.ts`가 BE record와 대조한다.
 
 const MOCK_DASHBOARD_BY_PERIOD: Record<DashboardPeriod, DashboardResponse> = {
   month: {
     userId: 1,
-    period: 'MONTH',
+    period: 'month',
     periodLabel: '2026년 8월',
     startDate: '2026-08-01',
     endDate: '2026-08-31',
     completedBookCount: 3,
     totalPagesRead: 842,
     genreRatios: [
-      {genre: '소설', count: 2, ratio: 66.7},
-      {genre: '에세이', count: 1, ratio: 33.3},
+      {genre: '소설', count: 2, percentage: 66.7},
+      {genre: '에세이', count: 1, percentage: 33.3},
     ],
     monthlyTrend: [
       {yearMonth: '2026-03', completedCount: 1},
@@ -33,24 +36,24 @@ const MOCK_DASHBOARD_BY_PERIOD: Record<DashboardPeriod, DashboardResponse> = {
     ],
     highlights: {
       topGenre: '소설',
-      longestReadBook: {id: 2, title: '채식주의자', days: 14},
-      fastestReadBook: {id: 1, title: '아몬드', days: 3},
+      longestReadBook: {bookId: 2, title: '채식주의자', days: 14},
+      fastestReadBook: {bookId: 1, title: '아몬드', days: 3},
     },
     recommendedCaption: '이번 달도 꾸준히 읽고 있어요! 다음 책도 기대할게요 📖',
   },
   quarter: {
     userId: 1,
-    period: 'QUARTER',
+    period: 'quarter',
     periodLabel: '2026년 3분기',
     startDate: '2026-07-01',
     endDate: '2026-09-30',
     completedBookCount: 11,
     totalPagesRead: 3184,
     genreRatios: [
-      {genre: '소설', count: 5, ratio: 45.5},
-      {genre: '인문', count: 3, ratio: 27.3},
-      {genre: '과학', count: 2, ratio: 18.2},
-      {genre: '자기계발', count: 1, ratio: 9.1},
+      {genre: '소설', count: 5, percentage: 45.5},
+      {genre: '인문', count: 3, percentage: 27.3},
+      {genre: '과학', count: 2, percentage: 18.2},
+      {genre: '자기계발', count: 1, percentage: 9.1},
     ],
     monthlyTrend: [
       {yearMonth: '2026-03', completedCount: 1},
@@ -62,14 +65,14 @@ const MOCK_DASHBOARD_BY_PERIOD: Record<DashboardPeriod, DashboardResponse> = {
     ],
     highlights: {
       topGenre: '소설',
-      longestReadBook: {id: 5, title: '코스모스', days: 21},
-      fastestReadBook: {id: 4, title: '데미안', days: 4},
+      longestReadBook: {bookId: 5, title: '코스모스', days: 21},
+      fastestReadBook: {bookId: 4, title: '데미안', days: 4},
     },
     recommendedCaption: '이번 분기에 4개 장르를 골고루 읽었어요, 다음엔 어떤 장르가 궁금하세요?',
   },
   year: {
     userId: 1,
-    period: 'YEAR',
+    period: 'year',
     periodLabel: '2026년',
     startDate: '2026-01-01',
     endDate: '2026-12-31',

@@ -39,7 +39,9 @@ export function GenreDonutChart({genreRatios}: GenreDonutChartProps) {
     const colorKey = GENRE_CHART_COLOR_KEY[genre.genre as Genre];
     return {
       label: genre.genre,
-      ratio: genre.ratio,
+      // BUG-20260910-b01: 응답 필드는 `percentage`다(BE GenreRatioDto). `ratio`는 이 컴포넌트 내부
+      // Slice의 이름일 뿐 — 예전엔 DTO도 `ratio`로 읽어서 항상 undefined → "NaN%"였다.
+      ratio: genre.percentage,
       color: colorKey ? colors[colorKey] : colors.n200,
     };
   });

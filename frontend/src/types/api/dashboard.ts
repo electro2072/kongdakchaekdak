@@ -4,19 +4,26 @@
  *
  * 2026-09-09: "인터페이스 한 폴더에 모아놓기" 리팩터링으로 src/types/dashboard.ts에서 이 파일로
  * 그대로 옮겼다(내용 변경 없음, 위치만 다른 API 응답 타입들과 함께 src/types/api/로 이동).
+ *
+ * 2026-09-11 (BUG-20260910-b01): 백엔드 record와 필드명이 어긋나 있던 것을 원본 기준으로 정정했다.
+ * 계약의 단일 출처는 backend `domain/dashboard/dto/*.java`·`DashboardPeriod.java`다(D15).
+ * 드리프트는 `__tests__/dashboardDtoContract.test.ts`가 잡는다 — 필드를 바꾸면 그 테스트부터 본다.
  */
 
-/** 쿼리 파라미터 `period` — 소문자 */
+/** 쿼리 파라미터 `period`. 백엔드가 `toUpperCase()` 후 `valueOf`하므로 대소문자 무관. */
 export type DashboardPeriod = 'month' | 'quarter' | 'year';
 
-/** 응답 필드 `period` — 대문자 */
-export type DashboardPeriodResponse = 'MONTH' | 'QUARTER' | 'YEAR';
+/**
+ * 응답 필드 `period` — **소문자.** `DashboardPeriod.java`의 `@JsonValue`가 `name().toLowerCase()`로
+ * 직렬화한다(BE `DashboardControllerTest`가 `$.period == "month"`로 고정). 이전 판은 대문자로 적혀 있었다.
+ */
+export type DashboardPeriodResponse = 'month' | 'quarter' | 'year';
 
 export interface GenreRatioDto {
   genre: string;
   count: number;
-  /** 0~100 */
-  ratio: number;
+  /** 0~100, 소수 첫째 자리 반올림 (BE `roundToOneDecimal`) */
+  percentage: number;
 }
 
 /** yearMonth: "yyyy-MM", 항상 6개 고정(직전 6개월, 과거→최신) */
@@ -26,7 +33,7 @@ export interface MonthlyTrendDto {
 }
 
 export interface BookHighlightDto {
-  id: number;
+  bookId: number;
   title: string;
   days: number;
 }
