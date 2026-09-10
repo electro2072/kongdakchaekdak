@@ -60,6 +60,12 @@ public enum ErrorCode {
     INVALID_SHARE_REQUEST(HttpStatus.BAD_REQUEST),
     /** 요청 본문(JSON) 파싱 실패 — enum 라벨 오류 포함. */
     MALFORMED_REQUEST(HttpStatus.BAD_REQUEST),
+    /**
+     * (OBS-26, 2026-09-10 신설) 완독 처리 시 endDate가 startDate보다 이른 경우. 기존 코드 중에는
+     * 이 상황에 맞는 게 없었다 — VALIDATION_FAILED는 단일 필드 Bean Validation 실패용이고,
+     * INVALID_SHARE_REQUEST는 공유 도메인 전용이라 재사용하면 의미가 어긋난다.
+     */
+    INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST),
 
     // --- 503 / 500 ---
     /** 이미지 업로드(presigned URL) 설정 문제로 기능 사용 불가. */

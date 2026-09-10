@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.dashboard;
 
+import com.kongdakchaekdak.common.time.KstClock;
 import com.kongdakchaekdak.domain.dashboard.dto.DashboardResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,7 +35,11 @@ public class DashboardController {
             @AuthenticationPrincipal Long currentUserId
     ) {
         DashboardPeriod dashboardPeriod = DashboardPeriod.valueOf(period.toUpperCase());
-        YearMonth referenceMonth = date == null ? YearMonth.now() : YearMonth.parse(date);
+        // (OBS-26, 2026-09-10) date 생략 시 "이번 달"은 서버 JVM 기본 타임존이 아니라 서비스
+        // 타임존(KST) 기준으로 고정한다 — Book.startDate/endDate 기본값과 동일한 버그 패턴이었다.
+        // 집계가 endDate 구간 조회(findByUserIdAndStatusAndEndDateBetween)라 월 경계에서 어긋나면
+        // "이번 달 완독 권수"가 실제와 달라진다.
+        YearMonth referenceMonth = date == null ? KstClock.thisMonth() : YearMonth.parse(date);
         return dashboardService.getDashboard(currentUserId, dashboardPeriod, referenceMonth);
     }
 }

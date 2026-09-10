@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.user.dto;
 
+import com.kongdakchaekdak.common.time.KstClock;
 import com.kongdakchaekdak.domain.common.Genre;
 import com.kongdakchaekdak.domain.user.Gender;
 import com.kongdakchaekdak.domain.user.User;
@@ -43,9 +44,12 @@ public record UserResponse(
         Long daysSinceLastLogin
 ) {
     public static UserResponse from(User user) {
+        // (OBS-26 확장, 2026-09-10) lastLoginAt이 User/SocialAuthService에서 이제 KST 기준으로
+        // 기록되므로, 여기서도 같은 기준(KST)의 "지금"과 비교해야 한다 — 한쪽만 KST로 바꾸면
+        // daysSinceLastLogin이 자정 근처에서 최대 하루 어긋나는 문제가 그대로 남는다.
         Long daysSinceLastLogin = user.getLastLoginAt() == null
                 ? null
-                : Duration.between(user.getLastLoginAt(), LocalDateTime.now()).toDays();
+                : Duration.between(user.getLastLoginAt(), LocalDateTime.now(KstClock.ZONE)).toDays();
 
         return new UserResponse(
                 user.getId(),

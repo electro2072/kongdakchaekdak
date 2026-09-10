@@ -2,6 +2,7 @@ package com.kongdakchaekdak.domain.book;
 
 import com.kongdakchaekdak.common.exception.ErrorCode;
 import com.kongdakchaekdak.common.exception.ForbiddenException;
+import com.kongdakchaekdak.common.exception.InvalidRequestException;
 import com.kongdakchaekdak.common.exception.ResourceNotFoundException;
 import com.kongdakchaekdak.common.logging.AuditLogger;
 import com.kongdakchaekdak.domain.book.dto.BookCreateRequest;
@@ -77,7 +78,17 @@ public class BookService {
         Book book = findBookOrThrow(id);
         requireOwner(book, currentUserId);
         book.complete(endDate);
-        auditLogger.event("BOOK_COMPLETED", currentUserId, "bookId=" + id + ", endDate=" + endDate);
+
+        // (OBS-26, 2026-09-10) endDate 생략 시 기본값(KstClock.today())은 Book.complete()가
+        // KST 기준으로 고정해 계산하지만, 클라이언트가 endDate를 직접 명시한 경우까지 막지는
+        // 못한다 — startDate보다 이른 endDate가 그대로 저장되는 입력값 자체는 별도로 막는다.
+        if (book.getEndDate().isBefore(book.getStartDate())) {
+            throw new InvalidRequestException(ErrorCode.INVALID_DATE_RANGE,
+                    "완독일이 시작일보다 이릅니다. bookId=" + id + ", startDate=" + book.getStartDate()
+                            + ", endDate=" + book.getEndDate());
+        }
+
+        auditLogger.event("BOOK_COMPLETED", currentUserId, "bookId=" + id + ", endDate=" + book.getEndDate());
         return BookResponse.from(book);
     }
 

@@ -2,6 +2,7 @@ package com.kongdakchaekdak.domain.auth;
 
 import com.kongdakchaekdak.common.logging.AuditLogger;
 import com.kongdakchaekdak.common.logging.SecurityEventLogger;
+import com.kongdakchaekdak.common.time.KstClock;
 import com.kongdakchaekdak.domain.auth.dto.TokenResponse;
 import com.kongdakchaekdak.domain.auth.oauth2.AppleOAuthClient;
 import com.kongdakchaekdak.domain.auth.oauth2.GoogleOAuthClient;
@@ -104,7 +105,9 @@ public class SocialAuthService {
             auditLogger.event("USER_SIGNUP", user.getId(), "provider=" + provider);
             isNewUser = true;
         }
-        user.updateLastLoginAt(LocalDateTime.now());
+        // (OBS-26 확장, 2026-09-10) User 생성자와 동일하게 KST 기준으로 고정 — Book.startDate/
+        // endDate와 lastLoginAt이 서로 다른 타임존 기준이면 화면에 같이 보일 때 날짜가 어긋난다.
+        user.updateLastLoginAt(LocalDateTime.now(KstClock.ZONE));
 
         securityEventLogger.loginSuccess(provider, user.getId());
         return authService.issueToken(user.getId(), isNewUser);

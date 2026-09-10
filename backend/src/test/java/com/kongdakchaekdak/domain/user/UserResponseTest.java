@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.user;
 
+import com.kongdakchaekdak.common.time.KstClock;
 import com.kongdakchaekdak.domain.user.dto.UserResponse;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +31,10 @@ class UserResponseTest {
     @Test
     void lastLoginAt이_30일_전이면_daysSinceLastLogin은_30이다() {
         User user = User.forSocialLogin("테스터", "kakao", "12345");
-        user.updateLastLoginAt(LocalDateTime.now().minusDays(30));
+        // (OBS-26 확장, 2026-09-10) UserResponse.from()이 이제 KstClock.ZONE 기준의 "지금"과
+        // 비교하므로, 기준점도 동일한 타임존으로 맞춘다 — 그러지 않으면 테스트를 실행하는 JVM의
+        // 기본 타임존에 따라 자정 근처에서 29/31로 흔들릴 수 있다.
+        user.updateLastLoginAt(LocalDateTime.now(KstClock.ZONE).minusDays(30));
 
         UserResponse response = UserResponse.from(user);
 

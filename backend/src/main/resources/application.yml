@@ -7,6 +7,12 @@ server:
 spring:
   application:
     name: kongdakchaekdak-backend
+  jackson:
+    # (OBS-26, 2026-09-10) 서비스 타임존은 KST(Asia/Seoul) 고정 — Jackson이 날짜/시간 관련 값을
+    # 다룰 때(예: 향후 zone 정보를 포함한 타입을 응답에 추가하게 될 경우) 기본으로 삼는 타임존도
+    # 맞춰둔다. 실질적인 방어선은 common.time.KstClock과 KongdakchaekdakApplication의 JVM 기본
+    # 타임존 고정이고, 이건 그 의도를 설정에도 명시해두는 것.
+    time-zone: Asia/Seoul
   datasource:
     # Step 6(배포, Railway): 호스트/포트/DB명을 분리해서 환경변수로 받도록 바꿈 — 로컬은 기존과
     # 동일하게 docker-compose의 localhost:3306/kongdakchaekdak을 기본값으로 그대로 쓰고,

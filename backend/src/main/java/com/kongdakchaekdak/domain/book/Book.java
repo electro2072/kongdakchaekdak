@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.book;
 
+import com.kongdakchaekdak.common.time.KstClock;
 import com.kongdakchaekdak.domain.common.Genre;
 import com.kongdakchaekdak.domain.common.GenreConverter;
 import com.kongdakchaekdak.domain.user.User;
@@ -89,7 +90,9 @@ public class Book {
         this.isbn = isbn;
         this.genre = genre;
         this.totalPages = totalPages;
-        this.startDate = startDate == null ? LocalDate.now() : startDate;
+        // (OBS-26, 2026-09-10) 서버 JVM 기본 타임존(배포 환경에선 UTC)이 아니라 서비스 타임존
+        // (KST) 기준 "오늘"로 고정한다 — KstClock 참고.
+        this.startDate = startDate == null ? KstClock.today() : startDate;
         this.status = BookStatus.READING;
     }
 
@@ -105,7 +108,12 @@ public class Book {
 
     public void complete(LocalDate endDate) {
         this.status = BookStatus.DONE;
-        this.endDate = endDate == null ? LocalDate.now() : endDate;
+        // (OBS-26, 2026-09-10) endDate 생략 시 "오늘"을 서버 JVM 기본 타임존이 아니라 서비스
+        // 타임존(KST) 기준으로 고정한다. 이전엔 배포 환경(UTC) 기준 "오늘"을 썼는데, KST
+        // 00:00~08:59 사이에 완독 처리하면 UTC로는 아직 전날이라 시작일보다 이른 완독일이
+        // 잡히는 문제가 있었다(테스터 관측: "2026.09.09 ~ 2026.09.08 (0일)"). endDate <
+        // startDate가 되는 입력 자체를 막는 검증은 BookService.complete()에서 한다.
+        this.endDate = endDate == null ? KstClock.today() : endDate;
     }
 
     /**

@@ -5,6 +5,7 @@ import com.kongdakchaekdak.common.exception.ForbiddenException;
 import com.kongdakchaekdak.common.exception.InvalidRequestException;
 import com.kongdakchaekdak.common.exception.ResourceNotFoundException;
 import com.kongdakchaekdak.common.logging.AuditLogger;
+import com.kongdakchaekdak.common.time.KstClock;
 import com.kongdakchaekdak.domain.book.Book;
 import com.kongdakchaekdak.domain.book.BookRepository;
 import com.kongdakchaekdak.domain.bookphoto.BookPhoto;
@@ -241,7 +242,9 @@ public class ShareRecordService {
         DashboardPeriod period = request.dashboardPeriod() == null ? DashboardPeriod.MONTH : request.dashboardPeriod();
         YearMonth referenceMonth;
         try {
-            referenceMonth = request.dashboardDate() == null ? YearMonth.now() : YearMonth.parse(request.dashboardDate());
+            // (OBS-26, 2026-09-10) dashboardDate 생략 시 "이번 달"도 DashboardController와 동일하게
+            // 서버 JVM 기본 타임존이 아니라 서비스 타임존(KST) 기준으로 고정한다.
+            referenceMonth = request.dashboardDate() == null ? KstClock.thisMonth() : YearMonth.parse(request.dashboardDate());
         } catch (DateTimeParseException ex) {
             throw new InvalidRequestException(ErrorCode.INVALID_SHARE_REQUEST, "dashboardDate는 yyyy-MM 형식이어야 합니다. 입력값=" + request.dashboardDate());
         }

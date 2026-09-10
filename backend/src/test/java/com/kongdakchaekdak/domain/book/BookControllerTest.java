@@ -13,8 +13,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -282,6 +286,69 @@ class BookControllerTest {
                 // (2026-09-09) message는 더 이상 응답에 실리지 않는다 — 사용자 문구는 프론트가
                 // error 코드로 매핑한다. 예외 상세는 서버 로그까지만 간다.
                 .andExpect(jsonPath("$.message").doesNotExist());
+    }
+
+    // (OBS-26, 2026-09-10) 완독 처리 시 endDate를 생략하면 서버 JVM 기본 타임존(배포 환경에선
+    // UTC)이 아니라 서비스 타임존(KST) 기준 "오늘"이 잡혀야 한다 — 이전에는 UTC 기준으로 계산해
+    // KST 00:00~08:59 사이 완독 처리하면 시작일보다 이른 완독일이 잡히는 문제가 있었다(테스터
+    // 관측: "2026.09.09 ~ 2026.09.08 (0일)"). CI가 어느 타임존에서 돌든 항상 성립해야 하는
+    // 계약이므로, 이 테스트가 도는 JVM의 기본 타임존과 무관하게 Asia/Seoul을 명시해서 비교한다.
+    @Test
+    void 완독_처리_후_endDate는_startDate보다_이르지_않고_KST_기준_오늘이다() throws Exception {
+        String createBody = objectMapper.writeValueAsString(Map.of(
+                "userId", userId,
+                "title", "완독일_타임존_테스트",
+                "author", "익명",
+                "startDate", "2026-07-01"
+        ));
+        String createResponse = mockMvc.perform(post("/api/books")
+                        .header("Authorization", bearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createBody))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        Long bookId = objectMapper.readTree(createResponse).get("id").asLong();
+
+        String completeResponse = mockMvc.perform(patch("/api/books/{id}/complete", bookId)
+                        .header("Authorization", bearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        LocalDate startDate = LocalDate.parse(objectMapper.readTree(completeResponse).get("startDate").asText());
+        LocalDate endDate = LocalDate.parse(objectMapper.readTree(completeResponse).get("endDate").asText());
+
+        assertFalse(endDate.isBefore(startDate));
+        assertEquals(LocalDate.now(ZoneId.of("Asia/Seoul")), endDate);
+    }
+
+    // (OBS-26, 2026-09-10) endDate를 클라이언트가 직접 명시해도 startDate보다 이르면 400으로
+    // 막는다 — endDate 생략 시 기본값을 KST로 고정하는 것과 별개로, 잘못된 입력값 자체를
+    // 막는 방어선이다.
+    @Test
+    void 완독일이_시작일보다_빠르면_400() throws Exception {
+        String createBody = objectMapper.writeValueAsString(Map.of(
+                "userId", userId,
+                "title", "잘못된_완독일_테스트",
+                "author", "익명",
+                "startDate", "2026-07-10"
+        ));
+        String createResponse = mockMvc.perform(post("/api/books")
+                        .header("Authorization", bearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createBody))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        Long bookId = objectMapper.readTree(createResponse).get("id").asLong();
+
+        String completeBody = objectMapper.writeValueAsString(Map.of("endDate", "2026-07-09"));
+        mockMvc.perform(patch("/api/books/{id}/complete", bookId)
+                        .header("Authorization", bearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(completeBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("INVALID_DATE_RANGE"));
     }
 
     @Test

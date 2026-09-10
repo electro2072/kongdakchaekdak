@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.user;
 
+import com.kongdakchaekdak.common.time.KstClock;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -17,11 +18,15 @@ class UserLastLoginAtTest {
 
     @Test
     void forSocialLogin으로_생성하면_lastLoginAt이_가입_시점으로_세팅된다() {
-        LocalDateTime before = LocalDateTime.now();
+        // (OBS-26 확장, 2026-09-10) User 생성자가 KstClock.ZONE(Asia/Seoul) 기준으로 lastLoginAt을
+        // 채우므로, 비교 기준도 동일한 타임존이어야 한다. 여기서 시스템 기본 타임존의
+        // LocalDateTime.now()를 쓰면 테스트를 실행하는 JVM이 KST가 아닐 때(예: UTC로 도는 CI)
+        // 최대 9시간 어긋나 isBetween 어설션이 실패한다.
+        LocalDateTime before = LocalDateTime.now(KstClock.ZONE);
 
         User user = User.forSocialLogin("테스터", "kakao", "12345");
 
-        LocalDateTime after = LocalDateTime.now();
+        LocalDateTime after = LocalDateTime.now(KstClock.ZONE);
         assertThat(user.getLastLoginAt()).isNotNull();
         assertThat(user.getLastLoginAt()).isBetween(before, after);
     }

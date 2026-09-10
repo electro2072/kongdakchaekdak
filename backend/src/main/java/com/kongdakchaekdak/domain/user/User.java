@@ -1,5 +1,6 @@
 package com.kongdakchaekdak.domain.user;
 
+import com.kongdakchaekdak.common.time.KstClock;
 import com.kongdakchaekdak.domain.common.Genre;
 import com.kongdakchaekdak.domain.common.GenreConverter;
 import jakarta.persistence.CollectionTable;
@@ -122,7 +123,12 @@ public class User {
         this.socialId = socialId;
         // 가입 자체가 첫 로그인이므로 생성 시점에 lastLoginAt을 채워둔다 → 가입 직후
         // daysSinceLastLogin은 항상 0 (엣지 케이스, 설계 v1의 5번 참고).
-        this.lastLoginAt = LocalDateTime.now();
+        // (OBS-26 확장, 2026-09-10) Book.startDate/endDate와 같은 이유로 서버 JVM 기본
+        // 타임존이 아니라 KST 기준으로 고정한다 — 그러지 않으면 "로그인은 9일에 했는데
+        // 완독 기록은 8일" 같은 화면 불일치가 생길 수 있다(둘 다 사용자 화면에는 KST 날짜로
+        // 보여야 함). SocialAuthService.updateLastLoginAt / UserResponse.daysSinceLastLogin
+        // 계산도 동일하게 맞췄다.
+        this.lastLoginAt = LocalDateTime.now(KstClock.ZONE);
     }
 
     /**
