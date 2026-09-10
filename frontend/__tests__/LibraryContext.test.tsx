@@ -123,7 +123,7 @@ describe('LibraryContext', () => {
 
     const harness = await mount();
 
-    expect(api.fetchBooks).toHaveBeenCalledWith(7);
+    expect(api.fetchBooks).toHaveBeenCalledWith();
     expect(harness.current.books).toHaveLength(2);
     expect(harness.current.books[0]).toMatchObject({
       id: '1',

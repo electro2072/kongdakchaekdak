@@ -152,7 +152,7 @@ export function LibraryProvider({children}: {children: React.ReactNode}) {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await libraryApi.fetchBooks(userId);
+      const response = await libraryApi.fetchBooks();
       setBooks(prev =>
         response.map(book =>
           mapBook(

@@ -49,8 +49,13 @@ export function toIsoDate(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-export function fetchBooks(userId: number): Promise<BookResponse[]> {
-  return apiFetch<BookResponse[]>(`/api/books?userId=${userId}`);
+/**
+ * G20(IDOR 수정, 2026-09-10) 후속 — 백엔드가 `?userId=` 쿼리 파라미터 대신
+ * `@AuthenticationPrincipal`로 요청자 본인의 책만 돌려주도록 바뀌어, 클라이언트가 대상을
+ * 지정할 필요/방법 자체가 없어졌다. 호출부(LibraryContext)의 `userId` 인자도 함께 제거했다.
+ */
+export function fetchBooks(): Promise<BookResponse[]> {
+  return apiFetch<BookResponse[]>('/api/books');
 }
 
 export function createBook(payload: BookCreatePayload): Promise<BookResponse> {
