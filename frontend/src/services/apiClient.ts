@@ -13,7 +13,7 @@ import type {ApiFieldError} from '../types/api/error';
 const API_BASE_URL = Config.API_BASE_URL ?? 'http://10.0.2.2:8080';
 
 /**
- * 서버 에러 응답의 `error` 코드(backend `common/exception/ErrorCode.java` 15종) → 사용자 문구
+ * 서버 에러 응답의 `error` 코드(backend `common/exception/ErrorCode.java`) → 사용자 문구
  * 매핑표. `INTERNAL_SERVER_ERROR`는 문구가 아니라 traceId 삽입이 필요해 여기 넣지 않고
  * apiFetch에서 별도로 처리한다. 코드가 늘면 이 표와 strings/ko.ts의 `apiError` 블록을 같이
  * 늘릴 것 — G21(2026-09-10 에러코드 체계 개편, `a32d5e3`·`bc66694`).
@@ -33,7 +33,11 @@ export const API_ERROR_MESSAGE_KEY: Record<string, StringKey> = {
   INVALID_SHARE_REQUEST: 'apiError.invalidShareRequest',
   MALFORMED_REQUEST: 'apiError.malformedRequest',
   IMAGE_STORAGE_UNAVAILABLE: 'apiError.imageStorageUnavailable',
-  INVALID_DATE_RANGE: 'apiError.invalidDateRange'
+  INVALID_DATE_RANGE: 'apiError.invalidDateRange',
+  // BUG-20260910-b02 후속: 없는 라우트(404)·미지원 메서드(405). 앱-서버 버전 불일치일 때만 보인다.
+  // 코드는 나눠두고 문구만 malformedRequest와 같은 뜻으로 겹치게 둔다(의도).
+  ROUTE_NOT_FOUND: 'apiError.routeNotFound',
+  METHOD_NOT_SUPPORTED: 'apiError.methodNotSupported',
 };
 
 export class ApiError extends Error {
