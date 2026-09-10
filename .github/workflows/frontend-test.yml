@@ -14,9 +14,14 @@ on:
   push:
     paths:
       - "frontend/**"
+      # 계약 테스트(__tests__/apiErrorCodeContract.test.ts)가 이 파일을 직접 읽는다.
+      # BE만 바뀐 푸시에서도 매핑 누락을 잡으려면 트리거에 포함해야 한다.
+      # (2026-09-10: b02가 ErrorCode 2개를 추가했는데 이 경로가 없어 CI를 통과할 뻔했다.)
+      - "backend/src/main/java/com/kongdakchaekdak/common/exception/ErrorCode.java"
   pull_request:
     paths:
       - "frontend/**"
+      - "backend/src/main/java/com/kongdakchaekdak/common/exception/ErrorCode.java"
   workflow_dispatch: {}
 
 jobs:
