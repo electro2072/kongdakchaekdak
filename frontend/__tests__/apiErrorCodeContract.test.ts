@@ -7,7 +7,7 @@ import {API_ERROR_MESSAGE_KEY} from '../src/services/apiClient';
  * G21 에러코드 매핑 누락 방지 계약 테스트.
  *
  * backend `common/exception/ErrorCode.java`가 실제 소스 오브 트루스다 — "백엔드는 코드만,
- * 문구는 프론트가 매핑한다"가 설계 원칙(G21, `docs/콩닥책닥_에러코드체계_설계_v1.md` §3)이라,
+ * 문구는 프론트가 매핑한다"가 설계 원칙(G21, ErrorCode.java Javadoc가 단일 출처)이라,
  * 백엔드가 코드를 추가/삭제해도 프론트 `apiClient.ts`의 `API_ERROR_MESSAGE_KEY` 매핑표가
  * 조용히 뒤쳐질 수 있다 — 실제로 `INVALID_DATE_RANGE`(OBS-26, 2026-09-10)가 이 방식으로
  * 한동안 누락될 뻔했다. 이 테스트가 그 드리프트를 CI에서 강제로 잡아낸다.
