@@ -18,7 +18,7 @@ const API_BASE_URL = Config.API_BASE_URL ?? 'http://10.0.2.2:8080';
  * apiFetch에서 별도로 처리한다. 코드가 늘면 이 표와 strings/ko.ts의 `apiError` 블록을 같이
  * 늘릴 것 — G21(2026-09-10 에러코드 체계 개편, `a32d5e3`·`bc66694`).
  */
-const API_ERROR_MESSAGE_KEY: Record<string, StringKey> = {
+export const API_ERROR_MESSAGE_KEY: Record<string, StringKey> = {
   UNAUTHENTICATED: 'apiError.unauthenticated',
   SOCIAL_AUTH_FAILED: 'apiError.socialAuthFailed',
   NOT_OWNER: 'apiError.notOwner',
