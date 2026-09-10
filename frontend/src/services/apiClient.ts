@@ -33,6 +33,7 @@ const API_ERROR_MESSAGE_KEY: Record<string, StringKey> = {
   INVALID_SHARE_REQUEST: 'apiError.invalidShareRequest',
   MALFORMED_REQUEST: 'apiError.malformedRequest',
   IMAGE_STORAGE_UNAVAILABLE: 'apiError.imageStorageUnavailable',
+  INVALID_DATE_RANGE: 'apiError.invalidDateRange'
 };
 
 export class ApiError extends Error {

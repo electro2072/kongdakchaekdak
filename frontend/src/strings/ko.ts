@@ -504,6 +504,7 @@ export const ko = {
     internalServerError: '오류가 발생했어요 (오류번호: {traceId})',
     /** 매핑표에 없는 코드(신규 코드 누락) · 응답이 JSON이 아닌 경우의 최종 폴백. */
     unknown: '요청을 처리하지 못했어요. 잠시 후 다시 시도해주세요.',
+    invalidDateRange: '완독일은 시작일보다 빠를 수 없어요. 날짜를 다시 확인해주세요.',
   },
 
   /**
