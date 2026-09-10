@@ -223,3 +223,13 @@ Mac이 없어 이 프로젝트는 iOS 빌드·검증이 계속 미실시 상태�
 | `.env` 값이 반영 안 됨 | 재빌드 안 함 — `./gradlew clean` 후 재빌드 |
 | 설치 시 "앱이 설치되지 않았습니다" | APK 수동 재패키징(§5-B 경고) 또는 서명 불일치 → 기존 앱 삭제 후 재설치 |
 | `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | 이전 설치본과 서명이 다름 → `adb uninstall com.kongdakchaekdak` 후 재설치 |
+
+## 버전 관리
+
+`frontend/android/app/build.gradle` 83~84행.
+
+- **Play 스토어에 업로드할 때마다 `versionCode`를 +1 한다.** 같은 숫자로는 업로드가 거부되고,
+  한 번 쓴 숫자는 영구히 재사용할 수 없다.
+- `versionName`은 사용자 표시용. 스토어 판단에는 관여하지 않는다.
+- **내부 테스트용 `adb install`에는 올리지 않아도 된다.** 같은 versionCode여도 덮어써진다.
+- 심사 리젝 후 재업로드도 새 versionCode가 필요하다. 리젝 한 번에 하나씩 소모된다고 보면 된다.
