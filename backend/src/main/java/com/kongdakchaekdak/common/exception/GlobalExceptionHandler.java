@@ -23,7 +23,7 @@ import java.util.List;
  * 들어가지 않는다. 개발자 언어("shareType이 BOOK이면 bookId가 필수입니다")와 내부 PK("id=4217")가
  * 그대로 사용자 화면에 노출되던 문제를 구조적으로 차단하기 위함이다. 상세 메시지는 서버 로그까지만
  * 간다. 응답에는 {@link ErrorCode}만 실리고, 사용자 문구는 프론트가 코드를 키로 매핑한다.
- * (설계: {@code docs/콩닥책닥_에러코드체계_설계_v1.md})
+ * (설계: ErrorCode.java Javadoc가 단일 출처)
  *
  * <p>로그인 실패(InvalidCredentialsException)와 접근 거부(ForbiddenException)는 이 클래스에서만
  * SecurityEventLogger를 호출한다 — 각 서비스가 예외를 던지는 지점마다 흩어져서 기록하면 같은

@@ -477,7 +477,7 @@ export const ko = {
   /**
    * 서버 에러 응답의 `error` 코드(backend `common/exception/ErrorCode.java` 15종,
    * `ErrorCode.name()` 그대로)를 사용자 문구로 매핑한다. "백엔드는 코드만, 문구는 프론트가"가
-   * 설계 원칙이다(docs/콩닥책닥_에러코드체계_설계_v1.md §3, G21 — 2026-09-10 개편).
+   * 설계 원칙이다(ErrorCode.java Javadoc가 단일 출처, G21 — 2026-09-10 개편).
    * 키 이름은 코드명을 camelCase로 옮긴 것 — `services/apiClient.ts`의 매핑 테이블과
    * 1:1로 대응하니 코드가 늘면 양쪽 다 같이 늘릴 것.
    *

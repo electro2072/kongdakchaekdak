@@ -10,7 +10,7 @@ import java.util.Map;
  * API 공통 에러 응답 포맷.
  *
  * <p><b>{@code message}는 원칙적으로 {@code null}이다.</b> 사용자에게 보일 문구는 프론트가
- * {@code error} 코드를 키로 자체 매핑한다 (설계: {@code docs/콩닥책닥_에러코드체계_설계_v1.md} §3).
+ * {@code error} 코드를 키로 자체 매핑한다 (설계: ErrorCode.java Javadoc가 단일 출처).
  * 예외는 백엔드가 분류하지 못한 에러({@link ErrorCode#INTERNAL_SERVER_ERROR}) 하나뿐이며,
  * 이때도 예외 문장이 아니라 traceId가 실린다 — 예외 문장에는 내부 PK가 섞여 있어 노출하면 안 된다.
  *
