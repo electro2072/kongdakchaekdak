@@ -30,6 +30,21 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  mvc:
+    # (BUG-20260910-b02, 2026-09-10) 기본값(false)이면 매핑되지 않은 라우트로 온 요청을 서블릿
+    # 컨테이너가 직접 처리해버려(NoHandlerFoundException을 던지지 않음) GlobalExceptionHandler를
+    # 아예 거치지 않는다 — 이 프로젝트가 응답 포맷을 항상 공통 ErrorResponse로 통일하는 것과
+    # 어긋나므로 true로 켠다. 아래 add-mappings: false와 반드시 같이 있어야 실제로 예외가 던져진다
+    # (정적 리소스 핸들러가 "/**"에 대한 폴백 핸들러로 항상 매칭돼버리면 "핸들러가 없다"는 상황
+    # 자체가 발생하지 않는다).
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      # 이 백엔드는 REST API 전용이고(정적 파일 서빙 없음, 공개 웹뷰는 Thymeleaf 템플릿 렌더링이라
+      # classpath:/static 등과 무관), springdoc의 swagger-ui 정적 리소스(/webjars/**)는 springdoc이
+      # 자체 WebMvcConfigurer로 별도 등록하므로 이 설정과 무관하게 계속 서빙된다 — 그래도 배포 후
+      # Swagger UI(/swagger-ui.html)가 정상 로드되는지는 한 번 직접 확인 권장.
+      add-mappings: false
 
 springdoc:
   swagger-ui:

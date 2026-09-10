@@ -1,4 +1,9 @@
 # 테스트 실행 전용 설정: MySQL/Docker 없이 H2 인메모리로 테스트를 돌린다.
+# 주의: 이 파일이 src/main/resources/application.yml을 "병합"하는 게 아니라 classpath 상에서
+# 통째로 대체한다(둘 다 classpath:/application.yml이고, 테스트 실행 시 Gradle이 test 리소스를
+# main보다 classpath 앞쪽에 둬서 이 파일만 로드됨) — 그래서 main쪽 application.yml에만 있는
+# 설정은 테스트에서 전혀 적용되지 않는다. 아래 spring.mvc/spring.web.resources 설정(BUG-b02)도
+# 이 이유로 여기 별도로 필요하다.
 spring:
   datasource:
     url: jdbc:h2:mem:kongdakchaekdak_test;MODE=MySQL
@@ -9,6 +14,13 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
+  mvc:
+    # (BUG-20260910-b02, 2026-09-10) main의 application.yml과 동일 — 위 주의사항 참고, 이 파일이
+    # main 설정을 shadow하므로 여기 없으면 GlobalExceptionHandlerTest가 실제로 검증하는 게 아니게 된다.
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
 
 app:
   jwt:

@@ -8,11 +8,13 @@ import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.List;
 
@@ -112,6 +114,31 @@ public class GlobalExceptionHandler {
         log.warn("요청 본문을 읽을 수 없음: {}", ex.getMessage());
         return ResponseEntity.status(ErrorCode.MALFORMED_REQUEST.getStatus())
                 .body(ErrorResponse.of(ErrorCode.MALFORMED_REQUEST));
+    }
+
+    /**
+     * (BUG-20260910-b02, 2026-09-10 추가) 아예 존재하지 않는 라우트로 온 요청 — 원래는
+     * {@link #handleUnexpected} catch-all에 걸려 500으로 잘못 응답되고 있었다. 이 예외가 실제로
+     * 발생하려면 {@code spring.mvc.throw-exception-if-no-handler-found: true} +
+     * {@code spring.web.resources.add-mappings: false}가 필요하다(application.yml 참고) —
+     * 기본값(false)이면 서블릿 컨테이너가 이 핸들러를 거치지 않고 자체 404를 내려버린다.
+     */
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ErrorResponse> handleRouteNotFound(NoHandlerFoundException ex) {
+        log.warn("존재하지 않는 라우트 요청: {} {}", ex.getHttpMethod(), ex.getRequestURL());
+        return ResponseEntity.status(ErrorCode.ROUTE_NOT_FOUND.getStatus())
+                .body(ErrorResponse.of(ErrorCode.ROUTE_NOT_FOUND));
+    }
+
+    /**
+     * (BUG-20260910-b02, 2026-09-10 추가) 존재하는 라우트지만 지원하지 않는 HTTP 메서드로 온
+     * 요청 — 마찬가지로 원래는 catch-all에 걸려 500으로 잘못 응답되고 있었다.
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        log.warn("지원하지 않는 HTTP 메서드 요청: {} (지원: {})", ex.getMethod(), ex.getSupportedHttpMethods());
+        return ResponseEntity.status(ErrorCode.METHOD_NOT_SUPPORTED.getStatus())
+                .body(ErrorResponse.of(ErrorCode.METHOD_NOT_SUPPORTED));
     }
 
     /**

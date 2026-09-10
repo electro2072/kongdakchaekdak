@@ -42,6 +42,21 @@ public enum ErrorCode {
     NOT_FOUND(HttpStatus.NOT_FOUND),
     /** 공유 요청 본문에 지정한 대상(사용자·그룹)이 없음 — 프론트는 대상 재선택을 유도한다. */
     SHARE_TARGET_NOT_FOUND(HttpStatus.NOT_FOUND),
+    /**
+     * (BUG-20260910-b02, 2026-09-10 신설) 아예 존재하지 않는 라우트로 온 요청(오타·삭제된
+     * 엔드포인트·FE 버전 불일치 등) — {@code NoHandlerFoundException}. 기존 {@link #NOT_FOUND}는
+     * "이 API는 있는데 그 안의 리소스(id 등)가 없다"는 의미로 서비스 계층이 의도적으로 던지는
+     * 코드라 의미가 다르다 — 재사용하면 프론트가 "목록을 갱신하고 이전 화면으로" 같은 리소스
+     * 소실 UX를 잘못된 상황(사실은 클라이언트/라우팅 버그)에 적용하게 될 수 있어 분리했다.
+     */
+    ROUTE_NOT_FOUND(HttpStatus.NOT_FOUND),
+
+    // --- 405 ---
+    /**
+     * (BUG-20260910-b02, 2026-09-10 신설) 존재하는 라우트지만 지원하지 않는 HTTP 메서드로 온
+     * 요청 — {@code HttpRequestMethodNotSupportedException}.
+     */
+    METHOD_NOT_SUPPORTED(HttpStatus.METHOD_NOT_ALLOWED),
 
     // --- 409 ---
     /** 이미 그룹에 속한 사용자를 다시 추가. */
