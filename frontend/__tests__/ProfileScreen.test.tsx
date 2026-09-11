@@ -1,10 +1,17 @@
 import React from 'react';
 import {Text} from 'react-native';
 import renderer, {act} from 'react-test-renderer';
-import {afterEach, describe, expect, it, jest} from '@jest/globals';
+import {afterEach, beforeEach, describe, expect, it, jest} from '@jest/globals';
 import {ProfileScreen} from '../src/screens/ProfileScreen';
 import {AuthProvider, useAuth} from '../src/navigation/AuthContext';
 import {ProfileProvider, useProfile} from '../src/navigation/ProfileContext';
+import {ToastProvider} from '../src/components/Toast';
+import {ConfirmDialog} from '../src/components/ConfirmDialog';
+import {
+  SECURE_KEY_ACCESS_TOKEN,
+  secureStorage,
+} from '../src/services/secureStorage';
+import {t} from '../src/strings';
 import type {ProfileSummary} from '../src/types/profile';
 
 type UseAuthResult = ReturnType<typeof useAuth>;
@@ -81,10 +88,13 @@ describe('ProfileScreen', () => {
       activeRoot = renderer.create(
         <AuthProvider>
           <ProfileProvider>
-            <AuthHarness onReady={value => (authApi = value)} />
-            <ProfileSeeder>
-              <ProfileScreen />
-            </ProfileSeeder>
+            {/* G16(회원 탈퇴)부터 ProfileScreen이 useToast()로 결과를 알린다 — App.tsx와 같은 위치 */}
+            <ToastProvider>
+              <AuthHarness onReady={value => (authApi = value)} />
+              <ProfileSeeder>
+                <ProfileScreen />
+              </ProfileSeeder>
+            </ToastProvider>
           </ProfileProvider>
         </AuthProvider>,
       );
@@ -138,5 +148,234 @@ describe('ProfileScreen', () => {
     });
 
     expect(getAuthApi().isLoggedIn).toBe(false);
+  });
+
+  it('회원 탈퇴 — userId를 아직 모르면(/api/auth/me 전) DELETE를 보내지 않고 안내만 한다', async () => {
+    // 이 하네스는 로그인 없이 ProfileSeeder로 값만 심으므로 userId가 null이다.
+    const fetchMock = jest.fn(async () => {
+      throw new Error('이 테스트에서는 네트워크를 타면 안 된다');
+    });
+    (global as unknown as {fetch: unknown}).fetch = fetchMock;
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+
+    const {root} = await renderScreen();
+    await act(async () => {
+      root.root.findByProps({testID: 'withdraw-link'}).props.onPress();
+    });
+    await act(async () => {
+      root.root.findByProps({testID: 'confirm-dialog-confirm'}).props.onPress();
+    });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(root.root.findByType(ConfirmDialog).props.visible).toBe(false);
+    expect(textsOf(root)).toContain(t('failure.profile'));
+    jest.restoreAllMocks();
+  });
+});
+
+/** 트리에 렌더된 문자열 전부 — 토스트·다이얼로그 문구 확인용 */
+function textsOf(root: renderer.ReactTestRenderer): unknown[] {
+  return root.root.findAllByType(Text).map(node => node.props.children);
+}
+
+/**
+ * 회원 탈퇴 UI (G16/S8, Frame 05.5·05.6).
+ *
+ * 탈퇴 흐름 자체(토큰 삭제·스택 리셋·연결 해제 순서)는 withdrawAccount.test.tsx가 RootNavigator 위에서
+ * 본다. 여기서는 화면이 책임지는 것만 누른다 — 다이얼로그 문구, 연타 방지, 실패 표시와 재시도 가능 상태.
+ * userId가 있어야 하므로 위 게스트 하네스 대신 저장된 토큰 + /api/auth/me로 실제 로그인 상태를 만든다.
+ */
+describe('ProfileScreen 회원 탈퇴', () => {
+  const SAVED_TOKEN = 'saved.jwt.token';
+  const USER_ID = 7;
+  let activeRoot: renderer.ReactTestRenderer | undefined;
+
+  type FakeResponse = {ok: boolean; status: number; body?: unknown};
+
+  /** DELETE 응답을 테스트가 원하는 시점에 풀 수 있게 보류해 두는 fetch 목 */
+  function mockFetch() {
+    const pendingDeletes: Array<(response: FakeResponse) => void> = [];
+    const toFetchResponse = ({ok, status, body}: FakeResponse) => ({
+      ok,
+      status,
+      text: async () => (status === 204 ? '' : JSON.stringify(body ?? null)),
+      json: async () => body ?? null,
+    });
+    const fetchMock = jest.fn(async (url: string, init?: RequestInit) => {
+      const path = url.replace(/^https?:\/\/[^/]+/, '').split('?')[0];
+      if (init?.method === 'DELETE') {
+        return new Promise(resolve => {
+          pendingDeletes.push(response => resolve(toFetchResponse(response)));
+        });
+      }
+      if (path === '/api/auth/me') {
+        return toFetchResponse({
+          ok: true,
+          status: 200,
+          body: {
+            id: USER_ID,
+            nickname: '책읽는콩이',
+            profileImage: null,
+            bio: null,
+            gender: null,
+            socialProvider: 'kakao',
+            interests: [],
+            createdAt: '2026-09-01T00:00:00',
+            updatedAt: '2026-09-01T00:00:00',
+            lastLoginAt: null,
+            daysSinceLastLogin: null,
+          },
+        });
+      }
+      // 프로필 통계(/api/books·/api/share-records) — 이 테스트의 관심사가 아니다
+      return toFetchResponse({ok: true, status: 200, body: []});
+    });
+    (global as unknown as {fetch: unknown}).fetch = fetchMock;
+
+    const deleteCallCount = () =>
+      fetchMock.mock.calls.filter(
+        ([, init]) => (init as RequestInit | undefined)?.method === 'DELETE',
+      ).length;
+    /** 가장 오래 보류 중인 DELETE를 주어진 응답으로 푼다 */
+    const respondToDelete = async (response: FakeResponse) => {
+      const resolve = pendingDeletes.shift();
+      if (!resolve) {
+        throw new Error('보류 중인 DELETE가 없다');
+      }
+      await act(async () => {
+        resolve(response);
+      });
+    };
+    return {deleteCallCount, respondToDelete};
+  }
+
+  beforeEach(async () => {
+    await secureStorage.setItem(SECURE_KEY_ACCESS_TOKEN, SAVED_TOKEN);
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    // 실패 케이스는 apiClient가 logger.error로 남기는 게 정상 — 출력만 죽인다.
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(async () => {
+    await act(async () => {
+      activeRoot?.unmount();
+    });
+    activeRoot = undefined;
+    await secureStorage.removeItem(SECURE_KEY_ACCESS_TOKEN);
+    jest.restoreAllMocks();
+  });
+
+  async function renderLoggedIn() {
+    let authApi: UseAuthResult | undefined;
+    let profileUserId: number | null = null;
+    function ProfileProbe() {
+      profileUserId = useProfile().userId;
+      return null;
+    }
+    await act(async () => {
+      activeRoot = renderer.create(
+        <AuthProvider>
+          <ProfileProvider>
+            <ToastProvider>
+              <AuthHarness onReady={value => (authApi = value)} />
+              <ProfileProbe />
+              <ProfileScreen />
+            </ToastProvider>
+          </ProfileProvider>
+        </AuthProvider>,
+      );
+    });
+    const root = activeRoot!;
+    // 전제: 실제 로그인 상태이고 userId가 잡혀 있다 — 아니면 아래 검증이 공허하다
+    expect(authApi!.isLoggedIn).toBe(true);
+    expect(profileUserId).toBe(USER_ID);
+
+    const link = () => root.root.findByProps({testID: 'withdraw-link'});
+    const openDialog = async () => {
+      await act(async () => {
+        link().props.onPress();
+      });
+    };
+    const confirmButton = () =>
+      root.root.findByProps({testID: 'confirm-dialog-confirm'});
+    return {root, link, openDialog, confirmButton, getAuthApi: () => authApi!};
+  }
+
+  it('링크를 누르면 확정 문구(제목 + 본문 2행)로 확인 다이얼로그를 띄운다', async () => {
+    mockFetch();
+    const {root, openDialog} = await renderLoggedIn();
+
+    expect(root.root.findByType(ConfirmDialog).props.visible).toBe(false);
+    await openDialog();
+
+    const dialog = root.root.findByType(ConfirmDialog);
+    expect(dialog.props.visible).toBe(true);
+    expect(dialog.props.danger).toBe(true);
+    // 문구는 목업 v1.21 Frame 05.5 + 2026-09-11 확정안 그대로여야 한다(삭제 고지 자리라 임의 변경 금지).
+    // 2행은 그룹 API 미연동이라 조건 없이 항상 붙는다.
+    const texts = textsOf(root);
+    expect(texts).toContain('정말 탈퇴하시겠어요?');
+    expect(texts).toContain(
+      '서재·독서 기록·사진·공유 링크가 모두 삭제되며 복구할 수 없어요.\n' +
+        '모임장을 맡은 모임은 가장 먼저 가입한 멤버에게 넘어가고, 혼자인 모임은 삭제돼요.',
+    );
+    expect(texts).toContain('취소');
+    expect(texts).toContain('탈퇴');
+  });
+
+  it('"탈퇴"를 연타해도 DELETE는 한 번만 나가고, 요청 중에는 링크가 비활성화된다', async () => {
+    const {deleteCallCount, respondToDelete} = mockFetch();
+    const {root, link, openDialog, confirmButton} = await renderLoggedIn();
+
+    await openDialog();
+    const confirm = confirmButton();
+    // 리렌더 전에 두 번 — 실제 빠른 연타와 같은 조건
+    await act(async () => {
+      confirm.props.onPress();
+      confirm.props.onPress();
+    });
+
+    expect(deleteCallCount()).toBe(1);
+    expect(link().props.disabled).toBe(true);
+
+    await respondToDelete({ok: true, status: 204});
+
+    expect(deleteCallCount()).toBe(1);
+    expect(textsOf(root)).toContain(t('profile.withdraw.success'));
+  });
+
+  it('실패하면 에러코드 매핑 문구를 토스트로 보여주고, 링크를 다시 살려 재시도할 수 있게 한다', async () => {
+    const {deleteCallCount, respondToDelete} = mockFetch();
+    const {root, link, openDialog, confirmButton, getAuthApi} =
+      await renderLoggedIn();
+
+    await openDialog();
+    await act(async () => {
+      confirmButton().props.onPress();
+    });
+    await respondToDelete({
+      ok: false,
+      status: 403,
+      body: {status: 403, error: 'NOT_OWNER', fieldErrors: []},
+    });
+
+    const texts = textsOf(root);
+    expect(texts).toContain(t('apiError.notOwner'));
+    expect(texts).not.toContain(t('profile.withdraw.success'));
+    expect(root.root.findByType(ConfirmDialog).props.visible).toBe(false);
+    expect(link().props.disabled).toBe(false);
+    // 실패 = 세션 유지
+    expect(getAuthApi().isLoggedIn).toBe(true);
+    await expect(secureStorage.getItem(SECURE_KEY_ACCESS_TOKEN)).resolves.toBe(
+      SAVED_TOKEN,
+    );
+
+    // 재시도가 실제로 요청을 보낸다 — 연타 방지 잠금이 풀렸는지까지 확인
+    await openDialog();
+    await act(async () => {
+      confirmButton().props.onPress();
+    });
+    expect(deleteCallCount()).toBe(2);
   });
 });

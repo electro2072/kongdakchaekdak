@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useRef, useState} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -14,6 +14,8 @@ import type {MainStackParamList} from '../navigation/types';
 import {useAuth} from '../navigation/AuthContext';
 import {useProfile} from '../navigation/ProfileContext';
 import {ProfileStatCard} from '../components/ProfileStatCard';
+import {ConfirmDialog} from '../components/ConfirmDialog';
+import {useToast} from '../components/Toast';
 import {useTheme} from '../theme';
 import {t} from '../strings';
 
@@ -28,13 +30,60 @@ import {t} from '../strings';
  * "로그아웃"/"독서 대시보드" 진입은 기존 AuthContext/DashboardScreen과 실제로 연결한다.
  *
  * 주요 인터랙션 요소에 testID를 달아뒀다 — __tests__/ProfileScreen.test.tsx 참고.
+ *
+ * 회원 탈퇴(G16/S8) — Frame 05.5·05.6(v1.21). 별도 설정 화면 없이 로그아웃 아래 텍스트 링크로
+ * 진입해 확인 다이얼로그 1회 → `AuthContext.withdraw` → 로그인 화면 + 완료 토스트.
+ * 흐름(서버 탈퇴·연결 해제·세션 정리 순서)은 AuthContext.withdraw 주석 참고.
+ * 진입 경로·모임장 위임 안내는 `ACCOUNT_DELETION.md`·`TERMS.md` 11조(`d8319c6`)와 일치시켜 뒀다.
  */
 export function ProfileScreen() {
   const {colors, typography, radii} = useTheme();
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const {logout} = useAuth();
-  const {profile, isStatsLoading} = useProfile();
+  const {logout, withdraw} = useAuth();
+  const {profile, isStatsLoading, userId, socialProvider} = useProfile();
+  const {showToast} = useToast();
+  const [isWithdrawDialogVisible, setIsWithdrawDialogVisible] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  // 중복 탭 방지는 state가 아니라 ref로 한다 — "탈퇴"를 빠르게 두 번 누르면 두 번째 onPress가
+  // state 갱신(리렌더) 전에 들어오므로, 동기적으로 읽히는 값이어야 DELETE가 한 번만 나간다.
+  const isWithdrawingRef = useRef(false);
+
+  const handleConfirmWithdraw = async () => {
+    if (isWithdrawingRef.current) {
+      return;
+    }
+    setIsWithdrawDialogVisible(false);
+    if (userId === null) {
+      // /api/auth/me를 아직 못 받았다 — 누구를 탈퇴시킬지 모르므로 요청하지 않는다.
+      showToast({
+        type: 'error',
+        message: t('failure.profile'),
+        aboveTabBar: true,
+      });
+      return;
+    }
+
+    isWithdrawingRef.current = true;
+    setIsWithdrawing(true);
+    try {
+      await withdraw({userId, socialProvider});
+      // 성공하면 RootNavigator가 AuthStack으로 바뀌며 이 화면은 이미 사라졌다.
+      // 토스트는 화면 밖(ToastProvider)에 떠서 로그인 화면 위에 보인다 — Frame 05.6.
+      // 사라진 화면의 state는 되돌리지 않는다.
+      showToast({type: 'success', message: t('profile.withdraw.success')});
+    } catch (e) {
+      // 실패 시 토큰·로그인 상태는 AuthContext가 그대로 둔다. 문구는 apiClient의 에러코드 매핑
+      // (API_ERROR_MESSAGE_KEY)을 거친 ApiError.message를 그대로 쓴다.
+      isWithdrawingRef.current = false;
+      setIsWithdrawing(false);
+      showToast({
+        type: 'error',
+        message: e instanceof Error ? e.message : t('apiError.unknown'),
+        aboveTabBar: true,
+      });
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: colors.surface}]}>
@@ -119,7 +168,38 @@ export function ProfileScreen() {
             {t('profile.logout')}
           </Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          testID="withdraw-link"
+          accessibilityRole="button"
+          accessibilityState={{disabled: isWithdrawing, busy: isWithdrawing}}
+          disabled={isWithdrawing}
+          hitSlop={12}
+          style={styles.withdrawLink}
+          onPress={() => setIsWithdrawDialogVisible(true)}>
+          <Text
+            style={[
+              typography.caption,
+              styles.withdrawLinkText,
+              {color: colors.error},
+            ]}>
+            {t('profile.withdraw.link')}
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
+
+      <ConfirmDialog
+        visible={isWithdrawDialogVisible}
+        title={t('profile.withdraw.dialogTitle')}
+        message={`${t('profile.withdraw.dialogDeleteNotice')}\n${t(
+          'profile.withdraw.dialogGroupNotice',
+        )}`}
+        cancelLabel={t('common.cancel')}
+        confirmLabel={t('profile.withdraw.confirm')}
+        danger
+        onCancel={() => setIsWithdrawDialogVisible(false)}
+        onConfirm={handleConfirmWithdraw}
+      />
     </SafeAreaView>
   );
 }
@@ -168,5 +248,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  // Frame 05.5 — 로그아웃 버튼보다 한 단계 작은 가운데 정렬 밑줄 링크(--error). 간격은 content gap(14)과 같다.
+  withdrawLink: {
+    alignSelf: 'center',
+    paddingVertical: 4,
+  },
+  withdrawLinkText: {
+    textDecorationLine: 'underline',
   },
 });
