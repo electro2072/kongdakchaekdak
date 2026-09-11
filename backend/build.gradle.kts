@@ -35,8 +35,9 @@ dependencies {
     implementation("com.nimbusds:nimbus-jose-jwt:9.37.3")
     runtimeOnly("com.mysql:mysql-connector-j")
     runtimeOnly("com.h2database:h2")
-    // S3Presigner(software.amazon.awssdk:s3 모듈 안에 포함)만 사용 — presigned URL은 순수
-    // 로컬 서명 연산이라 실제로 AWS에 네트워크 요청을 보내지 않는다(S3Client는 별도로 안 만든다).
+    // S3Presigner(software.amazon.awssdk:s3 모듈 안에 포함) — presigned URL은 순수 로컬 서명 연산이라
+    // 네트워크 요청을 보내지 않는다. (G16, 2026-09-11) 회원 탈퇴 시 사진 오브젝트 삭제용으로 같은 모듈의
+    // S3Client를 추가로 쓴다(의존성 변경 없음, S3Config 참고).
     implementation(platform("software.amazon.awssdk:bom:2.47.4"))
     implementation("software.amazon.awssdk:s3")
     compileOnly("org.projectlombok:lombok")

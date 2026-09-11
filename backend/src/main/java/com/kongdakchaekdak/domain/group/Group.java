@@ -56,4 +56,13 @@ public class Group {
             this.name = name;
         }
     }
+
+    /**
+     * (G16 회원 탈퇴, 2026-09-11) 모임장 위임. PM 결정으로 {@code groups.owner_id} 구조를 그대로 두고
+     * 모임장이 탈퇴하면 다음 가입자에게 넘긴다 — 후임자 선정 규칙은
+     * {@code AccountDeletionService} 참고. 일반 API로는 노출하지 않는다.
+     */
+    public void transferOwnership(User newOwner) {
+        this.owner = newOwner;
+    }
 }

@@ -59,7 +59,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "회원 삭제 (본인만 가능)")
+    @Operation(summary = "회원 탈퇴 — 계정과 소유 데이터 즉시 삭제 (본인만 가능, 성공 시 204)")
     public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal Long currentUserId) {
         userService.delete(id, currentUserId);
         return ResponseEntity.noContent().build();

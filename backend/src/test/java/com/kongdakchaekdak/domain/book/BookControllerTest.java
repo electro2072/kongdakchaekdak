@@ -115,13 +115,11 @@ class BookControllerTest {
     }
 
     @Test
-    void 존재하지_않는_사용자로_등록하면_404() throws Exception {
-        // BookService.create()는 "본인 명의로만 등록 가능" 검증(request.userId() == currentUserId)을
-        // 먼저 수행하므로, 실존하는 로그인 사용자가 body에 남의(혹은 없는) userId를 넣으면 항상
-        // 403(다른_사람_명의로_책을_등록하려하면_403 테스트가 이미 검증)이 먼저 발생하고 404 분기에는
-        // 도달하지 않는다. 404 분기(userRepository.findById 실패)를 실제로 타는 유일한 경로는
-        // "토큰의 subject(사용자 id) 자체가 DB에 없는 경우"(예: 로그인 이후 계정이 삭제된 상황)이므로,
-        // 존재하지 않는 id로 직접 토큰을 발급해 그 상황을 재현한다.
+    void 존재하지_않는_사용자의_토큰으로_등록하면_401() throws Exception {
+        // (G16, 2026-09-11 변경 — 예전 이름 "존재하지_않는_사용자로_등록하면_404") "토큰의 subject 자체가
+        // DB에 없는 경우"(로그인 이후 계정이 삭제된 상황)는 이제 JwtAuthenticationFilter가 인증 단계에서
+        // 거부한다(탈퇴 후 토큰 무효화). 그래서 BookService.create()의 404 분기(userRepository.findById
+        // 실패)에는 더 이상 이 경로로 도달하지 않는다 — 실존 사용자가 남의 userId를 넣으면 403이 먼저다.
         long nonExistentUserId = 999_999L;
         String tokenForMissingUser = "Bearer " + jwtProvider.generateToken(nonExistentUserId);
         String body = objectMapper.writeValueAsString(Map.of(
@@ -135,7 +133,8 @@ class BookControllerTest {
                         .header("Authorization", tokenForMissingUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
     }
 
     @Test

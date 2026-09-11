@@ -2,6 +2,7 @@ package com.kongdakchaekdak.domain.user;
 
 import com.kongdakchaekdak.security.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,11 +21,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Step 3부터 /api/users/** 가 인증을 요구하므로, 모든 요청에 임의의 인증된 사용자(id=1) 토큰을
- * Authorization 헤더로 실어 보낸다. 회원 생성(POST)은 소유자 개념이 없어 이 id가 실제로 존재하는
- * 회원일 필요는 없지만, 조회(단건)·수정·삭제는 전부 본인 계정에 대해서만 가능하도록 소유자 검증이
- * 적용되어 있어(UserService 참고, G20 확장으로 조회도 포함됨, 2026-09-10) 대상 id와 토큰의 주체가
- * 같아야 하는 테스트에서는 별도로 그 id로 토큰을 발급한다.
+ * Step 3부터 /api/users/** 가 인증을 요구하므로, 모든 요청에 인증된 사용자 토큰을 Authorization 헤더로
+ * 실어 보낸다. 조회(단건)·수정·삭제는 전부 본인 계정에 대해서만 가능하도록 소유자 검증이 적용되어
+ * 있어(UserService 참고, G20 확장으로 조회도 포함됨, 2026-09-10) 대상 id와 토큰의 주체가 같아야 하는
+ * 테스트에서는 별도로 그 id로 토큰을 발급한다.
+ *
+ * <p><b>(G16, 2026-09-11)</b> 예전엔 DB에 없는 id(1, victimId + 1)로 토큰을 만들어 썼다. 이제
+ * JwtAuthenticationFilter가 토큰 주체의 존재를 확인하므로(탈퇴 후 토큰 무효화) 그런 토큰은 401이다.
+ * 호출자·공격자 역할은 {@link #setUp()}에서 실제로 저장한 사용자로 바꿨다.</p>
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -40,8 +44,19 @@ class UserControllerTest {
     @Autowired
     private JwtProvider jwtProvider;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    private Long callerId;
+
+    @BeforeEach
+    void setUp() {
+        callerId = userRepository.save(new User("호출자", null, null, null, "kakao", "user-controller-test-caller")).getId();
+    }
+
+    /** 실제로 존재하는 호출자(대상 계정과는 다른 사람) 토큰. */
     private String bearerToken() {
-        return "Bearer " + jwtProvider.generateToken(1L);
+        return "Bearer " + jwtProvider.generateToken(callerId);
     }
 
     private String bearerToken(Long userId) {
@@ -96,9 +111,10 @@ class UserControllerTest {
         mockMvc.perform(delete("/api/users/{id}", id).header("Authorization", ownerToken))
                 .andExpect(status().isNoContent());
 
-        // 삭제된 본인 id로 다시 조회하면(소유자 검증은 통과) findUserOrThrow에서 404.
+        // (G16) 탈퇴 후 기존 토큰은 인증 단계에서 거부된다 — 예전엔 소유자 검증을 통과해 404였다.
         mockMvc.perform(get("/api/users/{id}", id).header("Authorization", ownerToken))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
     }
 
     // (G20 확장, 2026-09-10) 회귀 방지 테스트 — 인증만 되어 있으면 누구든 타인 id로 조회할 수
@@ -116,7 +132,7 @@ class UserControllerTest {
                 .andReturn().getResponse().getContentAsString();
         Long victimId = objectMapper.readTree(response).get("id").asLong();
 
-        String attackerToken = bearerToken(victimId + 1);
+        String attackerToken = bearerToken();
         mockMvc.perform(get("/api/users/{id}", victimId).header("Authorization", attackerToken))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("NOT_OWNER"));
@@ -135,8 +151,8 @@ class UserControllerTest {
                 .andReturn().getResponse().getContentAsString();
         Long victimId = objectMapper.readTree(response).get("id").asLong();
 
-        // victimId가 아닌 다른 사용자(그 id + 1)의 토큰으로 수정 시도
-        String attackerToken = bearerToken(victimId + 1);
+        // victimId가 아닌 다른 실존 사용자(호출자)의 토큰으로 수정 시도
+        String attackerToken = bearerToken();
         String updateBody = """
                 {"bio": "해킹된 소개"}
                 """;
@@ -161,20 +177,20 @@ class UserControllerTest {
                 .andReturn().getResponse().getContentAsString();
         Long victimId = objectMapper.readTree(response).get("id").asLong();
 
-        String attackerToken = bearerToken(victimId + 1);
+        String attackerToken = bearerToken();
         mockMvc.perform(delete("/api/users/{id}", victimId).header("Authorization", attackerToken))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("NOT_OWNER"));
     }
 
     @Test
-    void 존재하지_않는_회원_조회시_404() throws Exception {
-        // (G20 확장) 조회도 이제 소유자 검증을 거치므로, 토큰 주체와 조회 대상 id를 같게 맞춰야
-        // 403이 아니라 findUserOrThrow의 404 분기를 실제로 검증할 수 있다.
+    void 존재하지_않는_회원의_토큰이면_401() throws Exception {
+        // (G16, 2026-09-11) 예전 이름은 "존재하지_않는_회원_조회시_404". 서명이 유효해도 주체가 DB에 없으면
+        // JwtAuthenticationFilter가 인증하지 않으므로, 컨트롤러의 404 분기에 도달하기 전에 401이 된다.
         long missingId = 999_999L;
         mockMvc.perform(get("/api/users/{id}", missingId).header("Authorization", bearerToken(missingId)))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("NOT_FOUND"));
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
     }
 
     @Test

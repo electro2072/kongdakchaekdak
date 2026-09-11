@@ -1,0 +1,1201 @@
+diff --git a/backend/.env.example b/backend/.env.example
+index 37d5a49..f1455e6 100644
+--- a/backend/.env.example
++++ b/backend/.env.example
+@@ -33,7 +33,8 @@ NAVER_CLIENT_SECRET=
+ APPLE_CLIENT_ID=
+ 
+ # 책 사진(BookPhoto) 업로드용 S3 (AWS 콘솔 > S3 > 버킷 생성, IAM > 사용자 > 액세스 키 발급)
+-# IAM 사용자는 이 버킷에 대한 s3:PutObject 권한만 있으면 충분함 (presigned URL 발급용, 최소 권한 원칙).
++# IAM 사용자(또는 R2 API 토큰)에는 이 버킷에 대한 s3:PutObject(presigned URL 발급) + s3:DeleteObject
++# (회원 탈퇴 시 사진 삭제, G16 2026-09-11) 권한이 필요함. 삭제 권한이 없어도 탈퇴는 성공하지만 파일이 남는다.
+ AWS_S3_BUCKET=
+ AWS_S3_REGION=ap-northeast-2
+ AWS_ACCESS_KEY_ID=
+diff --git a/backend/build.gradle.kts b/backend/build.gradle.kts
+index a6a9ca9..3ae7c46 100644
+--- a/backend/build.gradle.kts
++++ b/backend/build.gradle.kts
+@@ -35,8 +35,9 @@ dependencies {
+     implementation("com.nimbusds:nimbus-jose-jwt:9.37.3")
+     runtimeOnly("com.mysql:mysql-connector-j")
+     runtimeOnly("com.h2database:h2")
+-    // S3Presigner(software.amazon.awssdk:s3 모듈 안에 포함)만 사용 — presigned URL은 순수
+-    // 로컬 서명 연산이라 실제로 AWS에 네트워크 요청을 보내지 않는다(S3Client는 별도로 안 만든다).
++    // S3Presigner(software.amazon.awssdk:s3 모듈 안에 포함) — presigned URL은 순수 로컬 서명 연산이라
++    // 네트워크 요청을 보내지 않는다. (G16, 2026-09-11) 회원 탈퇴 시 사진 오브젝트 삭제용으로 같은 모듈의
++    // S3Client를 추가로 쓴다(의존성 변경 없음, S3Config 참고).
+     implementation(platform("software.amazon.awssdk:bom:2.47.4"))
+     implementation("software.amazon.awssdk:s3")
+     compileOnly("org.projectlombok:lombok")
+diff --git a/backend/src/main/java/com/kongdakchaekdak/config/S3Config.java b/backend/src/main/java/com/kongdakchaekdak/config/S3Config.java
+index 009f87d..eb1159e 100644
+--- a/backend/src/main/java/com/kongdakchaekdak/config/S3Config.java
++++ b/backend/src/main/java/com/kongdakchaekdak/config/S3Config.java
+@@ -7,9 +7,13 @@ import org.springframework.context.annotation.Configuration;
+ import org.springframework.context.annotation.Lazy;
+ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
++import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
+ import software.amazon.awssdk.regions.Region;
++import software.amazon.awssdk.services.s3.S3Client;
+ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+ 
++import java.time.Duration;
++
+ /**
+  * BookPhoto 업로드용 presigned URL 발급 전용 설정.
+  *
+@@ -20,6 +24,11 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+  * 채워도 기동 시점에 {@code s3Presigner} 빈 생성이 실패하며 컨텍스트 초기화 자체가 깨졌다.
+  * {@link Lazy}로 실제 첫 사용 시점(사진 업로드 presigned URL 요청)까지 빈 생성을 미뤄서, 자격증명
+  * 없이도 서버 자체는 정상적으로 뜨고 그 기능을 실제로 쓸 때만 오류가 나도록 고쳤다.</p>
++ *
++ * <p><b>(G16 회원 탈퇴, 2026-09-11)</b> 탈퇴 시 사진 오브젝트 삭제용 {@link S3Client}를 추가했다.
++ * presigned 발급과 달리 삭제는 실제 네트워크 요청이라 클라이언트가 필요하다. 같은 이유로 {@link Lazy}이고,
++ * 탈퇴 응답을 붙잡지 않도록 타임아웃을 짧게 둔다(삭제는 커밋 후 best-effort — BookPhotoObjectCleaner).
++ * <b>G2에서 R2 {@code endpointOverride}를 적용할 때 두 빈 모두에 넣어야 한다.</b></p>
+  */
+ @Configuration
+ @EnableConfigurationProperties(S3Properties.class)
+@@ -40,4 +49,21 @@ public class S3Config {
+                         AwsBasicCredentials.create(accessKey, secretKey)))
+                 .build();
+     }
++
++    @Bean
++    @Lazy
++    public S3Client s3Client() {
++        String accessKey = s3Properties.accessKey() == null ? "" : s3Properties.accessKey();
++        String secretKey = s3Properties.secretKey() == null ? "" : s3Properties.secretKey();
++
++        return S3Client.builder()
++                .region(Region.of(s3Properties.region()))
++                .credentialsProvider(StaticCredentialsProvider.create(
++                        AwsBasicCredentials.create(accessKey, secretKey)))
++                .overrideConfiguration(ClientOverrideConfiguration.builder()
++                        .apiCallAttemptTimeout(Duration.ofSeconds(2))
++                        .apiCallTimeout(Duration.ofSeconds(5))
++                        .build())
++                .build();
++    }
+ }
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/book/BookRepository.java b/backend/src/main/java/com/kongdakchaekdak/domain/book/BookRepository.java
+index 93a2f1f..f8ccd4b 100644
+--- a/backend/src/main/java/com/kongdakchaekdak/domain/book/BookRepository.java
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/book/BookRepository.java
+@@ -1,6 +1,9 @@
+ package com.kongdakchaekdak.domain.book;
+ 
+ import org.springframework.data.jpa.repository.JpaRepository;
++import org.springframework.data.jpa.repository.Modifying;
++import org.springframework.data.jpa.repository.Query;
++import org.springframework.data.repository.query.Param;
+ 
+ import java.time.LocalDate;
+ import java.util.List;
+@@ -16,4 +19,12 @@ public interface BookRepository extends JpaRepository<Book, Long> {
+     // 독서 대시보드(Recap) 통계용 — 특정 사용자가 주어진 기간(endDate 기준, 양 끝 포함) 안에
+     // 완독 처리한 책 목록. Step 5-1 DashboardService에서 사용.
+     List<Book> findByUserIdAndStatusAndEndDateBetween(Long userId, BookStatus status, LocalDate start, LocalDate end);
++
++    // (G16 회원 탈퇴, 2026-09-11) AccountDeletionService 전용 — 소유 데이터 일괄 삭제.
++    @Query("select b.id from Book b where b.user.id = :userId")
++    List<Long> findIdsByUserId(@Param("userId") Long userId);
++
++    @Modifying(flushAutomatically = true)
++    @Query("delete from Book b where b.user.id = :userId")
++    int deleteAllOwnedBy(@Param("userId") Long userId);
+ }
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/booknote/BookNoteRepository.java b/backend/src/main/java/com/kongdakchaekdak/domain/booknote/BookNoteRepository.java
+index 160c5bc..742e05e 100644
+--- a/backend/src/main/java/com/kongdakchaekdak/domain/booknote/BookNoteRepository.java
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/booknote/BookNoteRepository.java
+@@ -1,10 +1,19 @@
+ package com.kongdakchaekdak.domain.booknote;
+ 
+ import org.springframework.data.jpa.repository.JpaRepository;
++import org.springframework.data.jpa.repository.Modifying;
++import org.springframework.data.jpa.repository.Query;
++import org.springframework.data.repository.query.Param;
+ 
++import java.util.Collection;
+ import java.util.List;
+ 
+ public interface BookNoteRepository extends JpaRepository<BookNote, Long> {
+ 
+     List<BookNote> findByBookIdOrderByCreatedAtDesc(Long bookId);
++
++    // (G16 회원 탈퇴, 2026-09-11) AccountDeletionService 전용 — 소유 데이터 일괄 삭제.
++    @Modifying(flushAutomatically = true)
++    @Query("delete from BookNote n where n.book.id in :bookIds")
++    int deleteAllByBookIds(@Param("bookIds") Collection<Long> bookIds);
+ }
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/bookphoto/BookPhotoRepository.java b/backend/src/main/java/com/kongdakchaekdak/domain/bookphoto/BookPhotoRepository.java
+index f3909df..5b79c01 100644
+--- a/backend/src/main/java/com/kongdakchaekdak/domain/bookphoto/BookPhotoRepository.java
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/bookphoto/BookPhotoRepository.java
+@@ -1,10 +1,21 @@
+ package com.kongdakchaekdak.domain.bookphoto;
+ 
+ import org.springframework.data.jpa.repository.JpaRepository;
++import org.springframework.data.jpa.repository.Modifying;
++import org.springframework.data.jpa.repository.Query;
++import org.springframework.data.repository.query.Param;
+ 
++import java.util.Collection;
+ import java.util.List;
+ 
+ public interface BookPhotoRepository extends JpaRepository<BookPhoto, Long> {
+ 
+     List<BookPhoto> findByBookIdOrderByCreatedAtDesc(Long bookId);
++
++    // (G16 회원 탈퇴, 2026-09-11) AccountDeletionService 전용 — 소유 데이터 일괄 삭제.
++    List<BookPhoto> findByBookIdIn(Collection<Long> bookIds);
++
++    @Modifying(flushAutomatically = true)
++    @Query("delete from BookPhoto p where p.book.id in :bookIds")
++    int deleteAllByBookIds(@Param("bookIds") Collection<Long> bookIds);
+ }
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/group/Group.java b/backend/src/main/java/com/kongdakchaekdak/domain/group/Group.java
+index b4d09b8..f993cfd 100644
+--- a/backend/src/main/java/com/kongdakchaekdak/domain/group/Group.java
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/group/Group.java
+@@ -56,4 +56,13 @@ public class Group {
+             this.name = name;
+         }
+     }
++
++    /**
++     * (G16 회원 탈퇴, 2026-09-11) 모임장 위임. PM 결정으로 {@code groups.owner_id} 구조를 그대로 두고
++     * 모임장이 탈퇴하면 다음 가입자에게 넘긴다 — 후임자 선정 규칙은
++     * {@code AccountDeletionService} 참고. 일반 API로는 노출하지 않는다.
++     */
++    public void transferOwnership(User newOwner) {
++        this.owner = newOwner;
++    }
+ }
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/group/GroupMemberRepository.java b/backend/src/main/java/com/kongdakchaekdak/domain/group/GroupMemberRepository.java
+index c7ec9ca..102a7e1 100644
+--- a/backend/src/main/java/com/kongdakchaekdak/domain/group/GroupMemberRepository.java
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/group/GroupMemberRepository.java
+@@ -1,6 +1,9 @@
+ package com.kongdakchaekdak.domain.group;
+ 
+ import org.springframework.data.jpa.repository.JpaRepository;
++import org.springframework.data.jpa.repository.Modifying;
++import org.springframework.data.jpa.repository.Query;
++import org.springframework.data.repository.query.Param;
+ 
+ import java.util.List;
+ import java.util.Optional;
+@@ -19,4 +22,12 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long>
+     long countByGroupId(Long groupId);
+ 
+     void deleteByGroupId(Long groupId);
++
++    // (G16 회원 탈퇴, 2026-09-11) AccountDeletionService 전용 — 소유 데이터 일괄 삭제.
++    // 모임장 위임 후보 순서: joined_at 오름차순, 같으면 id 오름차순(PM 결정).
++    List<GroupMember> findByGroupIdOrderByJoinedAtAscIdAsc(Long groupId);
++
++    @Modifying(flushAutomatically = true)
++    @Query("delete from GroupMember m where m.user.id = :userId")
++    int deleteAllByUserId(@Param("userId") Long userId);
+ }
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/group/GroupRepository.java b/backend/src/main/java/com/kongdakchaekdak/domain/group/GroupRepository.java
+index 20bd26f..a4b2690 100644
+--- a/backend/src/main/java/com/kongdakchaekdak/domain/group/GroupRepository.java
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/group/GroupRepository.java
+@@ -2,5 +2,12 @@ package com.kongdakchaekdak.domain.group;
+ 
+ import org.springframework.data.jpa.repository.JpaRepository;
+ 
++import java.util.List;
++
+ public interface GroupRepository extends JpaRepository<Group, Long> {
++
++    // (G16 회원 탈퇴, 2026-09-11) AccountDeletionService 전용 — 소유 데이터 일괄 삭제.
++    // 삭제는 JPQL 문자열("delete from Group ...")을 쓰지 않고 엔티티 단위 deleteAll로 한다 —
++    // 엔티티명 Group이 HQL 키워드 GROUP과 겹쳐 파서 동작에 기대지 않기 위해서다.
++    List<Group> findByOwnerId(Long ownerId);
+ }
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/share/ShareRecordPhotoRepository.java b/backend/src/main/java/com/kongdakchaekdak/domain/share/ShareRecordPhotoRepository.java
+index 4f68e97..dfe722e 100644
+--- a/backend/src/main/java/com/kongdakchaekdak/domain/share/ShareRecordPhotoRepository.java
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/share/ShareRecordPhotoRepository.java
+@@ -1,7 +1,11 @@
+ package com.kongdakchaekdak.domain.share;
+ 
+ import org.springframework.data.jpa.repository.JpaRepository;
++import org.springframework.data.jpa.repository.Modifying;
++import org.springframework.data.jpa.repository.Query;
++import org.springframework.data.repository.query.Param;
+ 
++import java.util.Collection;
+ import java.util.List;
+ 
+ public interface ShareRecordPhotoRepository extends JpaRepository<ShareRecordPhoto, Long> {
+@@ -9,4 +13,9 @@ public interface ShareRecordPhotoRepository extends JpaRepository<ShareRecordPho
+     List<ShareRecordPhoto> findByShareRecordIdOrderByDisplayOrderAsc(Long shareRecordId);
+ 
+     void deleteByShareRecordId(Long shareRecordId);
++
++    // (G16 회원 탈퇴, 2026-09-11) AccountDeletionService 전용 — 소유 데이터 일괄 삭제.
++    @Modifying(flushAutomatically = true)
++    @Query("delete from ShareRecordPhoto p where p.shareRecord.id in :shareRecordIds")
++    int deleteAllByShareRecordIds(@Param("shareRecordIds") Collection<Long> shareRecordIds);
+ }
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/share/ShareRecordRepository.java b/backend/src/main/java/com/kongdakchaekdak/domain/share/ShareRecordRepository.java
+index 2e56652..739e294 100644
+--- a/backend/src/main/java/com/kongdakchaekdak/domain/share/ShareRecordRepository.java
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/share/ShareRecordRepository.java
+@@ -1,7 +1,11 @@
+ package com.kongdakchaekdak.domain.share;
+ 
+ import org.springframework.data.jpa.repository.JpaRepository;
++import org.springframework.data.jpa.repository.Modifying;
++import org.springframework.data.jpa.repository.Query;
++import org.springframework.data.repository.query.Param;
+ 
++import java.util.Collection;
+ import java.util.List;
+ import java.util.Optional;
+ 
+@@ -11,4 +15,17 @@ public interface ShareRecordRepository extends JpaRepository<ShareRecord, Long>
+ 
+     // Step 5-2 공개 웹뷰(/public/share/{token})에서 비로그인 사용자가 토큰만으로 조회할 때 사용.
+     Optional<ShareRecord> findByPublicToken(String publicToken);
++
++    // (G16 회원 탈퇴, 2026-09-11) AccountDeletionService 전용 — 소유 데이터 일괄 삭제.
++    @Query("select s.id from ShareRecord s where s.user.id = :userId")
++    List<Long> findIdsByUserId(@Param("userId") Long userId);
++
++    // 본인 책을 가리키는 공유 기록 — 생성 시 소유자 검증이 있어 정상 데이터에선 위 결과와 같다.
++    // 그래도 합쳐서 지운다: 이 행이 남으면 books FK 위반으로 탈퇴 전체가 롤백된다.
++    @Query("select s.id from ShareRecord s where s.book.id in :bookIds")
++    List<Long> findIdsByBookIds(@Param("bookIds") Collection<Long> bookIds);
++
++    @Modifying(flushAutomatically = true)
++    @Query("delete from ShareRecord s where s.id in :ids")
++    int deleteAllByIds(@Param("ids") Collection<Long> ids);
+ }
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/share/ShareRecordTargetRepository.java b/backend/src/main/java/com/kongdakchaekdak/domain/share/ShareRecordTargetRepository.java
+index 816fdcf..dbaaf07 100644
+--- a/backend/src/main/java/com/kongdakchaekdak/domain/share/ShareRecordTargetRepository.java
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/share/ShareRecordTargetRepository.java
+@@ -1,7 +1,11 @@
+ package com.kongdakchaekdak.domain.share;
+ 
+ import org.springframework.data.jpa.repository.JpaRepository;
++import org.springframework.data.jpa.repository.Modifying;
++import org.springframework.data.jpa.repository.Query;
++import org.springframework.data.repository.query.Param;
+ 
++import java.util.Collection;
+ import java.util.List;
+ 
+ public interface ShareRecordTargetRepository extends JpaRepository<ShareRecordTarget, Long> {
+@@ -9,4 +13,15 @@ public interface ShareRecordTargetRepository extends JpaRepository<ShareRecordTa
+     List<ShareRecordTarget> findByShareRecordId(Long shareRecordId);
+ 
+     void deleteByShareRecordId(Long shareRecordId);
++
++    // (G16 회원 탈퇴, 2026-09-11) AccountDeletionService 전용 — 소유 데이터 일괄 삭제.
++    @Modifying(flushAutomatically = true)
++    @Query("delete from ShareRecordTarget t where t.shareRecord.id in :shareRecordIds")
++    int deleteAllByShareRecordIds(@Param("shareRecordIds") Collection<Long> shareRecordIds);
++
++    // 타인의 공유 기록에서 탈퇴자를 공유 대상으로 지정한 행. target_id는 FK가 없어 남겨도 에러는
++    // 안 나지만, 탈퇴자 식별자가 남는 데이터라 함께 지운다.
++    @Modifying(flushAutomatically = true)
++    @Query("delete from ShareRecordTarget t where t.targetType = :targetType and t.targetId = :targetId")
++    int deleteAllByTarget(@Param("targetType") ShareTargetType targetType, @Param("targetId") Long targetId);
+ }
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/user/UserController.java b/backend/src/main/java/com/kongdakchaekdak/domain/user/UserController.java
+index 5e66069..4f56939 100644
+--- a/backend/src/main/java/com/kongdakchaekdak/domain/user/UserController.java
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/user/UserController.java
+@@ -59,7 +59,7 @@ public class UserController {
+     }
+ 
+     @DeleteMapping("/{id}")
+-    @Operation(summary = "회원 삭제 (본인만 가능)")
++    @Operation(summary = "회원 탈퇴 — 계정과 소유 데이터 즉시 삭제 (본인만 가능, 성공 시 204)")
+     public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal Long currentUserId) {
+         userService.delete(id, currentUserId);
+         return ResponseEntity.noContent().build();
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/user/UserService.java b/backend/src/main/java/com/kongdakchaekdak/domain/user/UserService.java
+index a974f05..a532cdc 100644
+--- a/backend/src/main/java/com/kongdakchaekdak/domain/user/UserService.java
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/user/UserService.java
+@@ -18,6 +18,7 @@ public class UserService {
+ 
+     private final UserRepository userRepository;
+     private final RandomNicknameGenerator randomNicknameGenerator;
++    private final AccountDeletionService accountDeletionService;
+     private final AuditLogger auditLogger;
+ 
+     @Transactional
+@@ -59,11 +60,18 @@ public class UserService {
+         return UserResponse.from(user);
+     }
+ 
++    /**
++     * 회원 탈퇴 (G16, 2026-09-11 재작성 — D3: 기존 #10 재사용, 엔드포인트 신설 없음).
++     *
++     * <p>예전 구현은 {@code userRepository.delete(user)} 한 줄이라 책이 한 권이라도 있으면 FK 위반으로
++     * 500이 났다. 소유 데이터 일괄 삭제는 {@link AccountDeletionService}가 이 트랜잭션 안에서 수행한다.
++     * 탈퇴 후 기존 JWT는 {@code JwtAuthenticationFilter}의 사용자 존재 확인에서 걸려 401이 된다.
++     */
+     @Transactional
+     public void delete(Long id, Long currentUserId) {
+         requireOwner(id, currentUserId);
+         User user = findUserOrThrow(id);
+-        userRepository.delete(user);
++        accountDeletionService.deleteAccount(user);
+         auditLogger.event("USER_DELETED", currentUserId, "targetUserId=" + id);
+     }
+ 
+diff --git a/backend/src/main/java/com/kongdakchaekdak/security/JwtAuthenticationFilter.java b/backend/src/main/java/com/kongdakchaekdak/security/JwtAuthenticationFilter.java
+index 1947b4a..06a8f10 100644
+--- a/backend/src/main/java/com/kongdakchaekdak/security/JwtAuthenticationFilter.java
++++ b/backend/src/main/java/com/kongdakchaekdak/security/JwtAuthenticationFilter.java
+@@ -2,6 +2,7 @@ package com.kongdakchaekdak.security;
+ 
+ import com.kongdakchaekdak.common.logging.RequestTraceFilter;
+ import com.kongdakchaekdak.common.logging.SecurityEventLogger;
++import com.kongdakchaekdak.domain.user.UserRepository;
+ import jakarta.servlet.FilterChain;
+ import jakarta.servlet.ServletException;
+ import jakarta.servlet.http.HttpServletRequest;
+@@ -24,6 +25,16 @@ import java.util.List;
+  * <p>인증에 성공하면 userId를 request attribute({@link RequestTraceFilter#USER_ID_ATTRIBUTE})에도 남긴다 —
+  * SecurityContext는 필터 체인을 벗어난 뒤(예: 예외 처리, 응답 후 액세스 로그 기록 시점)에는 이미 정리되어
+  * 있을 수 있어, RequestTraceFilter와 GlobalExceptionHandler가 그 값을 대신 읽는다.
++ *
++ * <p><b>(G16 회원 탈퇴, 2026-09-11)</b> 서명·만료가 유효해도 subject 사용자가 DB에 없으면 인증하지 않는다.
++ * 탈퇴하면 사용자 행이 삭제되므로 기존 토큰은 다음 요청부터 401({@code UNAUTHENTICATED})이 된다
++ * (수용 기준 4). 이전에는 만료(기본 1시간)까지 인증이 통과돼, 예컨대 {@code GET /api/books}가 빈 목록
++ * 200을 돌려줬다.
++ *
++ * <p>스키마 변경(토큰 버전 컬럼 등) 대신 이 방식을 택한 이유: 탈퇴는 사용자 행 자체를 지우므로 users
++ * 테이블의 컬럼으로는 무효화 정보를 들고 있을 수 없다. 별도 폐기 목록 테이블은 탈퇴자 식별자를 다시
++ * 보관하는 셈이라 "즉시 삭제" 공지와도 어긋난다. 비용은 인증된 요청당 PK 존재 조회 1회다.
++ * 재가입하면 새 id가 발급되므로(IDENTITY) 옛 토큰이 새 계정으로 이어지지 않는다.
+  */
+ @Component
+ @RequiredArgsConstructor
+@@ -34,6 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
+ 
+     private final JwtProvider jwtProvider;
+     private final SecurityEventLogger securityEventLogger;
++    private final UserRepository userRepository;
+ 
+     @Override
+     protected void doFilterInternal(@NonNull HttpServletRequest request,
+@@ -45,6 +57,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
+             String token = header.substring(PREFIX.length());
+             jwtProvider.parseUserId(token).ifPresentOrElse(
+                     userId -> {
++                        if (!userRepository.existsById(userId)) {
++                            securityEventLogger.invalidToken("사용자 없음(탈퇴 등) userId=" + userId);
++                            return;
++                        }
+                         var authentication = new UsernamePasswordAuthenticationToken(userId, null, List.of());
+                         SecurityContextHolder.getContext().setAuthentication(authentication);
+                         request.setAttribute(RequestTraceFilter.USER_ID_ATTRIBUTE, userId);
+diff --git a/backend/src/test/java/com/kongdakchaekdak/domain/book/BookControllerTest.java b/backend/src/test/java/com/kongdakchaekdak/domain/book/BookControllerTest.java
+index 64c7221..e8b5b18 100644
+--- a/backend/src/test/java/com/kongdakchaekdak/domain/book/BookControllerTest.java
++++ b/backend/src/test/java/com/kongdakchaekdak/domain/book/BookControllerTest.java
+@@ -115,13 +115,11 @@ class BookControllerTest {
+     }
+ 
+     @Test
+-    void 존재하지_않는_사용자로_등록하면_404() throws Exception {
+-        // BookService.create()는 "본인 명의로만 등록 가능" 검증(request.userId() == currentUserId)을
+-        // 먼저 수행하므로, 실존하는 로그인 사용자가 body에 남의(혹은 없는) userId를 넣으면 항상
+-        // 403(다른_사람_명의로_책을_등록하려하면_403 테스트가 이미 검증)이 먼저 발생하고 404 분기에는
+-        // 도달하지 않는다. 404 분기(userRepository.findById 실패)를 실제로 타는 유일한 경로는
+-        // "토큰의 subject(사용자 id) 자체가 DB에 없는 경우"(예: 로그인 이후 계정이 삭제된 상황)이므로,
+-        // 존재하지 않는 id로 직접 토큰을 발급해 그 상황을 재현한다.
++    void 존재하지_않는_사용자의_토큰으로_등록하면_401() throws Exception {
++        // (G16, 2026-09-11 변경 — 예전 이름 "존재하지_않는_사용자로_등록하면_404") "토큰의 subject 자체가
++        // DB에 없는 경우"(로그인 이후 계정이 삭제된 상황)는 이제 JwtAuthenticationFilter가 인증 단계에서
++        // 거부한다(탈퇴 후 토큰 무효화). 그래서 BookService.create()의 404 분기(userRepository.findById
++        // 실패)에는 더 이상 이 경로로 도달하지 않는다 — 실존 사용자가 남의 userId를 넣으면 403이 먼저다.
+         long nonExistentUserId = 999_999L;
+         String tokenForMissingUser = "Bearer " + jwtProvider.generateToken(nonExistentUserId);
+         String body = objectMapper.writeValueAsString(Map.of(
+@@ -135,7 +133,8 @@ class BookControllerTest {
+                         .header("Authorization", tokenForMissingUser)
+                         .contentType(MediaType.APPLICATION_JSON)
+                         .content(body))
+-                .andExpect(status().isNotFound());
++                .andExpect(status().isUnauthorized())
++                .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
+     }
+ 
+     @Test
+diff --git a/backend/src/test/java/com/kongdakchaekdak/domain/user/UserControllerTest.java b/backend/src/test/java/com/kongdakchaekdak/domain/user/UserControllerTest.java
+index 0567a3c..9b51c64 100644
+--- a/backend/src/test/java/com/kongdakchaekdak/domain/user/UserControllerTest.java
++++ b/backend/src/test/java/com/kongdakchaekdak/domain/user/UserControllerTest.java
+@@ -2,6 +2,7 @@ package com.kongdakchaekdak.domain.user;
+ 
+ import com.kongdakchaekdak.security.JwtProvider;
+ import com.fasterxml.jackson.databind.ObjectMapper;
++import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+@@ -20,11 +21,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
+ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+ 
+ /**
+- * Step 3부터 /api/users/** 가 인증을 요구하므로, 모든 요청에 임의의 인증된 사용자(id=1) 토큰을
+- * Authorization 헤더로 실어 보낸다. 회원 생성(POST)은 소유자 개념이 없어 이 id가 실제로 존재하는
+- * 회원일 필요는 없지만, 조회(단건)·수정·삭제는 전부 본인 계정에 대해서만 가능하도록 소유자 검증이
+- * 적용되어 있어(UserService 참고, G20 확장으로 조회도 포함됨, 2026-09-10) 대상 id와 토큰의 주체가
+- * 같아야 하는 테스트에서는 별도로 그 id로 토큰을 발급한다.
++ * Step 3부터 /api/users/** 가 인증을 요구하므로, 모든 요청에 인증된 사용자 토큰을 Authorization 헤더로
++ * 실어 보낸다. 조회(단건)·수정·삭제는 전부 본인 계정에 대해서만 가능하도록 소유자 검증이 적용되어
++ * 있어(UserService 참고, G20 확장으로 조회도 포함됨, 2026-09-10) 대상 id와 토큰의 주체가 같아야 하는
++ * 테스트에서는 별도로 그 id로 토큰을 발급한다.
++ *
++ * <p><b>(G16, 2026-09-11)</b> 예전엔 DB에 없는 id(1, victimId + 1)로 토큰을 만들어 썼다. 이제
++ * JwtAuthenticationFilter가 토큰 주체의 존재를 확인하므로(탈퇴 후 토큰 무효화) 그런 토큰은 401이다.
++ * 호출자·공격자 역할은 {@link #setUp()}에서 실제로 저장한 사용자로 바꿨다.</p>
+  */
+ @SpringBootTest
+ @AutoConfigureMockMvc
+@@ -40,8 +44,19 @@ class UserControllerTest {
+     @Autowired
+     private JwtProvider jwtProvider;
+ 
++    @Autowired
++    private UserRepository userRepository;
++
++    private Long callerId;
++
++    @BeforeEach
++    void setUp() {
++        callerId = userRepository.save(new User("호출자", null, null, null, "kakao", "user-controller-test-caller")).getId();
++    }
++
++    /** 실제로 존재하는 호출자(대상 계정과는 다른 사람) 토큰. */
+     private String bearerToken() {
+-        return "Bearer " + jwtProvider.generateToken(1L);
++        return "Bearer " + jwtProvider.generateToken(callerId);
+     }
+ 
+     private String bearerToken(Long userId) {
+@@ -96,9 +111,10 @@ class UserControllerTest {
+         mockMvc.perform(delete("/api/users/{id}", id).header("Authorization", ownerToken))
+                 .andExpect(status().isNoContent());
+ 
+-        // 삭제된 본인 id로 다시 조회하면(소유자 검증은 통과) findUserOrThrow에서 404.
++        // (G16) 탈퇴 후 기존 토큰은 인증 단계에서 거부된다 — 예전엔 소유자 검증을 통과해 404였다.
+         mockMvc.perform(get("/api/users/{id}", id).header("Authorization", ownerToken))
+-                .andExpect(status().isNotFound());
++                .andExpect(status().isUnauthorized())
++                .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
+     }
+ 
+     // (G20 확장, 2026-09-10) 회귀 방지 테스트 — 인증만 되어 있으면 누구든 타인 id로 조회할 수
+@@ -116,7 +132,7 @@ class UserControllerTest {
+                 .andReturn().getResponse().getContentAsString();
+         Long victimId = objectMapper.readTree(response).get("id").asLong();
+ 
+-        String attackerToken = bearerToken(victimId + 1);
++        String attackerToken = bearerToken();
+         mockMvc.perform(get("/api/users/{id}", victimId).header("Authorization", attackerToken))
+                 .andExpect(status().isForbidden())
+                 .andExpect(jsonPath("$.error").value("NOT_OWNER"));
+@@ -135,8 +151,8 @@ class UserControllerTest {
+                 .andReturn().getResponse().getContentAsString();
+         Long victimId = objectMapper.readTree(response).get("id").asLong();
+ 
+-        // victimId가 아닌 다른 사용자(그 id + 1)의 토큰으로 수정 시도
+-        String attackerToken = bearerToken(victimId + 1);
++        // victimId가 아닌 다른 실존 사용자(호출자)의 토큰으로 수정 시도
++        String attackerToken = bearerToken();
+         String updateBody = """
+                 {"bio": "해킹된 소개"}
+                 """;
+@@ -161,20 +177,20 @@ class UserControllerTest {
+                 .andReturn().getResponse().getContentAsString();
+         Long victimId = objectMapper.readTree(response).get("id").asLong();
+ 
+-        String attackerToken = bearerToken(victimId + 1);
++        String attackerToken = bearerToken();
+         mockMvc.perform(delete("/api/users/{id}", victimId).header("Authorization", attackerToken))
+                 .andExpect(status().isForbidden())
+                 .andExpect(jsonPath("$.error").value("NOT_OWNER"));
+     }
+ 
+     @Test
+-    void 존재하지_않는_회원_조회시_404() throws Exception {
+-        // (G20 확장) 조회도 이제 소유자 검증을 거치므로, 토큰 주체와 조회 대상 id를 같게 맞춰야
+-        // 403이 아니라 findUserOrThrow의 404 분기를 실제로 검증할 수 있다.
++    void 존재하지_않는_회원의_토큰이면_401() throws Exception {
++        // (G16, 2026-09-11) 예전 이름은 "존재하지_않는_회원_조회시_404". 서명이 유효해도 주체가 DB에 없으면
++        // JwtAuthenticationFilter가 인증하지 않으므로, 컨트롤러의 404 분기에 도달하기 전에 401이 된다.
+         long missingId = 999_999L;
+         mockMvc.perform(get("/api/users/{id}", missingId).header("Authorization", bearerToken(missingId)))
+-                .andExpect(status().isNotFound())
+-                .andExpect(jsonPath("$.error").value("NOT_FOUND"));
++                .andExpect(status().isUnauthorized())
++                .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
+     }
+ 
+     @Test
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/bookphoto/BookPhotoObjectCleaner.java b/backend/src/main/java/com/kongdakchaekdak/domain/bookphoto/BookPhotoObjectCleaner.java
+new file mode 100644
+index 0000000..e112f56
+--- /dev/null
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/bookphoto/BookPhotoObjectCleaner.java
+@@ -0,0 +1,96 @@
++package com.kongdakchaekdak.domain.bookphoto;
++
++import com.kongdakchaekdak.config.S3Properties;
++import com.kongdakchaekdak.domain.user.AccountDeletedEvent;
++import lombok.extern.slf4j.Slf4j;
++import org.springframework.context.annotation.Lazy;
++import org.springframework.stereotype.Component;
++import org.springframework.transaction.event.TransactionPhase;
++import org.springframework.transaction.event.TransactionalEventListener;
++import software.amazon.awssdk.services.s3.S3Client;
++import software.amazon.awssdk.services.s3.model.Delete;
++import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
++import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
++import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
++
++import java.util.Collection;
++import java.util.List;
++
++/**
++ * (G16 회원 탈퇴, 2026-09-11) 탈퇴가 <b>커밋된 뒤</b> 사진 오브젝트를 스토리지에서 지운다. best-effort다.
++ *
++ * <p><b>이 클래스는 절대 예외를 밖으로 던지지 않는다.</b> 탈퇴는 이미 커밋됐고, 스토리지 실패로
++ * 사용자가 "탈퇴 실패"를 보면 안 된다. 실패하면 남은 key를 ERROR 로그에 남기고 끝낸다 —
++ * 수동 정리의 근거가 로그뿐이므로 key 목록을 반드시 함께 찍는다(key는 UUID 경로라 개인 식별 정보가 아니다).
++ *
++ * <p>스토리지가 설정되지 않은 환경(G2 이전)에서는 S3 클라이언트를 만들지도 않고 건너뛴다.
++ * 이때 남는 오브젝트는 없다 — 설정 전에는 업로드 자체가 불가능하기 때문이다.
++ *
++ * <p>요청 스레드에서 동기로 실행되므로 지연 상한을 {@code S3Config}의 타임아웃으로 묶어 둔다.
++ */
++@Slf4j
++@Component
++public class BookPhotoObjectCleaner {
++
++    /** S3 DeleteObjects 한 번에 보낼 수 있는 최대 key 수. */
++    static final int MAX_KEYS_PER_REQUEST = 1000;
++
++    private final S3Client s3Client;
++    private final S3Properties s3Properties;
++
++    // S3Presigner와 같은 이유(BookPhotoService Javadoc 조각1)로 생성자 파라미터에 @Lazy — 자격증명이
++    // 없어도 서버 기동이 깨지지 않고, 실제 삭제를 시도하는 시점까지 클라이언트 생성을 미룬다.
++    public BookPhotoObjectCleaner(@Lazy S3Client s3Client, S3Properties s3Properties) {
++        this.s3Client = s3Client;
++        this.s3Properties = s3Properties;
++    }
++
++    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
++    public void onAccountDeleted(AccountDeletedEvent event) {
++        deleteQuietly(event.photoObjectKeys());
++    }
++
++    public void deleteQuietly(Collection<String> objectKeys) {
++        if (objectKeys == null || objectKeys.isEmpty()) {
++            return;
++        }
++        List<String> keys = List.copyOf(objectKeys);
++        if (!isStorageConfigured()) {
++            log.warn("사진 오브젝트 삭제 건너뜀 — 스토리지 미설정(G2). 대상 {}개: {}", keys.size(), keys);
++            return;
++        }
++        for (int from = 0; from < keys.size(); from += MAX_KEYS_PER_REQUEST) {
++            deleteChunkQuietly(keys.subList(from, Math.min(from + MAX_KEYS_PER_REQUEST, keys.size())));
++        }
++    }
++
++    private void deleteChunkQuietly(List<String> keys) {
++        try {
++            DeleteObjectsRequest request = DeleteObjectsRequest.builder()
++                    .bucket(s3Properties.bucket())
++                    .delete(Delete.builder()
++                            .objects(keys.stream().map(key -> ObjectIdentifier.builder().key(key).build()).toList())
++                            .quiet(true)
++                            .build())
++                    .build();
++            DeleteObjectsResponse response = s3Client.deleteObjects(request);
++            if (response != null && response.hasErrors() && !response.errors().isEmpty()) {
++                log.error("사진 오브젝트 일부 삭제 실패 — 수동 정리 필요. 실패 {}개: {}", response.errors().size(),
++                        response.errors().stream().map(error -> error.key() + "(" + error.code() + ")").toList());
++            }
++        } catch (RuntimeException e) {
++            // SdkException(네트워크·권한), BeansException(@Lazy 클라이언트 생성 실패) 등 전부.
++            log.error("사진 오브젝트 삭제 실패 — 수동 정리 필요. 대상 {}개: {}", keys.size(), keys, e);
++        }
++    }
++
++    private boolean isStorageConfigured() {
++        return notBlank(s3Properties.bucket())
++                && notBlank(s3Properties.accessKey())
++                && notBlank(s3Properties.secretKey());
++    }
++
++    private static boolean notBlank(String value) {
++        return value != null && !value.isBlank();
++    }
++}
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/bookphoto/BookPhotoObjectKeys.java b/backend/src/main/java/com/kongdakchaekdak/domain/bookphoto/BookPhotoObjectKeys.java
+new file mode 100644
+index 0000000..bbc3773
+--- /dev/null
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/bookphoto/BookPhotoObjectKeys.java
+@@ -0,0 +1,45 @@
++package com.kongdakchaekdak.domain.bookphoto;
++
++import java.net.URI;
++import java.util.Optional;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
++
++/**
++ * (G16 회원 탈퇴, 2026-09-11) {@link BookPhoto#getImageUrl()}에서 스토리지 오브젝트 key를 되찾는다.
++ *
++ * <p>DB에는 key가 아니라 공개 URL만 저장돼 있다({@code BookPhotoService.buildPublicUrl}). 호스트는
++ * 스토리지 설정(AWS → R2, G2)에 따라 바뀌므로 보지 않고, 경로에서 이 서버가 발급하는 key 형식
++ * {@code book-photos/{bookId}/{uuid}{.ext}}만 인정한다.
++ *
++ * <p><b>bookId까지 대조하는 이유:</b> {@code imageUrl}은 클라이언트가 보낸 값이라 남의 책 경로를
++ * 넣을 수 있다. 사진이 실제로 속한 책의 접두사와 일치할 때만 key로 인정해야 탈퇴가 남의 오브젝트를
++ * 지우는 통로가 되지 않는다. 형식이 맞지 않으면 지우지 않는다(남는 쪽이 안전한 실패).
++ */
++public final class BookPhotoObjectKeys {
++
++    // BookPhotoService.buildObjectKey / extractSafeExtension 규칙과 맞춘다: UUID + 선택적 확장자.
++    private static final String KEY_TAIL = "[A-Za-z0-9-]+(?:\\.[a-z0-9]{1,10})?";
++
++    private BookPhotoObjectKeys() {
++    }
++
++    public static Optional<String> fromImageUrl(Long bookId, String imageUrl) {
++        if (bookId == null || imageUrl == null || imageUrl.isBlank()) {
++            return Optional.empty();
++        }
++        String path;
++        try {
++            path = URI.create(imageUrl.trim()).getPath();
++        } catch (IllegalArgumentException e) {
++            return Optional.empty();
++        }
++        if (path == null) {
++            return Optional.empty();
++        }
++        // virtual-hosted(/book-photos/..) 와 path-style(/{bucket}/book-photos/..) 둘 다 허용.
++        Pattern pattern = Pattern.compile("(?:^|/)(book-photos/" + bookId + "/" + KEY_TAIL + ")$");
++        Matcher matcher = pattern.matcher(path);
++        return matcher.find() ? Optional.of(matcher.group(1)) : Optional.empty();
++    }
++}
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/user/AccountDeletedEvent.java b/backend/src/main/java/com/kongdakchaekdak/domain/user/AccountDeletedEvent.java
+new file mode 100644
+index 0000000..ee18ca7
+--- /dev/null
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/user/AccountDeletedEvent.java
+@@ -0,0 +1,20 @@
++package com.kongdakchaekdak.domain.user;
++
++import java.util.List;
++
++/**
++ * (G16 회원 탈퇴, 2026-09-11) 회원 탈퇴 트랜잭션 안에서 발행되고, <b>커밋된 뒤에만</b> 소비된다
++ * ({@code @TransactionalEventListener(phase = AFTER_COMMIT)}).
++ *
++ * <p>DB 밖의 정리(스토리지 오브젝트 삭제 등)를 여기에 붙인다. 커밋 전에 지우면 DB가 롤백됐을 때
++ * 사진 행은 남고 파일만 사라지고, 커밋 전에 실패를 던지면 탈퇴 자체가 롤백되기 때문이다.
++ *
++ * @param userId            탈퇴한 사용자 id (이미 DB에 없음)
++ * @param photoObjectKeys   삭제 대상 스토리지 key — {@code BookPhotoObjectKeys} 규칙을 통과한 것만
++ */
++public record AccountDeletedEvent(Long userId, List<String> photoObjectKeys) {
++
++    public AccountDeletedEvent {
++        photoObjectKeys = photoObjectKeys == null ? List.of() : List.copyOf(photoObjectKeys);
++    }
++}
+diff --git a/backend/src/main/java/com/kongdakchaekdak/domain/user/AccountDeletionService.java b/backend/src/main/java/com/kongdakchaekdak/domain/user/AccountDeletionService.java
+new file mode 100644
+index 0000000..e69324f
+--- /dev/null
++++ b/backend/src/main/java/com/kongdakchaekdak/domain/user/AccountDeletionService.java
+@@ -0,0 +1,152 @@
++package com.kongdakchaekdak.domain.user;
++
++import com.kongdakchaekdak.common.logging.AuditLogger;
++import com.kongdakchaekdak.domain.book.BookRepository;
++import com.kongdakchaekdak.domain.booknote.BookNoteRepository;
++import com.kongdakchaekdak.domain.bookphoto.BookPhotoObjectKeys;
++import com.kongdakchaekdak.domain.bookphoto.BookPhotoRepository;
++import com.kongdakchaekdak.domain.group.Group;
++import com.kongdakchaekdak.domain.group.GroupMember;
++import com.kongdakchaekdak.domain.group.GroupMemberRepository;
++import com.kongdakchaekdak.domain.group.GroupRepository;
++import com.kongdakchaekdak.domain.share.ShareRecordPhotoRepository;
++import com.kongdakchaekdak.domain.share.ShareRecordRepository;
++import com.kongdakchaekdak.domain.share.ShareRecordTargetRepository;
++import com.kongdakchaekdak.domain.share.ShareTargetType;
++import lombok.RequiredArgsConstructor;
++import org.springframework.context.ApplicationEventPublisher;
++import org.springframework.stereotype.Service;
++import org.springframework.transaction.annotation.Propagation;
++import org.springframework.transaction.annotation.Transactional;
++
++import java.util.ArrayList;
++import java.util.LinkedHashSet;
++import java.util.List;
++import java.util.Optional;
++import java.util.Set;
++
++/**
++ * (G16 회원 탈퇴, 2026-09-11) 사용자 한 명의 소유 데이터를 <b>한 트랜잭션</b>으로 삭제한다.
++ *
++ * <p>근거: {@code ACCOUNT_DELETION.md}(공지된 약속), {@code docs/콩닥책닥_기능추가요청_회원탈퇴_v1.md}
++ * §4 삭제 스펙·§5 수용 기준, 연동매트릭스 G16/D3. 진입점은 기존 {@code DELETE /api/users/{id}}(#10)이고
++ * 소유자 검증은 {@link UserService#delete}가 먼저 한다.
++ *
++ * <p><b>삭제 순서는 FK 방향을 따른다</b>(자식 → 부모). 엔티티 간 cascade가 하나도 없어서 순서를
++ * 틀리면 FK 위반으로 전체가 롤백된다 — 기존 {@code userRepository.delete(user)} 한 줄이 책을 한 권이라도
++ * 가진 사용자에게 실패하던 이유가 이것이다.
++ * <ol>
++ *   <li>공유 기록(+사진 연결·대상) — 본인이 만든 것 전부. 공개 링크 {@code /public/share/{token}}은
++ *       행이 없으면 404 페이지를 내므로 삭제가 곧 접근 차단이다(수용 기준 3). PM 결정: 익명화가 아니라 완전 삭제.</li>
++ *   <li>타인의 공유 기록 중 탈퇴자를 대상(USER)으로 지정한 행</li>
++ *   <li>책 사진 → 소감 → 책</li>
++ *   <li>그룹 — 모임장이면 위임 또는 삭제(아래), 멤버십은 전부 삭제</li>
++ *   <li>사용자 (관심분야 {@code user_interests}는 엔티티 삭제 시 함께 지워진다)</li>
++ * </ol>
++ *
++ * <p><b>모임장 위임 (PM 결정):</b> {@code groups.owner_id} 구조 유지. 같은 그룹 멤버 중 탈퇴자 본인 행을
++ * 제외하고 {@code joined_at} 오름차순(같으면 {@code id} 오름차순) 첫 번째에게 넘긴다. 남은 멤버가 없으면
++ * 그룹을 삭제한다. 그룹 삭제 시 다른 사람 공유 기록의 GROUP 대상 행은 기존 {@code GroupService.delete}와
++ * 동일하게 건드리지 않는다.
++ *
++ * <p><b>스토리지 오브젝트</b>는 이 트랜잭션에서 지우지 않는다. key만 모아 {@link AccountDeletedEvent}로
++ * 넘기고, 커밋 후 {@code BookPhotoObjectCleaner}가 best-effort로 지운다.
++ *
++ * <p>DB 쪽은 bulk JPQL을 쓰고 마지막에 명시적으로 flush한다 — FK 위반 같은 SQL 오류가 커밋 시점이 아니라
++ * 이 메서드 안에서 드러나게 하고, 감사 로그·이벤트가 SQL 성공 뒤에만 남도록 하기 위해서다.
++ */
++@Service
++@RequiredArgsConstructor
++public class AccountDeletionService {
++
++    private final UserRepository userRepository;
++    private final BookRepository bookRepository;
++    private final BookNoteRepository bookNoteRepository;
++    private final BookPhotoRepository bookPhotoRepository;
++    private final ShareRecordRepository shareRecordRepository;
++    private final ShareRecordTargetRepository shareRecordTargetRepository;
++    private final ShareRecordPhotoRepository shareRecordPhotoRepository;
++    private final GroupRepository groupRepository;
++    private final GroupMemberRepository groupMemberRepository;
++    private final ApplicationEventPublisher eventPublisher;
++    private final AuditLogger auditLogger;
++
++    /** 호출자의 트랜잭션 안에서만 실행된다 — 부분 삭제 상태로 커밋되는 일을 구조적으로 막는다. */
++    @Transactional(propagation = Propagation.MANDATORY)
++    public void deleteAccount(User user) {
++        Long userId = user.getId();
++        List<Long> bookIds = bookRepository.findIdsByUserId(userId);
++
++        deleteShareRecords(userId, bookIds);
++        shareRecordTargetRepository.deleteAllByTarget(ShareTargetType.USER, userId);
++
++        List<String> photoObjectKeys = List.of();
++        if (!bookIds.isEmpty()) {
++            photoObjectKeys = collectPhotoObjectKeys(bookIds);
++            bookPhotoRepository.deleteAllByBookIds(bookIds);
++            bookNoteRepository.deleteAllByBookIds(bookIds);
++        }
++        bookRepository.deleteAllOwnedBy(userId);
++
++        List<GroupAudit> groupAudits = new ArrayList<>();
++        List<Group> groupsToDelete = transferOrCollectOwnedGroups(userId, groupAudits);
++        // flushAutomatically: 위에서 바꾼 owner_id UPDATE가 이 DELETE보다 먼저 나간다.
++        groupMemberRepository.deleteAllByUserId(userId);
++        groupRepository.deleteAll(groupsToDelete);
++
++        userRepository.delete(user);
++        userRepository.flush();
++
++        groupAudits.forEach(audit -> auditLogger.event(audit.action(), userId, audit.detail()));
++        auditLogger.event("ACCOUNT_DATA_DELETED", userId,
++                "books=" + bookIds.size() + ", photoObjects=" + photoObjectKeys.size());
++        eventPublisher.publishEvent(new AccountDeletedEvent(userId, photoObjectKeys));
++    }
++
++    private void deleteShareRecords(Long userId, List<Long> bookIds) {
++        Set<Long> shareRecordIds = new LinkedHashSet<>(shareRecordRepository.findIdsByUserId(userId));
++        if (!bookIds.isEmpty()) {
++            shareRecordIds.addAll(shareRecordRepository.findIdsByBookIds(bookIds));
++        }
++        if (shareRecordIds.isEmpty()) {
++            return;
++        }
++        shareRecordPhotoRepository.deleteAllByShareRecordIds(shareRecordIds);
++        shareRecordTargetRepository.deleteAllByShareRecordIds(shareRecordIds);
++        shareRecordRepository.deleteAllByIds(shareRecordIds);
++    }
++
++    private List<String> collectPhotoObjectKeys(List<Long> bookIds) {
++        return bookPhotoRepository.findByBookIdIn(bookIds).stream()
++                .map(photo -> BookPhotoObjectKeys.fromImageUrl(photo.getBook().getId(), photo.getImageUrl()))
++                .flatMap(Optional::stream)
++                .toList();
++    }
++
++    /**
++     * 탈퇴자가 모임장인 그룹마다 후임자에게 위임하고, 후임자가 없는 그룹은 삭제 대상으로 돌려준다.
++     * 감사 로그는 SQL이 성공한 뒤에 남기도록 {@code audits}에 모아 둔다.
++     */
++    private List<Group> transferOrCollectOwnedGroups(Long userId, List<GroupAudit> audits) {
++        List<Group> groupsToDelete = new ArrayList<>();
++        for (Group group : groupRepository.findByOwnerId(userId)) {
++            Optional<GroupMember> successor = groupMemberRepository.findByGroupIdOrderByJoinedAtAscIdAsc(group.getId())
++                    .stream()
++                    .filter(member -> !member.getUser().getId().equals(userId))
++                    .findFirst();
++            if (successor.isPresent()) {
++                User newOwner = successor.get().getUser();
++                group.transferOwnership(newOwner);
++                audits.add(new GroupAudit("GROUP_OWNER_TRANSFERRED", "groupId=" + group.getId()
++                        + ", newOwnerUserId=" + newOwner.getId() + ", reason=ACCOUNT_DELETED"));
++            } else {
++                groupsToDelete.add(group);
++                audits.add(new GroupAudit("GROUP_DELETED", "groupId=" + group.getId() + ", reason=ACCOUNT_DELETED"));
++            }
++        }
++        return groupsToDelete;
++    }
++
++    private record GroupAudit(String action, String detail) {
++    }
++}
+diff --git a/backend/src/test/java/com/kongdakchaekdak/domain/user/AccountDeletionTest.java b/backend/src/test/java/com/kongdakchaekdak/domain/user/AccountDeletionTest.java
+new file mode 100644
+index 0000000..ad8a02e
+--- /dev/null
++++ b/backend/src/test/java/com/kongdakchaekdak/domain/user/AccountDeletionTest.java
+@@ -0,0 +1,306 @@
++package com.kongdakchaekdak.domain.user;
++
++import com.kongdakchaekdak.domain.book.Book;
++import com.kongdakchaekdak.domain.book.BookRepository;
++import com.kongdakchaekdak.domain.booknote.BookNote;
++import com.kongdakchaekdak.domain.booknote.BookNoteRepository;
++import com.kongdakchaekdak.domain.bookphoto.BookPhoto;
++import com.kongdakchaekdak.domain.bookphoto.BookPhotoRepository;
++import com.kongdakchaekdak.domain.common.Genre;
++import com.kongdakchaekdak.domain.group.Group;
++import com.kongdakchaekdak.domain.group.GroupMember;
++import com.kongdakchaekdak.domain.group.GroupMemberRepository;
++import com.kongdakchaekdak.domain.group.GroupRepository;
++import com.kongdakchaekdak.domain.share.SharePlatform;
++import com.kongdakchaekdak.domain.share.ShareRecord;
++import com.kongdakchaekdak.domain.share.ShareRecordPhoto;
++import com.kongdakchaekdak.domain.share.ShareRecordPhotoRepository;
++import com.kongdakchaekdak.domain.share.ShareRecordRepository;
++import com.kongdakchaekdak.domain.share.ShareRecordTarget;
++import com.kongdakchaekdak.domain.share.ShareRecordTargetRepository;
++import com.kongdakchaekdak.domain.share.ShareScope;
++import com.kongdakchaekdak.domain.share.ShareTargetType;
++import com.kongdakchaekdak.domain.share.ShareType;
++import com.kongdakchaekdak.security.JwtProvider;
++import jakarta.persistence.EntityManager;
++import jakarta.persistence.PersistenceContext;
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
++import org.springframework.boot.test.context.SpringBootTest;
++import org.springframework.jdbc.core.JdbcTemplate;
++import org.springframework.test.web.servlet.MockMvc;
++import org.springframework.transaction.annotation.Transactional;
++
++import java.math.BigDecimal;
++import java.sql.Timestamp;
++import java.time.LocalDate;
++import java.time.LocalDateTime;
++import java.util.Set;
++import java.util.UUID;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.hamcrest.Matchers.containsString;
++import static org.hamcrest.Matchers.not;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
++import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
++import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
++import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
++
++/**
++ * (G16 회원 탈퇴, 2026-09-11) {@code DELETE /api/users/{id}}(#10) 통합 테스트.
++ *
++ * <p>테스트 트랜잭션은 롤백되므로 커밋 후 스토리지 삭제는 여기서 실행되지 않는다 — 그 경로는
++ * {@code AccountDeletionStorageFailureTest}·{@code AccountDeletionWithoutStorageCredentialsTest}가 커밋까지
++ * 태워서 검증한다.
++ *
++ * <p>검증 전에 반드시 {@code flushAndClear()}를 부른다. 1차 캐시에 남은 엔티티를 읽으면 SQL이 실제로
++ * 성공했는지(FK 위반이 없는지) 확인하지 못한 채 통과할 수 있기 때문이다.
++ */
++@SpringBootTest
++@AutoConfigureMockMvc
++@Transactional
++class AccountDeletionTest {
++
++    @Autowired
++    private MockMvc mockMvc;
++    @Autowired
++    private JwtProvider jwtProvider;
++    @Autowired
++    private JdbcTemplate jdbcTemplate;
++    @PersistenceContext
++    private EntityManager entityManager;
++
++    @Autowired
++    private UserRepository userRepository;
++    @Autowired
++    private BookRepository bookRepository;
++    @Autowired
++    private BookNoteRepository bookNoteRepository;
++    @Autowired
++    private BookPhotoRepository bookPhotoRepository;
++    @Autowired
++    private ShareRecordRepository shareRecordRepository;
++    @Autowired
++    private ShareRecordTargetRepository shareRecordTargetRepository;
++    @Autowired
++    private ShareRecordPhotoRepository shareRecordPhotoRepository;
++    @Autowired
++    private GroupRepository groupRepository;
++    @Autowired
++    private GroupMemberRepository groupMemberRepository;
++
++    @Test
++    void 책_소감_사진_공유_그룹멤버를_가진_사용자가_탈퇴하면_전부_삭제되고_공개링크도_막힌다() throws Exception {
++        User me = newUser("탈퇴자", "withdraw-full-me");
++        me.updateInterests(Set.of(Genre.NOVEL, Genre.SCIENCE));
++        me = userRepository.save(me);
++        User other = userRepository.save(newUser("남아있는사람", "withdraw-full-other"));
++
++        Book myBook = bookRepository.save(new Book(me, "탈퇴자의 책", "저자", null, null, Genre.NOVEL, 200,
++                LocalDate.of(2026, 9, 1)));
++        BookNote myNote = bookNoteRepository.save(new BookNote(myBook, "탈퇴자가 남긴 소감"));
++        BookPhoto myPhoto = bookPhotoRepository.save(new BookPhoto(myBook,
++                "https://test-bucket.s3.ap-northeast-2.amazonaws.com/book-photos/" + myBook.getId() + "/"
++                        + UUID.randomUUID() + ".jpg",
++                "동네 카페", new BigDecimal("37.566500"), new BigDecimal("126.978000")));
++
++        String myToken = UUID.randomUUID().toString();
++        ShareRecord myShare = shareRecordRepository.save(new ShareRecord(me, myBook, ShareType.BOOK, ShareScope.CUSTOM,
++                SharePlatform.APP, null, myToken, myNote, null));
++        ShareRecordTarget myShareTarget = shareRecordTargetRepository.save(
++                new ShareRecordTarget(myShare, ShareTargetType.USER, other.getId()));
++        ShareRecordPhoto myShareSelectedPhoto = shareRecordPhotoRepository.save(new ShareRecordPhoto(myShare, myPhoto, 0));
++
++        // 남의 데이터 — 탈퇴자를 공유 대상으로 지정한 행만 사라지고 나머지는 그대로여야 한다.
++        Book othersBook = bookRepository.save(new Book(other, "남의 책", "저자2", null, null, null, null,
++                LocalDate.of(2026, 9, 1)));
++        ShareRecord othersShare = shareRecordRepository.save(new ShareRecord(other, othersBook, ShareType.BOOK,
++                ShareScope.CUSTOM, SharePlatform.APP, null, UUID.randomUUID().toString(), null, null));
++        ShareRecordTarget targetPointingToMe = shareRecordTargetRepository.save(
++                new ShareRecordTarget(othersShare, ShareTargetType.USER, me.getId()));
++
++        // 남이 모임장인 그룹에 멤버로 참여 — 멤버십만 사라지고 그룹·모임장은 그대로여야 한다.
++        Group othersGroup = groupRepository.save(new Group(other, "남의 모임"));
++        groupMemberRepository.save(new GroupMember(othersGroup, other));
++        groupMemberRepository.save(new GroupMember(othersGroup, me));
++
++        flushAndClear();
++
++        // 전제 확인: 탈퇴 전에는 공개 링크가 콘텐츠를 보여준다(아래 404 단언이 의미 있음을 보장).
++        mockMvc.perform(get("/public/share/{token}", myToken))
++                .andExpect(status().isOk())
++                .andExpect(content().string(containsString("탈퇴자의 책")));
++
++        mockMvc.perform(delete("/api/users/{id}", me.getId()).header("Authorization", bearer(me)))
++                .andExpect(status().isNoContent())
++                .andExpect(content().string(""));
++
++        flushAndClear();
++        Long meId = me.getId();
++
++        assertThat(userRepository.existsById(meId)).isFalse();
++        assertThat(jdbcTemplate.queryForObject("select count(*) from user_interests where user_id = ?", Long.class, meId))
++                .isZero();
++        assertThat(bookRepository.findByUserId(meId)).isEmpty();
++        assertThat(bookNoteRepository.existsById(myNote.getId())).isFalse();
++        assertThat(bookPhotoRepository.existsById(myPhoto.getId())).isFalse();
++        assertThat(shareRecordRepository.existsById(myShare.getId())).isFalse();
++        assertThat(shareRecordTargetRepository.existsById(myShareTarget.getId())).isFalse();
++        assertThat(shareRecordPhotoRepository.existsById(myShareSelectedPhoto.getId())).isFalse();
++        assertThat(shareRecordTargetRepository.existsById(targetPointingToMe.getId())).isFalse();
++        assertThat(groupMemberRepository.existsByGroupIdAndUserId(othersGroup.getId(), meId)).isFalse();
++
++        assertThat(userRepository.existsById(other.getId())).isTrue();
++        assertThat(bookRepository.existsById(othersBook.getId())).isTrue();
++        assertThat(shareRecordRepository.existsById(othersShare.getId())).isTrue();
++        assertThat(groupRepository.findById(othersGroup.getId()).orElseThrow().getOwner().getId())
++                .isEqualTo(other.getId());
++        assertThat(groupMemberRepository.countByGroupId(othersGroup.getId())).isEqualTo(1);
++
++        // 수용 기준 3: 탈퇴 전 공개 링크에 콘텐츠가 보이지 않는다.
++        mockMvc.perform(get("/public/share/{token}", myToken))
++                .andExpect(status().isNotFound())
++                .andExpect(content().string(not(containsString("탈퇴자의 책"))))
++                .andExpect(content().string(not(containsString("탈퇴자가 남긴 소감"))))
++                .andExpect(content().string(not(containsString("탈퇴자"))));
++    }
++
++    @Test
++    void 모임장이_탈퇴하면_본인을_제외하고_joined_at이_가장_이른_멤버가_모임장이_된다() throws Exception {
++        User owner = userRepository.save(newUser("모임장", "withdraw-transfer-owner"));
++        User earlierIdLaterJoin = userRepository.save(newUser("id는빠르고가입은늦음", "withdraw-transfer-a"));
++        User laterIdEarlierJoin = userRepository.save(newUser("id는늦고가입은빠름", "withdraw-transfer-b"));
++
++        Group group = groupRepository.save(new Group(owner, "위임될 모임"));
++        GroupMember ownerRow = groupMemberRepository.save(new GroupMember(group, owner));
++        GroupMember rowA = groupMemberRepository.save(new GroupMember(group, earlierIdLaterJoin));
++        GroupMember rowB = groupMemberRepository.save(new GroupMember(group, laterIdEarlierJoin));
++        flushAndClear();
++
++        // id 순서(A < B)와 가입 순서(B가 먼저)를 일부러 엇갈리게 한다 — joined_at이 우선임을 확인.
++        setJoinedAt(ownerRow, LocalDateTime.of(2026, 9, 1, 10, 0));
++        setJoinedAt(rowB, LocalDateTime.of(2026, 9, 1, 10, 5));
++        setJoinedAt(rowA, LocalDateTime.of(2026, 9, 1, 10, 10));
++        flushAndClear();
++
++        mockMvc.perform(delete("/api/users/{id}", owner.getId()).header("Authorization", bearer(owner)))
++                .andExpect(status().isNoContent());
++        flushAndClear();
++
++        assertThat(groupRepository.findById(group.getId()).orElseThrow().getOwner().getId())
++                .isEqualTo(laterIdEarlierJoin.getId());
++        assertThat(groupMemberRepository.existsByGroupIdAndUserId(group.getId(), owner.getId())).isFalse();
++        assertThat(groupMemberRepository.countByGroupId(group.getId())).isEqualTo(2);
++        assertThat(userRepository.existsById(owner.getId())).isFalse();
++    }
++
++    @Test
++    void 가입_시각이_같으면_id가_작은_멤버가_모임장이_되고_모임장_본인_행은_건너뛴다() throws Exception {
++        User owner = userRepository.save(newUser("모임장2", "withdraw-tie-owner"));
++        User first = userRepository.save(newUser("먼저저장", "withdraw-tie-first"));
++        User second = userRepository.save(newUser("나중저장", "withdraw-tie-second"));
++
++        Group group = groupRepository.save(new Group(owner, "동시 가입 모임"));
++        GroupMember ownerRow = groupMemberRepository.save(new GroupMember(group, owner));
++        GroupMember firstRow = groupMemberRepository.save(new GroupMember(group, first));
++        GroupMember secondRow = groupMemberRepository.save(new GroupMember(group, second));
++        flushAndClear();
++
++        // 모임장 본인 행이 가장 작은 id + 같은 시각 — 본인을 "다음 멤버"로 고르면 안 된다.
++        LocalDateTime sameMoment = LocalDateTime.of(2026, 9, 1, 12, 0);
++        setJoinedAt(ownerRow, sameMoment);
++        setJoinedAt(firstRow, sameMoment);
++        setJoinedAt(secondRow, sameMoment);
++        flushAndClear();
++        assertThat(ownerRow.getId()).isLessThan(firstRow.getId());
++        assertThat(firstRow.getId()).isLessThan(secondRow.getId());
++
++        mockMvc.perform(delete("/api/users/{id}", owner.getId()).header("Authorization", bearer(owner)))
++                .andExpect(status().isNoContent());
++        flushAndClear();
++
++        assertThat(groupRepository.findById(group.getId()).orElseThrow().getOwner().getId())
++                .isEqualTo(first.getId());
++    }
++
++    @Test
++    void 혼자인_모임의_모임장이_탈퇴하면_모임이_삭제된다() throws Exception {
++        User owner = userRepository.save(newUser("혼자모임장", "withdraw-solo-owner"));
++        Group soloGroup = groupRepository.save(new Group(owner, "나 혼자 모임"));
++        groupMemberRepository.save(new GroupMember(soloGroup, owner));
++        flushAndClear();
++
++        mockMvc.perform(delete("/api/users/{id}", owner.getId()).header("Authorization", bearer(owner)))
++                .andExpect(status().isNoContent());
++        flushAndClear();
++
++        assertThat(groupRepository.existsById(soloGroup.getId())).isFalse();
++        assertThat(groupMemberRepository.countByGroupId(soloGroup.getId())).isZero();
++        assertThat(userRepository.existsById(owner.getId())).isFalse();
++    }
++
++    @Test
++    void 다른_사람의_id로_탈퇴를_요청하면_403이고_아무것도_지워지지_않는다() throws Exception {
++        User victim = userRepository.save(newUser("피해자", "withdraw-403-victim"));
++        User attacker = userRepository.save(newUser("공격자", "withdraw-403-attacker"));
++        Book victimBook = bookRepository.save(new Book(victim, "지켜져야 할 책", "저자", null, null, null, null,
++                LocalDate.of(2026, 9, 1)));
++        flushAndClear();
++
++        mockMvc.perform(delete("/api/users/{id}", victim.getId()).header("Authorization", bearer(attacker)))
++                .andExpect(status().isForbidden())
++                .andExpect(jsonPath("$.error").value("NOT_OWNER"));
++        flushAndClear();
++
++        assertThat(userRepository.existsById(victim.getId())).isTrue();
++        assertThat(bookRepository.existsById(victimBook.getId())).isTrue();
++        assertThat(userRepository.existsById(attacker.getId())).isTrue();
++    }
++
++    @Test
++    void 탈퇴_후_기존_토큰으로_호출하면_401() throws Exception {
++        User me = userRepository.save(newUser("토큰주인", "withdraw-token-me"));
++        bookRepository.save(new Book(me, "토큰주인의 책", "저자", null, null, null, null, LocalDate.of(2026, 9, 1)));
++        flushAndClear();
++        String token = bearer(me);
++
++        mockMvc.perform(get("/api/auth/me").header("Authorization", token))
++                .andExpect(status().isOk());
++
++        mockMvc.perform(delete("/api/users/{id}", me.getId()).header("Authorization", token))
++                .andExpect(status().isNoContent());
++        flushAndClear();
++
++        mockMvc.perform(get("/api/auth/me").header("Authorization", token))
++                .andExpect(status().isUnauthorized())
++                .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
++        // 예전엔 만료 전까지 인증이 통과해 빈 목록 200이었다.
++        mockMvc.perform(get("/api/books").header("Authorization", token))
++                .andExpect(status().isUnauthorized())
++                .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
++        mockMvc.perform(delete("/api/users/{id}", me.getId()).header("Authorization", token))
++                .andExpect(status().isUnauthorized())
++                .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"));
++    }
++
++    private User newUser(String nickname, String socialId) {
++        return new User(nickname, null, null, null, "kakao", socialId);
++    }
++
++    private String bearer(User user) {
++        return "Bearer " + jwtProvider.generateToken(user.getId());
++    }
++
++    private void flushAndClear() {
++        entityManager.flush();
++        entityManager.clear();
++    }
++
++    private void setJoinedAt(GroupMember member, LocalDateTime joinedAt) {
++        int updated = jdbcTemplate.update("update group_members set joined_at = ? where id = ?",
++                Timestamp.valueOf(joinedAt), member.getId());
++        assertThat(updated).isEqualTo(1);
++    }
++}

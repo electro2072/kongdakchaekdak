@@ -18,6 +18,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RandomNicknameGenerator randomNicknameGenerator;
+    private final AccountDeletionService accountDeletionService;
     private final AuditLogger auditLogger;
 
     @Transactional
@@ -59,11 +60,18 @@ public class UserService {
         return UserResponse.from(user);
     }
 
+    /**
+     * 회원 탈퇴 (G16, 2026-09-11 재작성 — D3: 기존 #10 재사용, 엔드포인트 신설 없음).
+     *
+     * <p>예전 구현은 {@code userRepository.delete(user)} 한 줄이라 책이 한 권이라도 있으면 FK 위반으로
+     * 500이 났다. 소유 데이터 일괄 삭제는 {@link AccountDeletionService}가 이 트랜잭션 안에서 수행한다.
+     * 탈퇴 후 기존 JWT는 {@code JwtAuthenticationFilter}의 사용자 존재 확인에서 걸려 401이 된다.
+     */
     @Transactional
     public void delete(Long id, Long currentUserId) {
         requireOwner(id, currentUserId);
         User user = findUserOrThrow(id);
-        userRepository.delete(user);
+        accountDeletionService.deleteAccount(user);
         auditLogger.event("USER_DELETED", currentUserId, "targetUserId=" + id);
     }
 
