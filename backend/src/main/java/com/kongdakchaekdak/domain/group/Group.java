@@ -23,9 +23,15 @@ import java.time.LocalDateTime;
  * 테이블정의서 Group 매핑 (공유 대상을 묶는 그룹, 예: 독서모임/가족). updated_at 컬럼이
  * 테이블정의서에 없어 createdAt만 감사 컬럼으로 둔다 — 그룹명 변경도 가능하지만 "수정 이력"
  * 자체를 추적할 필요는 없다고 판단.
+ *
+ * <p><b>테이블명 따옴표 (2026-09-11):</b> {@code groups}는 MySQL 8.0.2부터 예약어라, 따옴표 없이 나가는
+ * {@code create table groups} / {@code select ... from groups}가 운영 MySQL에서 문법 오류(1064)가 난다
+ * (MySQL 8.0.46에서 재현). H2 테스트에서는 드러나지 않는다. 백틱으로 감싸면 Hibernate가 DB 방언에 맞게
+ * 인용한다(MySQL은 백틱, H2는 큰따옴표) — 테이블 이름 자체는 그대로 {@code groups}다.
+ * 회귀 방지: {@code GroupTableNameTest}. H2 콘솔에서 직접 SQL을 쓸 때는 {@code "groups"}로 인용해야 한다.
  */
 @Entity
-@Table(name = "groups")
+@Table(name = "`groups`")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
