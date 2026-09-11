@@ -16,7 +16,9 @@ import {
   SECURE_KEY_ACCESS_TOKEN,
   secureStorage,
 } from '../services/secureStorage';
-import {getMe, type UserResponse} from '../services/userApi';
+import {deleteUser, getMe, type UserResponse} from '../services/userApi';
+import {unlinkSocialAccount} from '../services/socialAuth/unlinkSocialAccount';
+import type {SocialProvider} from '../types/api/auth';
 import {t} from '../strings';
 
 interface AuthContextValue {
@@ -50,6 +52,21 @@ interface AuthContextValue {
    */
   login: () => void;
   logout: () => void;
+  /**
+   * 회원 탈퇴(G16/S8) — `DELETE /api/users/{id}`(#10).
+   *
+   * 순서: ① 서버 탈퇴 → ② 소셜 연결 해제(best-effort, 최대 3초) → ③ 저장된 토큰 삭제 →
+   * ④ 로그인 상태 해제(RootNavigator가 AuthStack으로 바꿔 스택이 통째로 리셋되고,
+   * Profile/LibraryContext가 isLoggedIn=false에 반응해 캐시를 비운다).
+   *
+   * ①이 실패하면 ApiError(에러코드 매핑된 message)를 그대로 던지고 **토큰·상태는 건드리지 않는다.**
+   * 단 401은 apiClient의 unauthorizedHandler가 이미 로그아웃시킨다(토큰이 죽었으니 유지할 의미가 없다).
+   * ②는 절대 reject하지 않으므로 탈퇴 성공을 뒤집지 못한다. 완료 토스트는 호출부(ProfileScreen)가 띄운다.
+   */
+  withdraw: (params: {
+    userId: number;
+    socialProvider: SocialProvider | null;
+  }) => Promise<void>;
   /**
    * 신규 가입 온보딩 다이얼로그("가입을 환영해요! 지금 바로 서재에 책을 꽂아보시겠어요?")에서
    * "네"를 선택했을 때 true로 설정 — MainStack(정확히는 MainTabs)이 처음 마운트되자마자
@@ -88,17 +105,48 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
   const [pendingBookSearchOnEntry, setPendingBookSearchOnEntry] =
     useState(false);
 
-  const logout = useCallback(() => {
-    logger.info('AuthContext', '로그아웃');
+  /** 메모리 쪽 세션 상태만 되돌린다 — 저장소 삭제는 logout/withdraw가 각자 방식으로 한다. */
+  const resetSessionState = useCallback(() => {
     setAccessTokenState(null);
     setApiAccessToken(null);
     setSessionUser(null);
     setIsLoggedIn(false);
     setPendingBookSearchOnEntry(false);
+  }, []);
+
+  const logout = useCallback(() => {
+    logger.info('AuthContext', '로그아웃');
+    resetSessionState();
     secureStorage
       .removeItem(SECURE_KEY_ACCESS_TOKEN)
       .catch(error => logger.warn('AuthContext', '토큰 삭제 실패', {error}));
-  }, []);
+  }, [resetSessionState]);
+
+  const withdraw = useCallback<AuthContextValue['withdraw']>(
+    async ({userId, socialProvider}) => {
+      logger.info('AuthContext', '회원 탈퇴 요청', {userId});
+      // 실패하면 여기서 던진다 — 아래 정리 단계로 내려가지 않으므로 토큰이 유지된다.
+      await deleteUser(userId);
+
+      // 서버 탈퇴가 끝난 뒤에 연결을 끊는다. 먼저 끊었다가 서버 탈퇴가 실패하면
+      // "계정은 남았는데 소셜 연결만 끊긴" 상태가 되기 때문이다. 우리 JWT가 필요 없는 호출이라
+      // 세션 정리 전에 끝내 두어, 사용자가 곧바로 같은 계정으로 다시 로그인할 때 뒤늦게 도착한
+      // 연결 해제가 새 로그인의 SDK 토큰을 지우는 경합도 피한다.
+      await unlinkSocialAccount(socialProvider);
+
+      // 로그아웃과 달리 저장소 삭제를 기다린 뒤 상태를 푼다 — 탈퇴한 계정의 토큰이 남은 채
+      // 로그인 화면이 먼저 뜨지 않게. 삭제가 실패해도 계정은 이미 없어서, 다음 부팅의
+      // /api/auth/me 검증이 실패하며 토큰이 폐기된다(restoreSession 참고).
+      try {
+        await secureStorage.removeItem(SECURE_KEY_ACCESS_TOKEN);
+      } catch (error) {
+        logger.warn('AuthContext', '탈퇴 후 토큰 삭제 실패', {error});
+      }
+      logger.info('AuthContext', '회원 탈퇴 완료 — 세션 정리');
+      resetSessionState();
+    },
+    [resetSessionState],
+  );
 
   // 401 응답을 받으면 apiClient가 이 logout을 호출하도록 등록해둔다.
   useEffect(() => {
@@ -194,6 +242,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
         setIsLoggedIn(true);
       },
       logout,
+      withdraw,
       pendingBookSearchOnEntry,
       setPendingBookSearchOnEntry,
     }),
@@ -204,6 +253,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
       sessionUser,
       pendingBookSearchOnEntry,
       logout,
+      withdraw,
     ],
   );
 

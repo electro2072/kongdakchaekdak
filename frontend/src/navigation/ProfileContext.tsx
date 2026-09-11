@@ -10,9 +10,11 @@ import {logger} from '../utils/logger';
 import {
   getMe,
   mapGenderResponseToKey,
+  mapSocialProviderResponse,
   updateUser,
   type UserResponse,
 } from '../services/userApi';
+import type {SocialProvider} from '../types/api/auth';
 import {fetchProfileStats} from '../services/profileStatsApi';
 import {useAuth} from './AuthContext';
 import {t} from '../strings';
@@ -29,6 +31,11 @@ interface ProfileContextValue {
    * LibraryContext가 GET /api/books?userId= · POST /api/books 바디에 쓴다.
    */
   userId: number | null;
+  /**
+   * 가입에 쓴 소셜 제공자(/api/auth/me의 socialProvider). 회원 탈퇴(G16) 후 어느 SDK의 연결을
+   * 끊을지 고르는 데만 쓴다. 확인 전이거나 알 수 없는 값이면 null.
+   */
+  socialProvider: SocialProvider | null;
   isLoading: boolean;
   error: string | null;
   /** /api/auth/me 응답의 daysSinceLastLogin 그대로 — null이면 배너를 띄우지 않는다(백엔드 계약). */
@@ -69,6 +76,9 @@ export function ProfileProvider({children}: {children: React.ReactNode}) {
   const {isLoggedIn, accessToken, sessionUser} = useAuth();
   const [profile, setProfile] = useState<ProfileSummary>(EMPTY_PROFILE);
   const [userId, setUserId] = useState<number | null>(null);
+  const [socialProvider, setSocialProvider] = useState<SocialProvider | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isStatsLoading, setIsStatsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,6 +99,7 @@ export function ProfileProvider({children}: {children: React.ReactNode}) {
     }
     setProfile(EMPTY_PROFILE);
     setUserId(null);
+    setSocialProvider(null);
     setDaysSinceLastLogin(null);
     setError(null);
   }, [isLoggedIn, accessToken, userId]);
@@ -101,6 +112,7 @@ export function ProfileProvider({children}: {children: React.ReactNode}) {
     // AuthProvider의 부팅 세션 검증 응답이 있으면 그걸 그대로 쓴다(중복 호출 방지).
     if (sessionUser) {
       setUserId(sessionUser.id);
+      setSocialProvider(mapSocialProviderResponse(sessionUser.socialProvider));
       setDaysSinceLastLogin(sessionUser.daysSinceLastLogin ?? null);
       setProfile(prev => ({
         ...prev,
@@ -118,6 +130,7 @@ export function ProfileProvider({children}: {children: React.ReactNode}) {
           return;
         }
         setUserId(res.id);
+        setSocialProvider(mapSocialProviderResponse(res.socialProvider));
         setDaysSinceLastLogin(res.daysSinceLastLogin ?? null);
         setProfile(prev => ({
           ...prev,
@@ -168,6 +181,7 @@ export function ProfileProvider({children}: {children: React.ReactNode}) {
     () => ({
       profile,
       userId,
+      socialProvider,
       isLoading,
       isStatsLoading,
       error,
@@ -194,7 +208,15 @@ export function ProfileProvider({children}: {children: React.ReactNode}) {
         }
       },
     }),
-    [profile, isLoading, isStatsLoading, error, daysSinceLastLogin, userId],
+    [
+      profile,
+      isLoading,
+      isStatsLoading,
+      error,
+      daysSinceLastLogin,
+      userId,
+      socialProvider,
+    ],
   );
 
   return (
