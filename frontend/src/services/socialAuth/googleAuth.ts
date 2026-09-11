@@ -34,6 +34,15 @@ export async function signInWithGoogle(): Promise<
   return idToken;
 }
 
+/**
+ * 구글 앱 권한 회수(revokeAccess) — 회원 탈퇴(G16) 후 best-effort로 호출한다. 권한 회수와 함께
+ * SDK의 로그인 상태도 지워진다. SDK에 로그인된 구글 계정이 없으면(예: 기기 재설치 후 세션만
+ * 복원된 경우) reject될 수 있다 — 실패 처리는 호출부(`unlinkSocialAccount.ts`)가 맡는다.
+ */
+export async function revokeGoogleAccess(): Promise<void> {
+  await GoogleSignin.revokeAccess();
+}
+
 /** GoogleSignin 관련 에러인지(재시도 중, Play Services 없음 등) 판별할 때 사용 */
 export function isGoogleSignInError(error: unknown) {
   return isErrorWithCode(error);

@@ -2,6 +2,7 @@ import type {GenderKey} from '../constants/profileOptions';
 import {logger} from '../utils/logger';
 import {apiFetch} from './apiClient';
 import type {UserResponse, UserUpdateFields} from '../types/api/user';
+import type {SocialProvider} from '../types/api/auth';
 
 export type {UserResponse, UserUpdateFields};
 
@@ -32,6 +33,47 @@ export function updateUser(id: number, fields: UserUpdateFields): Promise<UserRe
     method: 'PATCH',
     body: JSON.stringify(body),
   });
+}
+
+/**
+ * 회원 탈퇴 — `DELETE /api/users/{id}` (연동매트릭스 #10, G16/D3). 본인 id만 허용되며(백엔드
+ * `UserService.requireOwner`) 성공 시 204 No Content라 반환값이 없다.
+ *
+ * 실패하면 apiFetch가 에러코드 매핑을 거친 `ApiError`를 그대로 던진다 — 호출부는 `message`만
+ * 보여주면 된다. 401이면 apiFetch의 unauthorizedHandler가 이미 로그아웃을 처리한다.
+ */
+export async function deleteUser(id: number): Promise<void> {
+  await apiFetch<null>(`/api/users/${id}`, {method: 'DELETE'});
+}
+
+/**
+ * 백엔드 `UserResponse.socialProvider` → 프론트 `SocialProvider`.
+ *
+ * 백엔드는 `SocialAuthService`의 상수(`"kakao"`/`"google"`/`"naver"`/`"apple"`)를 그대로 저장한다
+ * (2026-09-11 원본 확인). 지금은 철자가 같지만 대소문자 변환 같은 기계적 처리에 기대지 않고
+ * 표로 대조한다 — 백엔드가 G17 enum 통일로 표기를 바꾸면 여기서 null로 떨어지고 경고가 남는다.
+ */
+const BACKEND_SOCIAL_PROVIDER_TO_KEY: Readonly<Record<string, SocialProvider>> =
+  {
+    kakao: 'kakao',
+    google: 'google',
+    naver: 'naver',
+    apple: 'apple',
+  };
+
+export function mapSocialProviderResponse(
+  value: string | null | undefined,
+): SocialProvider | null {
+  if (value && BACKEND_SOCIAL_PROVIDER_TO_KEY[value]) {
+    return BACKEND_SOCIAL_PROVIDER_TO_KEY[value];
+  }
+  if (value) {
+    logger.warn(
+      'userApi',
+      `알 수 없는 socialProvider 값 — null로 처리: ${value}`,
+    );
+  }
+  return null;
 }
 
 /** 프론트 GenderKey → 백엔드 `Gender` enum 이름. (2026-09-09, BUG-20260909-21) */

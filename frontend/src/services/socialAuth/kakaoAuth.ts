@@ -1,4 +1,7 @@
-import {login as kakaoLoginSdk} from "@react-native-seoul/kakao-login";
+import {
+  login as kakaoLoginSdk,
+  unlink as kakaoUnlinkSdk,
+} from "@react-native-seoul/kakao-login";
 
 /**
  * 카카오 로그인 실행 후 백엔드(POST /api/auth/kakao)에 보낼 accessToken을 반환한다.
@@ -16,4 +19,13 @@ export async function signInWithKakao(): Promise<string> {
     throw new Error("카카오 로그인 응답에 accessToken이 없습니다.");
   }
   return token.accessToken;
+}
+
+/**
+ * 카카오 연결 끊기(unlink) — 회원 탈퇴(G16) 후 best-effort로 호출한다.
+ * SDK가 들고 있는 카카오 토큰으로 요청하므로 우리 서버 JWT와는 무관하다. 실패 처리는 호출부
+ * (`unlinkSocialAccount.ts`)가 맡는다 — 여기서는 SDK 에러를 그대로 던진다.
+ */
+export async function unlinkKakao(): Promise<void> {
+  await kakaoUnlinkSdk();
 }

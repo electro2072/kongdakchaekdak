@@ -49,3 +49,12 @@ export async function signInWithNaver(): Promise<string | null> {
   }
   throw new Error(result.failureResponse?.message ?? "네이버 로그인에 실패했습니다.");
 }
+
+/**
+ * 네이버 연동 해제(deleteToken, README 표기 "네이버 계정 연동 해제") — 회원 탈퇴(G16) 후
+ * best-effort로 호출한다. login()이 콜백 없이 멈춘 전례가 있어(위 30초 가드 참고) 이쪽도 멈출 수
+ * 있다고 보고, 시간 제한은 호출부(`unlinkSocialAccount.ts`)가 모든 제공자에 공통으로 건다.
+ */
+export async function unlinkNaver(): Promise<void> {
+  await NaverLogin.deleteToken();
+}

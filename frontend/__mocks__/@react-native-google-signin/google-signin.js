@@ -10,6 +10,8 @@ module.exports = {
     configure: jest.fn(),
     hasPlayServices: jest.fn().mockResolvedValue(true),
     signIn: jest.fn(),
+    // 2026-09-11 G16: 회원 탈퇴 후 권한 회수(googleAuth.ts `revokeGoogleAccess`).
+    revokeAccess: jest.fn(),
   },
   isSuccessResponse: jest.fn(() => true),
   isErrorWithCode: jest.fn(() => false),
