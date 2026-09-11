@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -213,6 +214,41 @@ class SocialAuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.lastLoginAt").exists())
                 .andExpect(jsonPath("$.daysSinceLastLogin").value(0));
+    }
+
+    // (G16 회원 탈퇴, 2026-09-11) 수용 기준 2 — 탈퇴 후 같은 소셜 계정으로 다시 로그인하면 기존 계정에
+    // 매칭되지 않고 신규 가입 플로우(isNewUser=true)로 들어가야 한다. 사용자 행이 실제로 삭제돼야만
+    // 통과한다(소프트 삭제·익명화였다면 (social_provider, social_id)로 다시 매칭된다).
+    @Test
+    void 탈퇴_후_같은_카카오_계정으로_로그인하면_신규가입으로_처리되고_새_id가_발급된다() throws Exception {
+        when(kakaoOAuthClient.fetchUserInfo("kakao-withdraw-access-token"))
+                .thenReturn(new SocialUserInfo("44444-withdraw", "탈퇴후재가입"));
+        String body = objectMapper.writeValueAsString(Map.of("accessToken", "kakao-withdraw-access-token"));
+
+        String firstResponse = mockMvc.perform(post("/api/auth/kakao")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isNewUser").value(true))
+                .andReturn().getResponse().getContentAsString();
+        String firstToken = objectMapper.readTree(firstResponse).get("accessToken").asText();
+        Long firstUserId = extractUserId(firstResponse);
+
+        mockMvc.perform(delete("/api/users/{id}", firstUserId).header("Authorization", "Bearer " + firstToken))
+                .andExpect(status().isNoContent());
+
+        String secondResponse = mockMvc.perform(post("/api/auth/kakao")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isNewUser").value(true))
+                .andReturn().getResponse().getContentAsString();
+        Long secondUserId = extractUserId(secondResponse);
+
+        org.junit.jupiter.api.Assertions.assertNotEquals(firstUserId, secondUserId);
+        // 탈퇴 전 토큰이 새 계정으로 이어지지 않는다.
+        mockMvc.perform(get("/api/auth/me").header("Authorization", "Bearer " + firstToken))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
